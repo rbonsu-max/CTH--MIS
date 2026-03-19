@@ -1,0 +1,160 @@
+import React from 'react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  BookOpen, 
+  BookMarked, 
+  ClipboardCheck, 
+  FileText, 
+  BarChart3, 
+  UserCog, 
+  Settings, 
+  GraduationCap,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Calendar,
+  UserPlus,
+  RefreshCw,
+  FileSpreadsheet,
+  Printer,
+  ChevronRight,
+  ChevronDown,
+  LogOut,
+  Bell,
+  Menu,
+  X
+} from 'lucide-react';
+import { ModuleType, UserRole } from './types';
+
+export interface NavItem {
+  id: ModuleType;
+  label: string;
+  icon: React.ReactNode;
+  roles: UserRole[];
+  subItems?: { id: string; label: string }[];
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['super_admin', 'admin', 'lecturer', 'student'] },
+  { 
+    id: 'students', 
+    label: 'Students', 
+    icon: <Users size={20} />,
+    roles: ['super_admin', 'admin'],
+    subItems: [
+      { id: 'add_student', label: 'Add Biodata' },
+      { id: 'update_student', label: 'Update Biodata' },
+      { id: 'view_students', label: 'View Biodata' },
+      { id: 'bulk_upload', label: 'Bulk Upload' },
+      { id: 'reset_password', label: 'Reset Password' }
+    ]
+  },
+  { 
+    id: 'programs', 
+    label: 'Programs', 
+    icon: <GraduationCap size={20} />,
+    roles: ['super_admin', 'admin'],
+    subItems: [
+      { id: 'setup_program', label: 'Setup Program' },
+      { id: 'populate_program', label: 'Populate Program' },
+      { id: 'view_programs', label: 'View Programs' },
+      { id: 'bulk_upload', label: 'Bulk Upload' }
+    ]
+  },
+  { 
+    id: 'courses', 
+    label: 'Courses', 
+    icon: <BookOpen size={20} />,
+    roles: ['super_admin', 'admin', 'lecturer'],
+    subItems: [
+      { id: 'setup_course', label: 'Setup Course' },
+      { id: 'mount_course', label: 'Mount Course' },
+      { id: 'view_courses', label: 'View Courses' },
+      { id: 'bulk_upload', label: 'Bulk Upload' }
+    ]
+  },
+  { 
+    id: 'registration', 
+    label: 'Registration', 
+    icon: <BookMarked size={20} />,
+    roles: ['super_admin', 'admin', 'student'],
+    subItems: [
+      { id: 'open_close', label: 'Open/Close Registration' },
+      { id: 'register_student', label: 'Register Student' },
+      { id: 'resit', label: 'Resit' },
+      { id: 'view_registration', label: 'View Registration' }
+    ]
+  },
+  { 
+    id: 'assessment', 
+    label: 'Assessment', 
+    icon: <ClipboardCheck size={20} />,
+    roles: ['super_admin', 'admin', 'lecturer'],
+    subItems: [
+      { id: 'by_course', label: 'By Course' },
+      { id: 'by_individual', label: 'By Individual' }
+    ]
+  },
+  { 
+    id: 'academic_records', 
+    label: 'Academic Records', 
+    icon: <FileText size={20} />,
+    roles: ['super_admin', 'admin', 'student'],
+    subItems: [
+      { id: 'course_results', label: 'Course Results' },
+      { id: 'composite_results', label: 'Composite Results' },
+      { id: 'broadsheet', label: 'Broadsheet' },
+      { id: 'statement_results', label: 'Statement of Results' },
+      { id: 'transcript', label: 'Transcript' }
+    ]
+  },
+  { 
+    id: 'statistics', 
+    label: 'Statistics', 
+    icon: <BarChart3 size={20} />,
+    roles: ['super_admin', 'admin'],
+    subItems: [
+      { id: 'student_stats', label: 'Students Statistics' },
+      { id: 'course_stats', label: 'Courses Statistics' }
+    ]
+  },
+  { 
+    id: 'lecturers', 
+    label: 'Lecturer', 
+    icon: <UserCog size={20} />,
+    roles: ['super_admin', 'admin'],
+    subItems: [
+      { id: 'setup_lecturer', label: 'Setup Lecturer' },
+      { id: 'assign_lecturer', label: 'Assign Lecturer' },
+      { id: 'view_lecturers', label: 'View Lecturers' },
+      { id: 'bulk_upload', label: 'Bulk Upload' }
+    ]
+  },
+  { 
+    id: 'settings', 
+    label: 'Settings', 
+    icon: <Settings size={20} />,
+    roles: ['super_admin'],
+    subItems: [
+      { id: 'academic_year', label: 'Academic Year' },
+      { id: 'semesters', label: 'Semesters' },
+      { id: 'grading_points', label: 'Grading Points' },
+      { id: 'users', label: 'Users' },
+      { id: 'bulk_upload', label: 'Bulk Upload' }
+    ]
+  }
+];
+
+export const COLORS = {
+  primary: '#1e293b', // Slate 800
+  secondary: '#334155', // Slate 700
+  accent: '#3b82f6', // Blue 500
+  background: '#f8fafc', // Slate 50
+  text: '#1e293b',
+  muted: '#64748b'
+};

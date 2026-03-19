@@ -1,0 +1,565 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Bell, 
+  LogOut, 
+  ChevronRight, 
+  ChevronDown,
+  Search,
+  Users,
+  GraduationCap,
+  BookOpen,
+  Calendar,
+  Menu,
+  FileSpreadsheet,
+  Plus,
+  Loader2
+} from 'lucide-react';
+import { NAV_ITEMS } from './constants';
+import { ModuleType, User, Student, Program, Course, Registration } from './types';
+import { StudentsModule } from './components/StudentsModule';
+import { ProgramsModule } from './components/ProgramsModule';
+import { CoursesModule } from './components/CoursesModule';
+import { RegistrationModule } from './components/RegistrationModule';
+import { AssessmentModule } from './components/AssessmentModule';
+import { LecturersModule } from './components/LecturersModule';
+import { SettingsModule } from './components/SettingsModule';
+import { Login } from './components/Login';
+import { api } from './services/api';
+
+export default function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
+  const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['dashboard']));
+  
+  // Dashboard Stats
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalPrograms: 0,
+    totalCourses: 0,
+    registrationRate: '0%'
+  });
+  const [recentRegistrations, setRecentRegistrations] = useState<Registration[]>([]);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const currentUser = await api.me();
+      setUser(currentUser);
+      if (currentUser) {
+        fetchDashboardData();
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    try {
+      const [students, programs, courses, registrations] = await Promise.all([
+        api.getStudents(),
+        api.getPrograms(),
+        api.getCourses(),
+        api.getRegistrations()
+      ]);
+
+      setStats({
+        totalStudents: students.length,
+        totalPrograms: programs.length,
+        totalCourses: courses.length,
+        registrationRate: students.length > 0 
+          ? `${Math.round((registrations.length / students.length) * 100)}%` 
+          : '0%'
+      });
+
+      setRecentRegistrations(registrations.slice(0, 5));
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+      setUser(null);
+      setActiveModule('dashboard');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const toggleExpand = (id: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedItems(newExpanded);
+  };
+
+  const handleNavClick = (id: ModuleType, hasSubItems: boolean) => {
+    if (hasSubItems) {
+      toggleExpand(id);
+    } else {
+      setActiveModule(id);
+      setActiveSubItem(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 size={48} className="text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login onLogin={(u) => { setUser(u); fetchDashboardData(); }} />;
+  }
+
+  const filteredNavItems = NAV_ITEMS.filter(item => item.roles.includes(user.role));
+
+  const renderDashboard = () => (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome back, {user.name}</h1>
+          <p className="text-slate-500">Here's what's happening in SIMS today.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+            <Calendar size={18} className="text-blue-600" />
+            <span className="text-sm font-medium">2025/2026 Academic Year</span>
+          </div>
+          <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
+            <Calendar size={18} className="text-blue-600" />
+            <span className="text-sm font-medium">First Semester</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Total Students', value: stats.totalStudents.toLocaleString(), icon: <Users className="text-blue-600" />, trend: 'Current enrollment' },
+          { label: 'Active Programs', value: stats.totalPrograms.toString(), icon: <GraduationCap className="text-emerald-600" />, trend: 'Available programs' },
+          { label: 'Courses Mounted', value: stats.totalCourses.toString(), icon: <BookOpen className="text-violet-600" />, trend: 'Current semester' },
+          { label: 'Registration Rate', value: stats.registrationRate, icon: <Calendar className="text-orange-600" />, trend: 'Students registered' },
+        ].map((stat, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="card p-6"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-3 bg-slate-50 rounded-xl">
+                {stat.icon}
+              </div>
+            </div>
+            <h3 className="text-slate-500 text-sm font-medium">{stat.label}</h3>
+            <div className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</div>
+            <p className="text-xs text-slate-400 mt-2">{stat.trend}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="card">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Quick Actions</h2>
+            </div>
+            <div className="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredNavItems.filter(item => item.id !== 'dashboard').slice(0, 6).map((item, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setActiveModule(item.id)}
+                  className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
+                >
+                  <div className="p-3 bg-slate-50 rounded-lg group-hover:bg-white transition-colors mb-3">
+                    {React.cloneElement(item.icon as React.ReactElement, { size: 24, className: 'text-slate-600 group-hover:text-blue-600' })}
+                  </div>
+                  <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Recent Registrations</h2>
+              <button 
+                onClick={() => setActiveModule('registration')}
+                className="text-blue-600 text-sm font-medium hover:underline"
+              >
+                View all
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                    <th className="px-6 py-3 font-semibold">Student</th>
+                    <th className="px-6 py-3 font-semibold">Course</th>
+                    <th className="px-6 py-3 font-semibold">Status</th>
+                    <th className="px-6 py-3 font-semibold">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentRegistrations.length > 0 ? (
+                    recentRegistrations.map((reg, i) => (
+                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
+                              {reg.studentName?.charAt(0) || 'S'}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-slate-900">{reg.studentName}</div>
+                              <div className="text-xs text-slate-400">{reg.studentId}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-slate-600">{reg.courseName}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase">{reg.courseCode}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                            reg.status === 'Registered' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {reg.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-500">
+                          {reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A'}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-slate-400 text-sm">
+                        No recent registrations found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="card p-6 bg-blue-600 text-white border-none">
+            <h3 className="font-bold text-lg mb-2">Academic Calendar</h3>
+            <p className="text-blue-100 text-sm mb-6">Important dates for the current semester.</p>
+            <div className="space-y-4">
+              {[
+                { date: 'Mar 25', event: 'Registration Closes' },
+                { date: 'Apr 10', event: 'Mid-Semester Exams' },
+                { date: 'May 15', event: 'Course Work Submission' },
+                { date: 'Jun 02', event: 'End of Semester Exams' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="bg-blue-500/50 px-2 py-1 rounded text-xs font-bold w-14 text-center">
+                    {item.date}
+                  </div>
+                  <div className="text-sm font-medium">{item.event}</div>
+                </div>
+              ))}
+            </div>
+            <button className="w-full mt-6 py-2 bg-white text-blue-600 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors">
+              View Full Calendar
+            </button>
+          </div>
+
+          <div className="card">
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="font-bold text-lg">System Notifications</h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                { title: 'Backup Successful', time: '2 hours ago', type: 'success' },
+                { title: 'New Lecturer Assigned', time: '5 hours ago', type: 'info' },
+                { title: 'Registration Deadline', time: '1 day ago', type: 'warning' },
+              ].map((notif, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    notif.type === 'success' ? 'bg-emerald-500' : 
+                    notif.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
+                  }`} />
+                  <div>
+                    <div className="text-sm font-medium text-slate-800">{notif.title}</div>
+                    <div className="text-xs text-slate-400">{notif.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderModuleContent = () => {
+    if (activeModule === 'dashboard') return renderDashboard();
+
+    const module = filteredNavItems.find(item => item.id === activeModule);
+    
+    const renderHeader = () => (
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">{module?.label}</h1>
+          <p className="text-slate-500">Manage your {module?.label.toLowerCase()} settings and data.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="btn btn-secondary gap-2">
+            <FileSpreadsheet size={18} />
+            Export
+          </button>
+          <button className="btn btn-primary gap-2">
+            <Plus size={18} />
+            New {module?.label.replace(/s$/, '')}
+          </button>
+        </div>
+      </div>
+    );
+
+    const renderTabs = () => (
+      <div className="flex border-b border-slate-200 overflow-x-auto no-scrollbar mb-6">
+        {module?.subItems?.map((sub) => (
+          <button
+            key={sub.id}
+            onClick={() => setActiveSubItem(sub.id)}
+            className={`px-6 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+              activeSubItem === sub.id || (!activeSubItem && module.subItems?.[0].id === sub.id)
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            {sub.label}
+          </button>
+        ))}
+      </div>
+    );
+
+    let content;
+    switch (activeModule) {
+      case 'students':
+        content = <StudentsModule activeSubItem={activeSubItem} />;
+        break;
+      case 'programs':
+        content = <ProgramsModule activeSubItem={activeSubItem} />;
+        break;
+      case 'courses':
+        content = <CoursesModule activeSubItem={activeSubItem} />;
+        break;
+      case 'registration':
+        content = <RegistrationModule activeSubItem={activeSubItem} />;
+        break;
+      case 'assessment':
+        content = <AssessmentModule activeSubItem={activeSubItem} />;
+        break;
+      case 'lecturers':
+        content = <LecturersModule activeSubItem={activeSubItem} />;
+        break;
+      case 'settings':
+        content = <SettingsModule activeSubItem={activeSubItem} />;
+        break;
+      default:
+        content = (
+          <div className="card p-12 flex flex-col items-center justify-center text-center">
+            <div className="p-4 bg-slate-50 rounded-full mb-4">
+              {module?.icon && React.cloneElement(module.icon as React.ReactElement, { size: 48, className: 'text-slate-300' })}
+            </div>
+            <h3 className="text-lg font-bold text-slate-900">
+              {activeSubItem 
+                ? module?.subItems?.find(s => s.id === activeSubItem)?.label 
+                : module?.subItems?.[0].label}
+            </h3>
+            <p className="text-slate-500 max-w-md mt-2">
+              This module is currently being populated with the modern UI components. 
+              All functionalities from the original SIMS will be available here.
+            </p>
+            <button className="mt-6 btn btn-primary">
+              Initialize Module
+            </button>
+          </div>
+        );
+    }
+
+    return (
+      <div className="space-y-0">
+        {renderHeader()}
+        {renderTabs()}
+        {content}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Sidebar */}
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 bg-slate-900 text-slate-400 transition-all duration-300 ease-in-out border-r border-slate-800 ${
+          isSidebarOpen ? 'w-64' : 'w-20'
+        }`}
+      >
+        <div className="h-20 flex items-center px-6 border-b border-slate-800">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shrink-0">
+            S
+          </div>
+          {isSidebarOpen && (
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="ml-3 text-white font-bold text-xl tracking-tight"
+            >
+              SIMS
+            </motion.span>
+          )}
+        </div>
+
+        <nav className="p-4 space-y-2 overflow-y-auto h-[calc(100vh-160px)] no-scrollbar">
+          {filteredNavItems.map((item) => {
+            const isExpanded = expandedItems.has(item.id);
+            const isActive = activeModule === item.id;
+
+            return (
+              <div key={item.id} className="space-y-1">
+                <button
+                  onClick={() => handleNavClick(item.id, !!item.subItems)}
+                  className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all group ${
+                    isActive && !item.subItems
+                      ? 'bg-blue-600 text-white'
+                      : 'hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <span className={`${isActive && !item.subItems ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
+                    {item.icon}
+                  </span>
+                  {isSidebarOpen && (
+                    <>
+                      <span className="ml-3 font-medium text-sm flex-1 text-left">{item.label}</span>
+                      {item.subItems && (
+                        isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                      )}
+                    </>
+                  )}
+                </button>
+
+                {isSidebarOpen && item.subItems && isExpanded && (
+                  <div className="ml-9 space-y-1 border-l border-slate-800 pl-2">
+                    {item.subItems.map((sub) => (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setActiveModule(item.id);
+                          setActiveSubItem(sub.id);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                          activeModule === item.id && activeSubItem === sub.id
+                            ? 'text-blue-400 bg-blue-400/10'
+                            : 'text-slate-500 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        <div className="absolute bottom-0 w-full p-4 border-t border-slate-800">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all group"
+          >
+            <LogOut size={20} />
+            {isSidebarOpen && <span className="ml-3 font-medium text-sm">Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main 
+        className={`flex-1 transition-all duration-300 ${
+          isSidebarOpen ? 'ml-64' : 'ml-20'
+        }`}
+      >
+        {/* Header */}
+        <header className="h-20 bg-white border-b border-slate-200 sticky top-0 z-40 px-8 flex items-center justify-between">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-64">
+              <Search size={16} className="text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search students, courses..." 
+                className="bg-transparent border-none focus:ring-0 text-sm ml-2 w-full"
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                <Bell size={20} />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+              </button>
+              
+              <div className="h-8 w-px bg-slate-200 mx-2" />
+
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <div className="text-sm font-bold text-slate-900">{user.name}</div>
+                  <div className="text-[10px] font-bold uppercase text-blue-600 tracking-wider">
+                    {user.role.replace('_', ' ')}
+                  </div>
+                </div>
+                <img 
+                  src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} 
+                  alt="Profile" 
+                  className="w-10 h-10 rounded-xl border-2 border-white shadow-sm"
+                />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="p-8 max-w-7xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeModule + (activeSubItem || '')}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderModuleContent()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+}
