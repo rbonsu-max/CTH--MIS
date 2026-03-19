@@ -1,5 +1,26 @@
 import express from 'express';
+import 'express-async-errors';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        role: string;
+        email: string;
+      };
+    }
+  }
+}
+
+import compression from 'compression';
+import morgan from 'morgan';
+import hpp from 'hpp';
+import dotenv from 'dotenv';
+import { z } from 'zod';
 import { createServer as createViteServer } from 'vite';
+
+dotenv.config();
 import path from 'path';
 import cors from 'cors';
 import { initDb } from './db';
@@ -8,8 +29,10 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sims-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('JWT_SECRET is required in production'); })() : 'sims-secret-key');
 
 async function startServer() {
   const app = express();
@@ -17,6 +40,30 @@ async function startServer() {
 
   // Initialize DB
   initDb();
+
+  // CORS
+  const corsOptions = {
+    origin: process.env.APP_URL || true,
+    credentials: true,
+  };
+  app.use(cors(corsOptions));
+
+  // Security Middlewares
+  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+  app.use(hpp());
+  app.use(compression());
+  app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for development with Vite
+    crossOriginEmbedderPolicy: false
+  }));
+
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+  });
+
+  app.use('/api/', limiter);
 
   app.use(cors({
     origin: true,
@@ -38,12 +85,36 @@ async function startServer() {
     }
   };
 
+  const checkRole = (roles: string[]) => {
+    return (req: any, res: any, next: any) => {
+      if (!req.user || !roles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+      }
+      next();
+    };
+  };
+
   // API Routes
+  // Health check
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   const api = express.Router();
 
   // Auth Routes
   api.post('/auth/login', (req, res) => {
-    const { email, password } = req.body;
+    const loginSchema = z.object({
+      email: z.string().email(),
+      password: z.string().min(6)
+    });
+
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: 'Invalid email or password format' });
+    }
+
+    const { email, password } = validation.data;
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -51,15 +122,15 @@ async function startServer() {
     const token = jwt.sign({ id: user.id, role: user.role, name: user.name, email: user.email, avatar: user.avatar }, JWT_SECRET, { expiresIn: '1d' });
     res.cookie('token', token, { 
       httpOnly: true, 
-      secure: true, 
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
     res.json({ id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar });
   });
 
   api.post('/auth/logout', (req, res) => {
-    res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'none' });
+    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
     res.json({ success: true });
   });
 
@@ -73,7 +144,7 @@ async function startServer() {
     res.json(students);
   });
 
-  api.post('/students', (req, res) => {
+  api.post('/students', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { indexNumber, name, email, programId, level, gender, dateOfBirth, phoneNumber, address } = req.body;
     const id = uuidv4();
     try {
@@ -93,7 +164,7 @@ async function startServer() {
     res.json(programs);
   });
 
-  api.post('/programs', (req, res) => {
+  api.post('/programs', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { name, code, department, duration, description } = req.body;
     const id = uuidv4();
     try {
@@ -113,7 +184,7 @@ async function startServer() {
     res.json(courses);
   });
 
-  api.post('/courses', (req, res) => {
+  api.post('/courses', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { name, code, creditHours, programId, semester, level } = req.body;
     const id = uuidv4();
     try {
@@ -138,7 +209,7 @@ async function startServer() {
     res.json(registrations);
   });
 
-  api.post('/registrations', (req, res) => {
+  api.post('/registrations', authenticate, (req, res) => {
     const { studentId, courseId, academicYear, semester } = req.body;
     const id = uuidv4();
     try {
@@ -163,7 +234,7 @@ async function startServer() {
     res.json(assessments);
   });
 
-  api.post('/assessments', (req, res) => {
+  api.post('/assessments', authenticate, checkRole(['super_admin', 'admin', 'lecturer']), (req, res) => {
     const { studentId, courseId, academicYear, semester, midSemScore, examScore } = req.body;
     const totalScore = (midSemScore || 0) + (examScore || 0);
     
@@ -203,7 +274,7 @@ async function startServer() {
     res.json(lecturers);
   });
 
-  api.post('/lecturers', (req, res) => {
+  api.post('/lecturers', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { name, email, department, phoneNumber } = req.body;
     const id = uuidv4();
     try {
@@ -218,7 +289,7 @@ async function startServer() {
   });
 
   // Bulk Uploads
-  api.post('/bulk/students', authenticate, (req, res) => {
+  api.post('/bulk/students', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const students = req.body;
     const insert = db.prepare(`
       INSERT OR REPLACE INTO students (id, indexNumber, name, email, programId, level, gender, dateOfBirth, phoneNumber, address, status)
@@ -237,7 +308,7 @@ async function startServer() {
     }
   });
 
-  api.post('/bulk/programs', authenticate, (req, res) => {
+  api.post('/bulk/programs', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const programs = req.body;
     const insert = db.prepare(`
       INSERT OR REPLACE INTO programs (id, name, code, department, duration, description)
@@ -256,7 +327,7 @@ async function startServer() {
     }
   });
 
-  api.post('/bulk/courses', authenticate, (req, res) => {
+  api.post('/bulk/courses', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const courses = req.body;
     const insert = db.prepare(`
       INSERT OR REPLACE INTO courses (id, name, code, creditHours, programId, semester, level)
@@ -275,7 +346,7 @@ async function startServer() {
     }
   });
 
-  api.post('/bulk/lecturers', authenticate, (req, res) => {
+  api.post('/bulk/lecturers', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const lecturers = req.body;
     const insert = db.prepare(`
       INSERT OR REPLACE INTO lecturers (id, name, email, department, phoneNumber)
@@ -294,7 +365,7 @@ async function startServer() {
     }
   });
 
-  api.post('/bulk/users', authenticate, (req, res) => {
+  api.post('/bulk/users', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const users = req.body;
     const insert = db.prepare(`
       INSERT OR REPLACE INTO users (id, name, email, password, role, avatar)
@@ -320,7 +391,7 @@ async function startServer() {
     res.json(years.map((y: any) => ({ ...y, isCurrent: !!y.isCurrent })));
   });
 
-  api.post('/academic-years', (req, res) => {
+  api.post('/academic-years', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { year, isCurrent } = req.body;
     const id = uuidv4();
     try {
@@ -337,11 +408,32 @@ async function startServer() {
     }
   });
 
-  api.post('/academic-years/:id/set-current', (req, res) => {
+  api.post('/academic-years/:id/set-current', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { id } = req.params;
     try {
       db.prepare('UPDATE academic_years SET isCurrent = 0').run();
       db.prepare('UPDATE academic_years SET isCurrent = 1 WHERE id = ?').run(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.put('/academic-years/:id', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const { id } = req.params;
+    const { year } = req.body;
+    try {
+      db.prepare('UPDATE academic_years SET year = ? WHERE id = ?').run(year, id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.delete('/academic-years/:id', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const { id } = req.params;
+    try {
+      db.prepare('DELETE FROM academic_years WHERE id = ?').run(id);
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -354,11 +446,100 @@ async function startServer() {
     res.json(semesters.map((s: any) => ({ ...s, isCurrent: !!s.isCurrent })));
   });
 
-  api.post('/semesters/:id/set-current', (req, res) => {
+  api.post('/semesters/:id/set-current', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
     const { id } = req.params;
     try {
       db.prepare('UPDATE semesters SET isCurrent = 0').run();
       db.prepare('UPDATE semesters SET isCurrent = 1 WHERE id = ?').run(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.put('/semesters/:id', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    try {
+      db.prepare('UPDATE semesters SET name = ? WHERE id = ?').run(name, id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Users
+  api.get('/users', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const users = db.prepare('SELECT id, name, email, role, avatar FROM users').all();
+    res.json(users);
+  });
+
+  api.post('/users', authenticate, checkRole(['super_admin']), async (req, res) => {
+    const { name, email, password, role } = req.body;
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const id = Math.random().toString(36).substring(2, 9);
+      db.prepare('INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)')
+        .run(id, name, email, hashedPassword, role);
+      res.status(201).json({ id, name, email, role });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.put('/users/:id/password', authenticate, async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+    
+    // Only super_admin or the user themselves can change their password
+    if (req.user.role !== 'super_admin' && req.user.id !== id) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.delete('/users/:id', authenticate, checkRole(['super_admin']), (req, res) => {
+    const { id } = req.params;
+    if (req.user.id === id) {
+      return res.status(400).json({ error: 'Cannot delete yourself' });
+    }
+    try {
+      db.prepare('DELETE FROM users WHERE id = ?').run(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Calendar Events
+  api.get('/calendar-events', authenticate, (req, res) => {
+    const events = db.prepare('SELECT * FROM calendar_events').all();
+    res.json(events);
+  });
+
+  api.post('/calendar-events', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const { date, event, academicYear, semester } = req.body;
+    try {
+      const id = Math.random().toString(36).substring(2, 9);
+      db.prepare('INSERT INTO calendar_events (id, date, event, academicYear, semester) VALUES (?, ?, ?, ?, ?)')
+        .run(id, date, event, academicYear, semester);
+      res.status(201).json({ id, date, event, academicYear, semester });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  api.delete('/calendar-events/:id', authenticate, checkRole(['super_admin', 'admin']), (req, res) => {
+    const { id } = req.params;
+    try {
+      db.prepare('DELETE FROM calendar_events WHERE id = ?').run(id);
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

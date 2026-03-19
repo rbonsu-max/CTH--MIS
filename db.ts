@@ -96,6 +96,14 @@ export function initDb() {
       isCurrent INTEGER DEFAULT 0
     );
 
+    CREATE TABLE IF NOT EXISTS calendar_events (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      event TEXT NOT NULL,
+      academicYear TEXT,
+      semester TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
@@ -116,11 +124,18 @@ export function initDb() {
   }
 
   // Seed initial super admin if not exists
-  const adminExists = db.prepare('SELECT id FROM users WHERE role = ?').get('super_admin');
+  const adminExists = db.prepare('SELECT id FROM users WHERE email = ?').get('great@olacoe.edu.gh');
   if (!adminExists) {
     const hashedPassword = bcrypt.hashSync('admin123', 10);
     db.prepare('INSERT INTO users (id, name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?, ?)')
       .run('1', 'Professor Great', 'great@olacoe.edu.gh', hashedPassword, 'super_admin', 'https://picsum.photos/seed/prof/200');
+  }
+
+  const userAdminExists = db.prepare('SELECT id FROM users WHERE email = ?').get('rbonsu@olacoe.edu.gh');
+  if (!userAdminExists) {
+    const hashedPassword = bcrypt.hashSync('admin123', 10);
+    db.prepare('INSERT INTO users (id, name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?, ?)')
+      .run('2', 'Richard Bonsu', 'rbonsu@olacoe.edu.gh', hashedPassword, 'super_admin', 'https://ui-avatars.com/api/?name=Richard+Bonsu&background=random');
   }
 }
 

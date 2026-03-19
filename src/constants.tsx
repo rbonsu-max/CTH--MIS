@@ -143,8 +143,9 @@ export const NAV_ITEMS: NavItem[] = [
     subItems: [
       { id: 'academic_year', label: 'Academic Year' },
       { id: 'semesters', label: 'Semesters' },
+      { id: 'academic_calendar', label: 'Academic Calendar' },
       { id: 'grading_points', label: 'Grading Points' },
-      { id: 'users', label: 'Users' },
+      { id: 'user_management', label: 'User Management' },
       { id: 'bulk_upload', label: 'Bulk Upload' }
     ]
   }

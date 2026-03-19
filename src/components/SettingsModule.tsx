@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Settings, Calendar, Clock, UserCog, CheckCircle, Loader2, X, Upload } from 'lucide-react';
-import { AcademicYear, Semester } from '../types';
+import { AcademicYear, Semester, User, CalendarEvent } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
 
@@ -15,6 +15,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const [showAddYearModal, setShowAddYearModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [newYear, setNewYear] = useState('');
+  const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
+  const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'admin' });
+  const [newEvent, setNewEvent] = useState({ date: '', event: '' });
+  const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -23,12 +33,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [years, sems] = await Promise.all([
+      const [years, sems, allUsers, events] = await Promise.all([
         api.getAcademicYears(),
-        api.getSemesters()
+        api.getSemesters(),
+        api.getUsers(),
+        api.getCalendarEvents()
       ]);
       setAcademicYears(years);
       setSemesters(sems);
+      setUsers(allUsers);
+      setCalendarEvents(events);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
     } finally {
@@ -40,14 +54,49 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.createAcademicYear({ year: newYear, isCurrent: academicYears.length === 0 });
+      if (editingYear) {
+        await api.updateAcademicYear(editingYear.id, { year: newYear });
+        alert('Academic year updated successfully!');
+      } else {
+        await api.createAcademicYear({ year: newYear, isCurrent: academicYears.length === 0 });
+        alert('Academic year added successfully!');
+      }
       setNewYear('');
       setShowAddYearModal(false);
-      alert('Academic year added successfully!');
+      setEditingYear(null);
       fetchData();
     } catch (error) {
       console.error('Failed to save academic year:', error);
       alert('Failed to save academic year');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteYear = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this academic year?')) return;
+    try {
+      await api.deleteAcademicYear(id);
+      alert('Academic year deleted!');
+      fetchData();
+    } catch (error) {
+      console.error('Failed to delete academic year:', error);
+      alert('Failed to delete academic year');
+    }
+  };
+
+  const handleEditSemester = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSemester) return;
+    setSubmitting(true);
+    try {
+      await api.updateSemester(editingSemester.id, { name: editingSemester.name });
+      alert('Semester updated successfully!');
+      setEditingSemester(null);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to update semester:', error);
+      alert('Failed to update semester');
     } finally {
       setSubmitting(false);
     }
@@ -75,6 +124,52 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     }
   };
 
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.createUser(newUser);
+      alert('User created successfully!');
+      setNewUser({ name: '', email: '', password: '', role: 'admin' });
+      setShowAddUserModal(false);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      alert('Failed to create user');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!changingPasswordUser) return;
+    setSubmitting(true);
+    try {
+      await api.updateUserPassword(changingPasswordUser.id, newPassword);
+      alert('Password updated successfully!');
+      setNewPassword('');
+      setChangingPasswordUser(null);
+    } catch (error) {
+      console.error('Failed to update password:', error);
+      alert('Failed to update password');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.deleteUser(id);
+      alert('User deleted!');
+      fetchData();
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      alert('Failed to delete user');
+    }
+  };
+
   const renderAcademicYear = () => (
     <div className="space-y-6">
       <div className="card">
@@ -83,7 +178,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
             <h2 className="font-bold text-lg">Academic Year Setup</h2>
             <p className="text-slate-500 text-sm">Manage academic years and set the current active year.</p>
           </div>
-          <button className="btn btn-primary gap-2" onClick={() => setShowAddYearModal(true)}>
+          <button className="btn btn-primary gap-2" onClick={() => { setEditingYear(null); setNewYear(''); setShowAddYearModal(true); }}>
             <Plus size={18} />
             New Academic Year
           </button>
@@ -119,10 +214,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                   </button>
                 )}
                 <div className="flex gap-1">
-                  <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all">
+                  <button 
+                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
+                    onClick={() => { setEditingYear(item); setNewYear(item.year); setShowAddYearModal(true); }}
+                  >
                     <Edit size={16} />
                   </button>
-                  <button className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all">
+                  <button 
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
+                    onClick={() => handleDeleteYear(item.id)}
+                  >
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -138,7 +239,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="font-bold text-lg">Add Academic Year</h2>
+              <h2 className="font-bold text-lg">{editingYear ? 'Edit' : 'Add'} Academic Year</h2>
               <button onClick={() => setShowAddYearModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                 <X size={20} className="text-slate-500" />
               </button>
@@ -159,7 +260,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                 <button type="button" className="btn btn-secondary" onClick={() => setShowAddYearModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
                   {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                  {submitting ? 'Adding...' : 'Add Year'}
+                  {submitting ? (editingYear ? 'Saving...' : 'Adding...') : (editingYear ? 'Save Changes' : 'Add Year')}
                 </button>
               </div>
             </form>
@@ -205,7 +306,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                   {sem.isCurrent ? 'Currently Active' : 'Activate Semester'}
                 </button>
                 <div className="flex gap-1">
-                  <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all">
+                  <button 
+                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
+                    onClick={() => setEditingSemester(sem)}
+                  >
                     <Edit size={16} />
                   </button>
                 </div>
@@ -214,6 +318,342 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
           ))}
         </div>
       </div>
+
+      {editingSemester && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Edit Semester</h2>
+              <button onClick={() => setEditingSemester(null)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={handleEditSemester}>
+              <div className="space-y-2">
+                <label className="label">Semester Name</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  required
+                  value={editingSemester.name}
+                  onChange={e => setEditingSemester({ ...editingSemester, name: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary" onClick={() => setEditingSemester(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Edit size={18} />}
+                  {submitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderUserManagement = () => (
+    <div className="space-y-6">
+      <div className="card">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-lg">User Management</h2>
+            <p className="text-slate-500 text-sm">Manage system administrators and lecturers.</p>
+          </div>
+          <button className="btn btn-primary gap-2" onClick={() => setShowAddUserModal(true)}>
+            <Plus size={18} />
+            New User
+          </button>
+        </div>
+        <div className="p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-3 font-semibold">User</th>
+                  <th className="px-6 py-3 font-semibold">Role</th>
+                  <th className="px-6 py-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`} 
+                          alt="" 
+                          className="w-8 h-8 rounded-lg"
+                        />
+                        <div>
+                          <div className="text-sm font-bold text-slate-900">{u.name}</div>
+                          <div className="text-xs text-slate-400">{u.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
+                        u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {u.role.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
+                          title="Change Password"
+                          onClick={() => setChangingPasswordUser(u)}
+                        >
+                          <Lock size={16} />
+                        </button>
+                        <button 
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
+                          title="Delete User"
+                          onClick={() => handleDeleteUser(u.id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Add New User</h2>
+              <button onClick={() => setShowAddUserModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={handleAddUser}>
+              <div className="space-y-2">
+                <label className="label">Full Name</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  required
+                  value={newUser.name}
+                  onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="label">Email Address</label>
+                <input 
+                  type="email" 
+                  className="input" 
+                  required
+                  value={newUser.email}
+                  onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="label">Password</label>
+                <input 
+                  type="password" 
+                  className="input" 
+                  required
+                  value={newUser.password}
+                  onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="label">Role</label>
+                <select 
+                  className="input"
+                  value={newUser.role}
+                  onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                >
+                  <option value="admin">Admin</option>
+                  <option value="lecturer">Lecturer</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddUserModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                  {submitting ? 'Creating...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {changingPasswordUser && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Change Password</h2>
+              <button onClick={() => setChangingPasswordUser(null)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={handleChangePassword}>
+              <div className="p-4 bg-blue-50 rounded-xl mb-4">
+                <p className="text-sm text-blue-700">Changing password for <strong>{changingPasswordUser.name}</strong></p>
+              </div>
+              <div className="space-y-2">
+                <label className="label">New Password</label>
+                <input 
+                  type="password" 
+                  className="input" 
+                  required
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary" onClick={() => setChangingPasswordUser(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Lock size={18} />}
+                  {submitting ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const handleAddEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.createCalendarEvent(newEvent);
+      alert('Calendar event added successfully!');
+      setNewEvent({ date: '', event: '' });
+      setShowAddEventModal(false);
+      fetchData();
+    } catch (error) {
+      console.error('Failed to add calendar event:', error);
+      alert('Failed to add calendar event');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await api.deleteCalendarEvent(id);
+      alert('Calendar event deleted!');
+      fetchData();
+    } catch (error) {
+      console.error('Failed to delete calendar event:', error);
+      alert('Failed to delete calendar event');
+    }
+  };
+
+  const renderCalendarManagement = () => (
+    <div className="space-y-6">
+      <div className="card">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-lg">Academic Calendar</h2>
+            <p className="text-slate-500 text-sm">Manage important dates and events.</p>
+          </div>
+          <button className="btn btn-primary gap-2" onClick={() => setShowAddEventModal(true)}>
+            <Plus size={18} />
+            New Event
+          </button>
+        </div>
+        <div className="p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-3 font-semibold">Date</th>
+                  <th className="px-6 py-3 font-semibold">Event</th>
+                  <th className="px-6 py-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {calendarEvents.map((ev) => (
+                  <tr key={ev.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-bold text-slate-900">{ev.date}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-slate-600">{ev.event}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button 
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
+                        onClick={() => handleDeleteEvent(ev.id)}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {calendarEvents.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-12 text-center text-slate-400 italic">
+                      No events found. Add your first event to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {showAddEventModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Add Calendar Event</h2>
+              <button onClick={() => setShowAddEventModal(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={handleAddEvent}>
+              <div className="space-y-2">
+                <label className="label">Date (e.g., Mar 25)</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  placeholder="Mar 25"
+                  required
+                  value={newEvent.date}
+                  onChange={e => setNewEvent({ ...newEvent, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="label">Event Description</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  placeholder="Registration Closes"
+                  required
+                  value={newEvent.event}
+                  onChange={e => setNewEvent({ ...newEvent, event: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddEventModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                  {submitting ? 'Adding...' : 'Add Event'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -222,6 +662,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
       return renderAcademicYear();
     case 'semesters':
       return renderSemesters();
+    case 'academic_calendar':
+      return renderCalendarManagement();
+    case 'user_management':
+      return renderUserManagement();
     case 'bulk_upload':
       return <BulkUploadModule />;
     default:

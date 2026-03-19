@@ -92,6 +92,14 @@ export interface Semester {
   isCurrent: boolean;
 }
 
+export interface CalendarEvent {
+  id: string;
+  date: string;
+  event: string;
+  academicYear?: string;
+  semester?: string;
+}
+
 export type ModuleType = 
   | 'dashboard'
   | 'students'

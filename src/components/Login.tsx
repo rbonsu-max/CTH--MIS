@@ -99,13 +99,6 @@ export function Login({ onLogin }: LoginProps) {
               )}
             </button>
           </form>
-
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-400">
-              Default Super Admin: <br/>
-              <span className="font-medium text-slate-600">great@olacoe.edu.gh / admin123</span>
-            </p>
-          </div>
         </div>
 
         <p className="text-center mt-8 text-sm text-slate-400">

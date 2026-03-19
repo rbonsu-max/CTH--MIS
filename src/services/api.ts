@@ -1,4 +1,4 @@
-import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User } from '../types';
+import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent } from '../types';
 
 const API_URL = '/api';
 
@@ -178,6 +178,18 @@ export const api = {
       method: 'POST',
     });
   },
+  updateAcademicYear: async (id: string, data: Partial<AcademicYear>): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic-years/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+  deleteAcademicYear: async (id: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic-years/${id}`, {
+      method: 'DELETE',
+    });
+  },
 
   // Semesters
   getSemesters: async (): Promise<Semester[]> => {
@@ -187,6 +199,58 @@ export const api = {
   setCurrentSemester: async (id: string): Promise<void> => {
     await fetchWithAuth(`${API_URL}/semesters/${id}/set-current`, {
       method: 'POST',
+    });
+  },
+  updateSemester: async (id: string, data: Partial<Semester>): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/semesters/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Users
+  getUsers: async (): Promise<User[]> => {
+    const res = await fetchWithAuth(`${API_URL}/users`);
+    return res.json();
+  },
+  createUser: async (data: any): Promise<User> => {
+    const res = await fetchWithAuth(`${API_URL}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  updateUserPassword: async (id: string, password: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/users/${id}/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+  },
+  deleteUser: async (id: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/users/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Calendar Events
+  getCalendarEvents: async (): Promise<CalendarEvent[]> => {
+    const res = await fetchWithAuth(`${API_URL}/calendar-events`);
+    return res.json();
+  },
+  createCalendarEvent: async (data: any): Promise<CalendarEvent> => {
+    const res = await fetchWithAuth(`${API_URL}/calendar-events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  deleteCalendarEvent: async (id: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/calendar-events/${id}`, {
+      method: 'DELETE',
     });
   },
 };

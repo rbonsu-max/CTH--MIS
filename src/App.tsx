@@ -16,7 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { NAV_ITEMS } from './constants';
-import { ModuleType, User, Student, Program, Course, Registration } from './types';
+import { ModuleType, User, Student, Program, Course, Registration, CalendarEvent } from './types';
 import { StudentsModule } from './components/StudentsModule';
 import { ProgramsModule } from './components/ProgramsModule';
 import { CoursesModule } from './components/CoursesModule';
@@ -43,6 +43,9 @@ export default function App() {
     registrationRate: '0%'
   });
   const [recentRegistrations, setRecentRegistrations] = useState<Registration[]>([]);
+  const [currentYear, setCurrentYear] = useState<string>('Loading...');
+  const [currentSemester, setCurrentSemester] = useState<string>('Loading...');
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     checkAuth();
@@ -64,11 +67,14 @@ export default function App() {
 
   const fetchDashboardData = async () => {
     try {
-      const [students, programs, courses, registrations] = await Promise.all([
+      const [students, programs, courses, registrations, years, sems, events] = await Promise.all([
         api.getStudents(),
         api.getPrograms(),
         api.getCourses(),
-        api.getRegistrations()
+        api.getRegistrations(),
+        api.getAcademicYears(),
+        api.getSemesters(),
+        api.getCalendarEvents()
       ]);
 
       setStats({
@@ -81,6 +87,14 @@ export default function App() {
       });
 
       setRecentRegistrations(registrations.slice(0, 5));
+      setCalendarEvents(events.slice(0, 4));
+      
+      const activeYear = years.find(y => y.isCurrent);
+      if (activeYear) setCurrentYear(activeYear.year);
+      
+      const activeSem = sems.find(s => s.isCurrent);
+      if (activeSem) setCurrentSemester(activeSem.name);
+
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     }
@@ -139,11 +153,11 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
             <Calendar size={18} className="text-blue-600" />
-            <span className="text-sm font-medium">2025/2026 Academic Year</span>
+            <span className="text-sm font-medium">{currentYear} Academic Year</span>
           </div>
           <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
             <Calendar size={18} className="text-blue-600" />
-            <span className="text-sm font-medium">First Semester</span>
+            <span className="text-sm font-medium">{currentSemester}</span>
           </div>
         </div>
       </div>
@@ -265,19 +279,16 @@ export default function App() {
             <h3 className="font-bold text-lg mb-2">Academic Calendar</h3>
             <p className="text-blue-100 text-sm mb-6">Important dates for the current semester.</p>
             <div className="space-y-4">
-              {[
-                { date: 'Mar 25', event: 'Registration Closes' },
-                { date: 'Apr 10', event: 'Mid-Semester Exams' },
-                { date: 'May 15', event: 'Course Work Submission' },
-                { date: 'Jun 02', event: 'End of Semester Exams' },
-              ].map((item, i) => (
+              {calendarEvents.length > 0 ? calendarEvents.map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="bg-blue-500/50 px-2 py-1 rounded text-xs font-bold w-14 text-center">
                     {item.date}
                   </div>
                   <div className="text-sm font-medium">{item.event}</div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-blue-100 text-xs italic">No upcoming events scheduled.</p>
+              )}
             </div>
             <button className="w-full mt-6 py-2 bg-white text-blue-600 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors">
               View Full Calendar
