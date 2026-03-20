@@ -6,27 +6,27 @@ import { api } from '../services/api';
 const TEMPLATES = {
   students: {
     label: 'Students',
-    headers: ['indexNumber', 'name', 'email', 'programId', 'level', 'gender', 'dateOfBirth', 'phoneNumber', 'address', 'status'],
+    headers: ['index_number', 'surname', 'other_names', 'progid', 'current_level', 'gender', 'dob', 'phone', 'address', 'admission_year'],
     uploadFn: api.bulkUploadStudents
   },
   programs: {
     label: 'Programs',
-    headers: ['name', 'code', 'department', 'duration', 'description'],
+    headers: ['progid', 'name', 'duration_years', 'department'],
     uploadFn: api.bulkUploadPrograms
   },
   courses: {
     label: 'Courses',
-    headers: ['name', 'code', 'creditHours', 'programId', 'semester', 'level'],
+    headers: ['cid', 'title', 'credits', 'department'],
     uploadFn: api.bulkUploadCourses
   },
   lecturers: {
     label: 'Lecturers',
-    headers: ['name', 'email', 'department', 'phoneNumber'],
+    headers: ['staff_id', 'fullname', 'email', 'phone', 'department'],
     uploadFn: api.bulkUploadLecturers
   },
   users: {
     label: 'Users',
-    headers: ['name', 'email', 'role', 'avatar'],
+    headers: ['fullname', 'username', 'password', 'role'],
     uploadFn: api.bulkUploadUsers
   }
 };
@@ -109,14 +109,23 @@ export const BulkUploadModule: React.FC = () => {
               <label className="label">Select Data Type</label>
               <div className="grid grid-cols-1 gap-2">
                 {(Object.keys(TEMPLATES) as Array<keyof typeof TEMPLATES>).map((type) => (
-                  <button
+                  <div
                     key={type}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => {
                       setSelectedType(type);
                       setFile(null);
                       setResult(null);
                     }}
-                    className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedType(type);
+                        setFile(null);
+                        setResult(null);
+                      }
+                    }}
+                    className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
                       selectedType === type 
                         ? 'border-blue-600 bg-blue-50 text-blue-700' 
                         : 'border-slate-100 bg-white hover:bg-slate-50'
@@ -137,7 +146,7 @@ export const BulkUploadModule: React.FC = () => {
                     >
                       <Download size={18} />
                     </button>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>

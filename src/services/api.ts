@@ -7,10 +7,12 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     ...options,
     credentials: 'include',
   });
-  if (res.status === 401 && !url.includes('/auth/login')) {
-    // Handle unauthorized - maybe redirect to login or clear state
-    // For now, let the caller handle it
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `Request failed with status ${res.status}`);
   }
+  
   return res;
 };
 
@@ -22,7 +24,6 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    if (!res.ok) throw new Error('Invalid credentials');
     return res.json();
   },
   logout: async (): Promise<void> => {
@@ -30,7 +31,6 @@ export const api = {
   },
   me: async (): Promise<User> => {
     const res = await fetchWithAuth(`${API_URL}/auth/me`);
-    if (!res.ok) throw new Error('Not authenticated');
     return res.json();
   },
 
@@ -44,6 +44,22 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(student),
+    });
+    return res.json();
+  },
+  getStudentLogin: async (iid: string): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/students/${iid}/login`);
+    return res.json();
+  },
+  getTranscript: async (iid: string): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/students/${iid}/transcript`);
+    return res.json();
+  },
+  createStudentLogin: async (iid: string, data: any): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/students/${iid}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
     return res.json();
   },
@@ -91,8 +107,12 @@ export const api = {
   },
 
   // Assessments
-  getAssessments: async (): Promise<Assessment[]> => {
-    const res = await fetchWithAuth(`${API_URL}/assessments`);
+  getAssessments: async (cid?: string, academic_year?: string, semester_sid?: string): Promise<Assessment[]> => {
+    const params = new URLSearchParams();
+    if (cid) params.append('cid', cid);
+    if (academic_year) params.append('academic_year', academic_year);
+    if (semester_sid) params.append('semester_sid', semester_sid);
+    const res = await fetchWithAuth(`${API_URL}/assessments?${params.toString()}`);
     return res.json();
   },
   createAssessment: async (assessment: Partial<Assessment>): Promise<Assessment> => {
@@ -159,53 +179,102 @@ export const api = {
     });
     return res.json();
   },
-
-  // Academic Years
-  getAcademicYears: async (): Promise<AcademicYear[]> => {
-    const res = await fetchWithAuth(`${API_URL}/academic-years`);
-    return res.json();
-  },
-  createAcademicYear: async (data: Partial<AcademicYear>): Promise<AcademicYear> => {
-    const res = await fetchWithAuth(`${API_URL}/academic-years`, {
+  bulkUploadAssessments: async (data: any[]): Promise<{ count: number }> => {
+    const res = await fetchWithAuth(`${API_URL}/bulk/assessments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     return res.json();
   },
-  setCurrentAcademicYear: async (id: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/academic-years/${id}/set-current`, {
+
+  // Academic Years
+  getAcademicYears: async (): Promise<AcademicYear[]> => {
+    const res = await fetchWithAuth(`${API_URL}/academic/years`);
+    return res.json();
+  },
+  createAcademicYear: async (data: Partial<AcademicYear>): Promise<AcademicYear> => {
+    const res = await fetchWithAuth(`${API_URL}/academic/years`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  setCurrentAcademicYear: async (code: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic/years/${code}/set-current`, {
       method: 'POST',
     });
   },
-  updateAcademicYear: async (id: string, data: Partial<AcademicYear>): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/academic-years/${id}`, {
+  deleteAcademicYear: async (code: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic/years/${code}`, {
+      method: 'DELETE',
+    });
+  },
+  updateAcademicYear: async (code: string, data: Partial<AcademicYear>): Promise<AcademicYear> => {
+    const res = await fetchWithAuth(`${API_URL}/academic/years/${code}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-  },
-  deleteAcademicYear: async (id: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/academic-years/${id}`, {
-      method: 'DELETE',
-    });
+    return res.json();
   },
 
   // Semesters
   getSemesters: async (): Promise<Semester[]> => {
-    const res = await fetchWithAuth(`${API_URL}/semesters`);
+    const res = await fetchWithAuth(`${API_URL}/academic/semesters`);
     return res.json();
   },
-  setCurrentSemester: async (id: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/semesters/${id}/set-current`, {
+  setCurrentSemester: async (sid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic/semesters/${sid}/set-current`, {
       method: 'POST',
     });
   },
-  updateSemester: async (id: string, data: Partial<Semester>): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/semesters/${id}`, {
+  updateSemester: async (sid: string, data: Partial<Semester>): Promise<Semester> => {
+    const res = await fetchWithAuth(`${API_URL}/academic/semesters/${sid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  // Curriculum
+  getCurriculum: async (progid: string, level?: number, semester_sid?: string): Promise<any[]> => {
+    let url = `${API_URL}/programs/${progid}/curriculum`;
+    const params = new URLSearchParams();
+    if (level) params.append('level', level.toString());
+    if (semester_sid) params.append('semester_sid', semester_sid);
+    if (params.toString()) url += `?${params.toString()}`;
+    
+    const res = await fetchWithAuth(url);
+    return res.json();
+  },
+  mountCurriculum: async (progid: string, data: any): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/programs/${progid}/curriculum`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  // Registration Windows
+  getRegistrationWindows: async (): Promise<any[]> => {
+    const res = await fetchWithAuth(`${API_URL}/registrations/windows`);
+    return res.json();
+  },
+  openRegistrationWindow: async (data: any): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/registrations/windows`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  closeRegistrationWindow: async (id: number): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/registrations/windows/${id}/close`, {
+      method: 'POST',
     });
   },
 
@@ -222,15 +291,15 @@ export const api = {
     });
     return res.json();
   },
-  updateUserPassword: async (id: string, password: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/users/${id}/password`, {
+  updateUserPassword: async (uid: string, password: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/users/${uid}/password`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
   },
-  deleteUser: async (id: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/users/${id}`, {
+  deleteUser: async (uid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/users/${uid}`, {
       method: 'DELETE',
     });
   },

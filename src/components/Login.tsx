@@ -67,7 +67,7 @@ export function Login({ onLogin }: LoginProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                  placeholder="name@olacoe.edu.gh"
+                  placeholder="name@snsanglican.org"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ export function Login({ onLogin }: LoginProps) {
         </div>
 
         <p className="text-center mt-8 text-sm text-slate-400">
-          © 2026 OLA College of Education. All rights reserved.
+          © 2026 St. Nicholas Anglican Seminary. All rights reserved.
         </p>
       </motion.div>
     </div>

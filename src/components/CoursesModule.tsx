@@ -17,12 +17,10 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    creditHours: 3,
-    programId: '',
-    semester: '1st Semester',
-    level: '100'
+    title: '',
+    cid: '',
+    credits: 3,
+    department: ''
   });
 
   useEffect(() => {
@@ -51,12 +49,10 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
     try {
       await api.createCourse(formData);
       setFormData({
-        name: '',
-        code: '',
-        creditHours: 3,
-        programId: '',
-        semester: '1st Semester',
-        level: '100'
+        title: '',
+        cid: '',
+        credits: 3,
+        department: ''
       });
       alert('Course created successfully!');
       fetchData();
@@ -69,8 +65,8 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
   };
 
   const filteredCourses = courses.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.code.toLowerCase().includes(searchTerm.toLowerCase())
+    c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.cid.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const renderSetupCourse = () => (
@@ -88,8 +84,8 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
               className="input" 
               placeholder="e.g. Calculus I" 
               required
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
+              value={formData.title}
+              onChange={e => setFormData({...formData, title: e.target.value})}
             />
           </div>
           <div className="space-y-2">
@@ -99,8 +95,8 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
               className="input" 
               placeholder="e.g. MAT101" 
               required
-              value={formData.code}
-              onChange={e => setFormData({...formData, code: e.target.value})}
+              value={formData.cid}
+              onChange={e => setFormData({...formData, cid: e.target.value})}
             />
           </div>
           <div className="space-y-2">
@@ -109,52 +105,25 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
               type="number" 
               className="input" 
               required
-              value={formData.creditHours}
-              onChange={e => setFormData({...formData, creditHours: parseInt(e.target.value)})}
+              value={formData.credits}
+              onChange={e => setFormData({...formData, credits: parseInt(e.target.value)})}
             />
           </div>
           <div className="space-y-2">
-            <label className="label">Program</label>
-            <select 
-              className="input"
+            <label className="label">Department</label>
+            <input 
+              type="text" 
+              className="input" 
+              placeholder="e.g. Mathematics" 
               required
-              value={formData.programId}
-              onChange={e => setFormData({...formData, programId: e.target.value})}
-            >
-              <option value="">Select Program</option>
-              {programs.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="label">Level</label>
-            <select 
-              className="input"
-              value={formData.level}
-              onChange={e => setFormData({...formData, level: e.target.value})}
-            >
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="label">Semester</label>
-            <select 
-              className="input"
-              value={formData.semester}
-              onChange={e => setFormData({...formData, semester: e.target.value})}
-            >
-              <option value="1st Semester">1st Semester</option>
-              <option value="2nd Semester">2nd Semester</option>
-            </select>
+              value={formData.department}
+              onChange={e => setFormData({...formData, department: e.target.value})}
+            />
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
           <button type="button" className="btn btn-secondary" onClick={() => setFormData({
-            name: '', code: '', creditHours: 3, programId: '', semester: '1st Semester', level: '100'
+            title: '', cid: '', credits: 3, department: ''
           })}>Cancel</button>
           <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
@@ -199,25 +168,19 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                   <th className="px-6 py-4 font-semibold">Course Code</th>
                   <th className="px-6 py-4 font-semibold">Course Title</th>
-                  <th className="px-6 py-4 font-semibold">Credits</th>
-                  <th className="px-6 py-4 font-semibold">Level</th>
-                  <th className="px-6 py-4 font-semibold">Semester</th>
+                  <th className="px-6 py-4 font-semibold hidden sm:table-cell">Credits</th>
                   <th className="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredCourses.length > 0 ? filteredCourses.map((course) => (
                   <tr key={course.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-mono text-slate-600 font-bold">{course.code}</td>
+                    <td className="px-6 py-4 text-sm font-mono text-slate-600 font-bold">{course.cid}</td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-slate-900">{course.name}</div>
-                      <div className="text-xs text-slate-400">
-                        {programs.find(p => p.id === course.programId)?.name || 'N/A'}
-                      </div>
+                      <div className="text-sm font-medium text-slate-900">{course.title}</div>
+                      <div className="text-xs text-slate-400">{course.department}</div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{course.creditHours}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{course.level}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{course.semester}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 hidden sm:table-cell">{course.credits}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">

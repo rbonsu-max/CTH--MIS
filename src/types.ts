@@ -1,95 +1,122 @@
-export type UserRole = 'super_admin' | 'admin' | 'lecturer' | 'student';
+export type UserRole = 'Administrator' | 'User' | 'Lecturer' | 'Student' | 'Finance' | 'Registry' | 'SuperAdmin';
 
 export interface User {
   id: string;
-  name: string;
-  email: string;
+  uid: string;
+  fullname: string;
+  username: string;
   role: UserRole;
-  avatar?: string;
+  status: 'active' | 'inactive' | 'locked';
 }
 
 export interface Student {
-  id: string;
-  indexNumber: string;
-  name: string;
+  id: number;
+  iid: string;
+  index_number: string;
+  surname: string;
+  other_names: string;
+  full_name: string;
+  gender: 'Male' | 'Female' | 'Other';
+  dob: string;
   email: string;
-  programId: string;
-  level: string;
-  gender: string;
-  dateOfBirth: string;
-  phoneNumber: string;
-  address?: string;
-  status: string;
-  createdAt?: string;
+  phone: string;
+  progid: string;
+  admission_year: string;
+  current_level: number;
+  status: 'active' | 'withdrawn' | 'graduated' | 'suspended' | 'deferred';
+  user_uid?: string;
+  program_name?: string;
+  admission_year_code?: string;
 }
 
 export interface Program {
-  id: string;
+  id: number;
+  progid: string;
   name: string;
-  code: string;
   department: string;
-  duration: string;
-  description?: string;
+  duration_years: number;
 }
 
 export interface Course {
-  id: string;
-  name: string;
-  code: string;
-  creditHours: number;
-  programId: string;
-  semester: string;
-  level: string;
+  id: number;
+  cid: string;
+  title: string;
+  credits: number;
+  department: string;
 }
 
 export interface Registration {
-  id: string;
-  studentId: string;
-  courseId: string;
-  academicYear: string;
-  semester: string;
-  status: string;
-  createdAt?: string;
-  studentName?: string;
-  courseName?: string;
-  courseCode?: string;
+  id: number;
+  iid: string;
+  cid: string;
+  academic_year: string;
+  semester_sid: string;
+  registration_date: string;
+  status: 'pending' | 'approved' | 'rejected';
+  surname?: string;
+  other_names?: string;
+  course_title?: string;
+  credits?: number;
 }
 
 export interface Assessment {
-  id: string;
-  studentId: string;
-  courseId: string;
-  academicYear: string;
-  semester: string;
-  midSemScore: number;
-  examScore: number;
-  totalScore: number;
+  id: number;
+  iid: string;
+  cid: string;
+  academic_year: string;
+  semester_sid: string;
+  class_score: number;
+  exam_score: number;
+  total_score: number;
   grade: string;
-  gradePoint: number;
-  updatedAt?: string;
-  studentName?: string;
-  courseName?: string;
-  courseCode?: string;
+  gp: number;
+  updated_at?: string;
+  surname?: string;
+  other_names?: string;
+  course_title?: string;
+  credits: number;
+}
+
+export interface BoardsheetCache {
+  id: number;
+  iid: string;
+  academic_year: string;
+  semester_sid: string;
+  tcr: number;
+  tcp: number;
+  gpa: number;
+  ctcr: number;
+  ctcp: number;
+  cgpa: number;
+  remarks: string;
+  calculated_at: string;
 }
 
 export interface Lecturer {
-  id: string;
-  name: string;
+  id: number;
+  lid: string;
+  fullname: string;
   email: string;
+  phone: string;
   department: string;
-  phoneNumber: string;
+  designation: string;
+  user_uid?: string;
 }
 
 export interface AcademicYear {
-  id: string;
-  year: string;
-  isCurrent: boolean;
+  id: number;
+  code: string;
+  start_date?: string;
+  end_date?: string;
+  is_current: boolean;
 }
 
 export interface Semester {
-  id: string;
-  name: 'First Semester' | 'Second Semester';
-  isCurrent: boolean;
+  id: number;
+  sid: string;
+  name: string;
+  sort_order: number;
+  is_current: boolean;
 }
 
 export interface CalendarEvent {

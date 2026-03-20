@@ -16,15 +16,24 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
   // Form state
   const [formData, setFormData] = useState({
     name: '',
-    code: '',
+    progid: '',
     department: '',
-    duration: '4 Years',
-    description: ''
+    duration_years: 4
   });
+
+  const [courses, setCourses] = useState<any[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<string>('');
+  const [selectedLevel, setSelectedLevel] = useState<number>(100);
+  const [selectedSemester, setSelectedSemester] = useState<string>('');
+  const [semesters, setSemesters] = useState<any[]>([]);
+  const [curriculum, setCurriculum] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+    if (activeSubItem === 'mount_curriculum') {
+      fetchMountData();
+    }
+  }, [activeSubItem]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -38,6 +47,145 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
     }
   };
 
+  const fetchMountData = async () => {
+    try {
+      const [courseData, semesterData] = await Promise.all([
+        api.getCourses(),
+        api.getSemesters()
+      ]);
+      setCourses(courseData);
+      setSemesters(semesterData);
+      const currentSem = semesterData.find((s: any) => s.is_current);
+      if (currentSem) setSelectedSemester(currentSem.sid);
+    } catch (error) {
+      console.error('Failed to fetch mounting data:', error);
+    }
+  };
+
+  const handleMountCourse = async (course_code: string) => {
+    if (!selectedProgram || !selectedSemester) {
+      alert('Please select program and semester first');
+      return;
+    }
+    try {
+      await api.mountCurriculum(selectedProgram, {
+        semester_sid: selectedSemester,
+        course_code,
+        level: selectedLevel
+      });
+      alert('Course mounted successfully!');
+      fetchCurriculum();
+    } catch (error) {
+      console.error('Failed to mount course:', error);
+      alert('Failed to mount course');
+    }
+  };
+
+  const fetchCurriculum = async () => {
+    if (!selectedProgram) return;
+    try {
+      const data = await api.getCurriculum(selectedProgram, selectedLevel, selectedSemester);
+      setCurriculum(data);
+    } catch (error) {
+      console.error('Failed to fetch curriculum:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProgram && selectedSemester) {
+      fetchCurriculum();
+    }
+  }, [selectedProgram, selectedLevel, selectedSemester]);
+
+  const renderMountCurriculum = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="label">Select Program</label>
+            <select 
+              className="input"
+              value={selectedProgram}
+              onChange={e => setSelectedProgram(e.target.value)}
+            >
+              <option value="">Select Program</option>
+              {programs.map(p => <option key={p.progid} value={p.progid}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Level</label>
+            <select 
+              className="input"
+              value={selectedLevel}
+              onChange={e => setSelectedLevel(parseInt(e.target.value))}
+            >
+              <option value="100">Level 100</option>
+              <option value="200">Level 200</option>
+              <option value="300">Level 300</option>
+              <option value="400">Level 400</option>
+            </select>
+          </div>
+          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+            <label className="label">Semester</label>
+            <select 
+              className="input"
+              value={selectedSemester}
+              onChange={e => setSelectedSemester(e.target.value)}
+            >
+              <option value="">Select Semester</option>
+              {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="card">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+            <h3 className="font-bold">Available Courses</h3>
+          </div>
+          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
+            {courses.map(course => (
+              <div key={course.code} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 transition-all">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="text-sm font-bold truncate">{course.code}</div>
+                  <div className="text-xs text-slate-500 truncate">{course.title} ({course.credit_hours} Credits)</div>
+                </div>
+                <button 
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all flex-shrink-0"
+                  onClick={() => handleMountCourse(course.code)}
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="p-4 border-b border-slate-100 bg-blue-50/50">
+            <h3 className="font-bold text-blue-900">Mounted Curriculum</h3>
+          </div>
+          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
+            {curriculum.length > 0 ? curriculum.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-3 bg-white border border-blue-100 rounded-lg">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="text-sm font-bold truncate">{item.course_code}</div>
+                  <div className="text-xs text-slate-500 truncate">{item.course_title}</div>
+                </div>
+                <button className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0">
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            )) : (
+              <div className="p-12 text-center text-slate-400 italic">No courses mounted for this selection.</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -45,10 +193,9 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
       await api.createProgram(formData);
       setFormData({
         name: '',
-        code: '',
+        progid: '',
         department: '',
-        duration: '4 Years',
-        description: ''
+        duration_years: 4
       });
       alert('Program created successfully!');
       fetchData();
@@ -86,8 +233,8 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
               className="input" 
               placeholder="e.g. BED-MAT" 
               required
-              value={formData.code}
-              onChange={e => setFormData({...formData, code: e.target.value})}
+              value={formData.progid}
+              onChange={e => setFormData({...formData, progid: e.target.value})}
             />
           </div>
           <div className="space-y-2">
@@ -106,31 +253,23 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
             </select>
           </div>
           <div className="space-y-2">
-            <label className="label">Duration</label>
+            <label className="label">Duration (Years)</label>
             <select 
               className="input"
-              value={formData.duration}
-              onChange={e => setFormData({...formData, duration: e.target.value})}
+              required
+              value={formData.duration_years}
+              onChange={e => setFormData({...formData, duration_years: parseInt(e.target.value)})}
             >
-              <option value="1 Year">1 Year</option>
-              <option value="2 Years">2 Years</option>
-              <option value="3 Years">3 Years</option>
-              <option value="4 Years">4 Years</option>
+              <option value="1">1 Year</option>
+              <option value="2">2 Years</option>
+              <option value="3">3 Years</option>
+              <option value="4">4 Years</option>
             </select>
-          </div>
-          <div className="md:col-span-2 space-y-2">
-            <label className="label">Description</label>
-            <textarea 
-              className="input min-h-[100px]" 
-              placeholder="Program description..."
-              value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}
-            />
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
           <button type="button" className="btn btn-secondary" onClick={() => setFormData({
-            name: '', code: '', department: '', duration: '4 Years', description: ''
+            name: '', progid: '', department: '', duration_years: 4
           })}>Cancel</button>
           <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
@@ -167,7 +306,7 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
                   </div>
                 </div>
                 <div className="mt-4">
-                  <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">{program.code}</div>
+                  <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">{program.progid}</div>
                   <h3 className="font-bold text-lg text-slate-900 leading-tight">{program.name}</h3>
                 </div>
               </div>
@@ -178,7 +317,7 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <Clock size={16} className="text-slate-400" />
-                  <span>{program.duration}</span>
+                  <span>{program.duration_years} Years</span>
                 </div>
               </div>
             </div>
@@ -200,6 +339,8 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
   switch (activeSubItem) {
     case 'setup_program':
       return renderSetupProgram();
+    case 'mount_curriculum':
+      return renderMountCurriculum();
     case 'view_programs':
     case null:
       return renderViewPrograms();

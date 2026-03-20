@@ -1,141 +1,294 @@
 import Database from 'better-sqlite3';
-import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
+import path from 'path';
 
-const db = new Database(join(process.cwd(), 'sims.db'));
+const db = new Database('sims.db');
 
-// Initialize database schema
+// Enable foreign keys
+db.pragma('foreign_keys = ON');
+
 export function initDb() {
+  // 1. CORE REFERENCE TABLES
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      role TEXT NOT NULL,
-      avatar TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS students (
-      id TEXT PRIMARY KEY,
-      indexNumber TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      programId TEXT,
-      level TEXT,
-      gender TEXT,
-      dateOfBirth TEXT,
-      phoneNumber TEXT,
-      address TEXT,
-      status TEXT DEFAULT 'active',
-      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS programs (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      department TEXT,
-      duration TEXT,
-      description TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS courses (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      creditHours INTEGER,
-      programId TEXT,
-      semester TEXT,
-      level TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS registrations (
-      id TEXT PRIMARY KEY,
-      studentId TEXT,
-      courseId TEXT,
-      academicYear TEXT,
-      semester TEXT,
-      status TEXT DEFAULT 'pending',
-      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(studentId, courseId, academicYear, semester)
-    );
-
-    CREATE TABLE IF NOT EXISTS assessments (
-      id TEXT PRIMARY KEY,
-      studentId TEXT,
-      courseId TEXT,
-      academicYear TEXT,
-      semester TEXT,
-      midSemScore REAL,
-      examScore REAL,
-      totalScore REAL,
-      grade TEXT,
-      gradePoint REAL,
-      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(studentId, courseId, academicYear, semester)
-    );
-
-    CREATE TABLE IF NOT EXISTS lecturers (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      department TEXT,
-      phoneNumber TEXT
+      uid TEXT NOT NULL UNIQUE,
+      fullname TEXT NOT NULL,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL CHECK (role IN ('Administrator','User','Lecturer','Student','Finance','Registry','SuperAdmin')),
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','locked')),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS academic_years (
-      id TEXT PRIMARY KEY,
-      year TEXT UNIQUE NOT NULL,
-      isCurrent INTEGER DEFAULT 0
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      start_date TEXT,
+      end_date TEXT,
+      is_current INTEGER NOT NULL DEFAULT 0 CHECK (is_current IN (0,1)),
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS semesters (
-      id TEXT PRIMARY KEY,
-      name TEXT UNIQUE NOT NULL,
-      isCurrent INTEGER DEFAULT 0
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sid TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL UNIQUE,
+      sort_order INTEGER,
+      is_current INTEGER NOT NULL DEFAULT 0 CHECK (is_current IN (0,1)),
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
-    CREATE TABLE IF NOT EXISTS calendar_events (
-      id TEXT PRIMARY KEY,
-      date TEXT NOT NULL,
-      event TEXT NOT NULL,
-      academicYear TEXT,
-      semester TEXT
+    CREATE TABLE IF NOT EXISTS programs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      progid TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      department TEXT,
+      duration_years INTEGER DEFAULT 4,
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS courses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      cid TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      credits INTEGER NOT NULL DEFAULT 3,
+      department TEXT,
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS lecturers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lid TEXT NOT NULL UNIQUE,
+      fullname TEXT NOT NULL,
+      email TEXT UNIQUE,
+      phone TEXT,
+      department TEXT,
+      designation TEXT,
+      user_uid TEXT REFERENCES users(uid),
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- 2. STUDENT DOMAIN
+    CREATE TABLE IF NOT EXISTS students (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL UNIQUE,
+      index_number TEXT NOT NULL UNIQUE,
+      surname TEXT NOT NULL,
+      other_names TEXT NOT NULL,
+      full_name TEXT GENERATED ALWAYS AS (surname || ', ' || other_names) VIRTUAL,
+      gender TEXT CHECK (gender IN ('Male','Female','Other')),
+      dob TEXT,
+      email TEXT UNIQUE,
+      phone TEXT,
+      progid TEXT REFERENCES programs(progid),
+      admission_year TEXT REFERENCES academic_years(code),
+      current_level INTEGER DEFAULT 100,
+      status TEXT DEFAULT 'active' CHECK (status IN ('active','withdrawn','graduated','suspended','deferred')),
+      user_uid TEXT REFERENCES users(uid),
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS student_logins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      last_login TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS student_levels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      level INTEGER NOT NULL,
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      is_current INTEGER DEFAULT 1,
+      updated_by TEXT REFERENCES users(uid),
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(iid, academic_year, semester_sid)
+    );
+
+    -- 3. CURRICULUM & DELIVERY
+    CREATE TABLE IF NOT EXISTS program_curriculum (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      progid TEXT NOT NULL REFERENCES programs(progid),
+      cid TEXT NOT NULL REFERENCES courses(cid),
+      level INTEGER NOT NULL,
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      is_elective INTEGER DEFAULT 0,
+      created_by TEXT REFERENCES users(uid),
+      UNIQUE(progid, cid, level, semester_sid)
+    );
+
+    CREATE TABLE IF NOT EXISTS lecturer_course_assignments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lid TEXT NOT NULL REFERENCES lecturers(lid),
+      cid TEXT NOT NULL REFERENCES courses(cid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      assigned_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(lid, cid, academic_year, semester_sid)
+    );
+
+    -- 4. REGISTRATION
+    CREATE TABLE IF NOT EXISTS registration_windows (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      is_active INTEGER DEFAULT 1,
+      created_by TEXT REFERENCES users(uid)
+    );
+
+    CREATE TABLE IF NOT EXISTS course_registrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      cid TEXT NOT NULL REFERENCES courses(cid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      registration_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+      UNIQUE(iid, cid, academic_year, semester_sid)
+    );
+
+    -- 5. ASSESSMENT & RESULTS
+    CREATE TABLE IF NOT EXISTS student_assessments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      cid TEXT NOT NULL REFERENCES courses(cid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      class_score REAL DEFAULT 0,
+      exam_score REAL DEFAULT 0,
+      total_score REAL GENERATED ALWAYS AS (class_score + exam_score) VIRTUAL,
+      grade TEXT,
+      gp REAL,
+      entered_by TEXT REFERENCES users(uid),
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(iid, cid, academic_year, semester_sid)
+    );
+
+    CREATE TABLE IF NOT EXISTS lecturer_assessments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      cid TEXT NOT NULL REFERENCES courses(cid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      class_score REAL DEFAULT 0,
+      exam_score REAL DEFAULT 0,
+      total_score REAL GENERATED ALWAYS AS (class_score + exam_score) VIRTUAL,
+      grade TEXT,
+      gp REAL,
+      entered_by TEXT REFERENCES users(uid),
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(iid, cid, academic_year, semester_sid)
+    );
+
+    CREATE TABLE IF NOT EXISTS boardsheet_cache (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      iid TEXT NOT NULL REFERENCES students(iid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
+      tcr INTEGER,
+      tcp INTEGER,
+      gpa REAL,
+      ctcr INTEGER,
+      ctcp INTEGER,
+      cgpa REAL,
+      remarks TEXT,
+      calculated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(iid, academic_year, semester_sid)
+    );
+
+    -- 6. AUXILIARY TABLES
+    CREATE TABLE IF NOT EXISTS sms_credits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      balance INTEGER NOT NULL DEFAULT 0,
+      last_updated TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_by TEXT REFERENCES users(uid)
+    );
+
+    CREATE TABLE IF NOT EXISTS test_sms_numbers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      phone_number TEXT NOT NULL UNIQUE,
+      description TEXT,
+      added_by TEXT REFERENCES users(uid)
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_uid TEXT REFERENCES users(uid),
+      action TEXT NOT NULL,
+      table_name TEXT,
+      record_id TEXT,
+      old_values TEXT,
+      new_values TEXT,
+      ip_address TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- PERFORMANCE INDEXES
+    CREATE INDEX IF NOT EXISTS idx_students_prog ON students(progid);
+    CREATE INDEX IF NOT EXISTS idx_students_iid ON students(iid);
+    CREATE INDEX IF NOT EXISTS idx_assessments_iid ON student_assessments(iid);
+    CREATE INDEX IF NOT EXISTS idx_assessments_cid ON student_assessments(cid);
+    CREATE INDEX IF NOT EXISTS idx_assessments_period ON student_assessments(academic_year, semester_sid);
+    CREATE INDEX IF NOT EXISTS idx_registrations_iid ON course_registrations(iid);
+    CREATE INDEX IF NOT EXISTS idx_curriculum_prog ON program_curriculum(progid);
+
+    -- LEGACY COMPATIBILITY VIEWS
+    CREATE VIEW IF NOT EXISTS view_student_details AS
+    SELECT s.*, p.name as program_name, ay.code as admission_year_code
+    FROM students s
+    LEFT JOIN programs p ON s.progid = p.progid
+    LEFT JOIN academic_years ay ON s.admission_year = ay.code;
+
+    CREATE VIEW IF NOT EXISTS view_course_registrations AS
+    SELECT cr.*, s.surname, s.other_names, c.title as course_title, c.credits
+    FROM course_registrations cr
+    JOIN students s ON cr.iid = s.iid
+    JOIN courses c ON cr.cid = c.cid;
+
+    CREATE VIEW IF NOT EXISTS view_student_results AS
+    SELECT sa.*, s.surname, s.other_names, c.title as course_title, c.credits
+    FROM student_assessments sa
+    JOIN students s ON sa.iid = s.iid
+    JOIN courses c ON sa.cid = c.cid;
   `);
 
-  // Seed initial semesters if not exists
-  const semesterExists = db.prepare('SELECT id FROM semesters').get();
-  if (!semesterExists) {
-    db.prepare('INSERT INTO semesters (id, name, isCurrent) VALUES (?, ?, ?)').run('1', 'First Semester', 1);
-    db.prepare('INSERT INTO semesters (id, name, isCurrent) VALUES (?, ?, ?)').run('2', 'Second Semester', 0);
+  // Seed initial SuperAdmin if not exists
+  const superAdmin = db.prepare('SELECT * FROM users WHERE role = ?').get('SuperAdmin');
+  if (!superAdmin) {
+    const uid = uuidv4();
+    const passwordHash = bcrypt.hashSync('admin123', 10);
+    db.prepare(`
+      INSERT INTO users (id, uid, fullname, username, password_hash, role, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(uuidv4(), uid, 'Richard Bonsu', 'admin', passwordHash, 'SuperAdmin', 'active');
   }
 
-  // Seed initial academic year if not exists
-  const yearExists = db.prepare('SELECT id FROM academic_years').get();
-  if (!yearExists) {
-    db.prepare('INSERT INTO academic_years (id, year, isCurrent) VALUES (?, ?, ?)').run('1', '2024/2025', 1);
+  // Seed default academic year and semester if empty
+  const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };
+  if (yearCount.count === 0) {
+    db.prepare('INSERT INTO academic_years (code, is_current) VALUES (?, ?)').run('2023/2024', 1);
   }
 
-  // Seed initial super admin if not exists
-  const adminExists = db.prepare('SELECT id FROM users WHERE email = ?').get('great@olacoe.edu.gh');
-  if (!adminExists) {
-    const hashedPassword = bcrypt.hashSync('admin123', 10);
-    db.prepare('INSERT INTO users (id, name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?, ?)')
-      .run('1', 'Professor Great', 'great@olacoe.edu.gh', hashedPassword, 'super_admin', 'https://picsum.photos/seed/prof/200');
-  }
-
-  const userAdminExists = db.prepare('SELECT id FROM users WHERE email = ?').get('rbonsu@olacoe.edu.gh');
-  if (!userAdminExists) {
-    const hashedPassword = bcrypt.hashSync('admin123', 10);
-    db.prepare('INSERT INTO users (id, name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?, ?)')
-      .run('2', 'Richard Bonsu', 'rbonsu@olacoe.edu.gh', hashedPassword, 'super_admin', 'https://ui-avatars.com/api/?name=Richard+Bonsu&background=random');
+  const semCount = db.prepare('SELECT COUNT(*) as count FROM semesters').get() as { count: number };
+  if (semCount.count === 0) {
+    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM1', 'Semester 1', 1, 1);
+    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM2', 'Semester 2', 2, 0);
   }
 }
 

@@ -40,12 +40,12 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['super_admin', 'admin', 'lecturer', 'student'] },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'Administrator', 'Lecturer', 'Student'] },
   { 
     id: 'students', 
     label: 'Students', 
     icon: <Users size={20} />,
-    roles: ['super_admin', 'admin'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'add_student', label: 'Add Biodata' },
       { id: 'update_student', label: 'Update Biodata' },
@@ -58,7 +58,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'programs', 
     label: 'Programs', 
     icon: <GraduationCap size={20} />,
-    roles: ['super_admin', 'admin'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'setup_program', label: 'Setup Program' },
       { id: 'populate_program', label: 'Populate Program' },
@@ -70,7 +70,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'courses', 
     label: 'Courses', 
     icon: <BookOpen size={20} />,
-    roles: ['super_admin', 'admin', 'lecturer'],
+    roles: ['SuperAdmin', 'Administrator', 'Lecturer'],
     subItems: [
       { id: 'setup_course', label: 'Setup Course' },
       { id: 'mount_course', label: 'Mount Course' },
@@ -82,7 +82,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'registration', 
     label: 'Registration', 
     icon: <BookMarked size={20} />,
-    roles: ['super_admin', 'admin', 'student'],
+    roles: ['SuperAdmin', 'Administrator', 'Student'],
     subItems: [
       { id: 'open_close', label: 'Open/Close Registration' },
       { id: 'register_student', label: 'Register Student' },
@@ -94,7 +94,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'assessment', 
     label: 'Assessment', 
     icon: <ClipboardCheck size={20} />,
-    roles: ['super_admin', 'admin', 'lecturer'],
+    roles: ['SuperAdmin', 'Administrator', 'Lecturer'],
     subItems: [
       { id: 'by_course', label: 'By Course' },
       { id: 'by_individual', label: 'By Individual' }
@@ -104,7 +104,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'academic_records', 
     label: 'Academic Records', 
     icon: <FileText size={20} />,
-    roles: ['super_admin', 'admin', 'student'],
+    roles: ['SuperAdmin', 'Administrator', 'Student'],
     subItems: [
       { id: 'course_results', label: 'Course Results' },
       { id: 'composite_results', label: 'Composite Results' },
@@ -117,7 +117,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'statistics', 
     label: 'Statistics', 
     icon: <BarChart3 size={20} />,
-    roles: ['super_admin', 'admin'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'student_stats', label: 'Students Statistics' },
       { id: 'course_stats', label: 'Courses Statistics' }
@@ -127,7 +127,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'lecturers', 
     label: 'Lecturer', 
     icon: <UserCog size={20} />,
-    roles: ['super_admin', 'admin'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'setup_lecturer', label: 'Setup Lecturer' },
       { id: 'assign_lecturer', label: 'Assign Lecturer' },
@@ -139,7 +139,7 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'settings', 
     label: 'Settings', 
     icon: <Settings size={20} />,
-    roles: ['super_admin'],
+    roles: ['SuperAdmin'],
     subItems: [
       { id: 'academic_year', label: 'Academic Year' },
       { id: 'semesters', label: 'Semesters' },

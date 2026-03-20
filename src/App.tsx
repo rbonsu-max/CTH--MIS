@@ -32,8 +32,21 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['dashboard']));
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Dashboard Stats
   const [stats, setStats] = useState({
@@ -67,7 +80,7 @@ export default function App() {
 
   const fetchDashboardData = async () => {
     try {
-      const [students, programs, courses, registrations, years, sems, events] = await Promise.all([
+      const [studentsData, programsData, coursesData, registrationsData, yearsData, semsData, eventsData] = await Promise.all([
         api.getStudents(),
         api.getPrograms(),
         api.getCourses(),
@@ -76,6 +89,14 @@ export default function App() {
         api.getSemesters(),
         api.getCalendarEvents()
       ]);
+
+      const students = Array.isArray(studentsData) ? studentsData : [];
+      const programs = Array.isArray(programsData) ? programsData : [];
+      const courses = Array.isArray(coursesData) ? coursesData : [];
+      const registrations = Array.isArray(registrationsData) ? registrationsData : [];
+      const years = Array.isArray(yearsData) ? yearsData : [];
+      const sems = Array.isArray(semsData) ? semsData : [];
+      const events = Array.isArray(eventsData) ? eventsData : [];
 
       setStats({
         totalStudents: students.length,
@@ -89,10 +110,10 @@ export default function App() {
       setRecentRegistrations(registrations.slice(0, 5));
       setCalendarEvents(events.slice(0, 4));
       
-      const activeYear = years.find(y => y.isCurrent);
-      if (activeYear) setCurrentYear(activeYear.year);
+      const activeYear = years.find(y => y.is_current);
+      if (activeYear) setCurrentYear(activeYear.code);
       
-      const activeSem = sems.find(s => s.isCurrent);
+      const activeSem = sems.find(s => s.is_current);
       if (activeSem) setCurrentSemester(activeSem.name);
 
     } catch (error) {
@@ -162,11 +183,11 @@ export default function App() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Total Students', value: stats.totalStudents.toLocaleString(), icon: <Users className="text-blue-600" />, trend: 'Current enrollment' },
-          { label: 'Active Programs', value: stats.totalPrograms.toString(), icon: <GraduationCap className="text-emerald-600" />, trend: 'Available programs' },
-          { label: 'Courses Mounted', value: stats.totalCourses.toString(), icon: <BookOpen className="text-violet-600" />, trend: 'Current semester' },
+          { label: 'Total Students', value: (stats.totalStudents || 0).toLocaleString(), icon: <Users className="text-blue-600" />, trend: 'Current enrollment' },
+          { label: 'Active Programs', value: (stats.totalPrograms || 0).toString(), icon: <GraduationCap className="text-emerald-600" />, trend: 'Available programs' },
+          { label: 'Courses Mounted', value: (stats.totalCourses || 0).toString(), icon: <BookOpen className="text-violet-600" />, trend: 'Current semester' },
           { label: 'Registration Rate', value: stats.registrationRate, icon: <Calendar className="text-orange-600" />, trend: 'Students registered' },
         ].map((stat, i) => (
           <motion.div 
@@ -174,37 +195,37 @@ export default function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="card p-6"
+            className="card p-5 md:p-6"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-slate-50 rounded-xl">
+              <div className="p-2.5 bg-slate-50 rounded-xl">
                 {stat.icon}
               </div>
             </div>
-            <h3 className="text-slate-500 text-sm font-medium">{stat.label}</h3>
-            <div className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</div>
-            <p className="text-xs text-slate-400 mt-2">{stat.trend}</p>
+            <h3 className="text-slate-500 text-xs md:text-sm font-medium">{stat.label}</h3>
+            <div className="text-xl md:text-2xl font-bold text-slate-900 mt-1">{stat.value}</div>
+            <p className="text-[10px] md:text-xs text-slate-400 mt-2">{stat.trend}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="card">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div className="p-5 md:p-6 border-b border-slate-100">
               <h2 className="font-bold text-lg">Quick Actions</h2>
             </div>
-            <div className="p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="p-4 md:p-6 grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
               {filteredNavItems.filter(item => item.id !== 'dashboard').slice(0, 6).map((item, i) => (
                 <button 
                   key={i}
                   onClick={() => setActiveModule(item.id)}
-                  className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
+                  className="flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
                 >
-                  <div className="p-3 bg-slate-50 rounded-lg group-hover:bg-white transition-colors mb-3">
-                    {React.cloneElement(item.icon as React.ReactElement, { size: 24, className: 'text-slate-600 group-hover:text-blue-600' })}
+                  <div className="p-2.5 bg-slate-50 rounded-lg group-hover:bg-white transition-colors mb-2 md:mb-3">
+                    {React.cloneElement(item.icon as React.ReactElement, { size: 20, className: 'text-slate-600 group-hover:text-blue-600' })}
                   </div>
-                  <span className="text-sm font-medium text-slate-700 group-hover:text-blue-700">{item.label}</span>
+                  <span className="text-xs md:text-sm font-medium text-slate-700 group-hover:text-blue-700 text-center">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -237,17 +258,17 @@ export default function App() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-                              {reg.studentName?.charAt(0) || 'S'}
+                              {reg.full_name?.charAt(0) || 'S'}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-slate-900">{reg.studentName}</div>
-                              <div className="text-xs text-slate-400">{reg.studentId}</div>
+                              <div className="text-sm font-medium text-slate-900">{reg.full_name}</div>
+                              <div className="text-xs text-slate-400">{reg.iid}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-slate-600">{reg.courseName}</div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase">{reg.courseCode}</div>
+                          <div className="text-sm text-slate-600">{reg.cid}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase">{reg.status}</div>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
@@ -421,24 +442,33 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && window.innerWidth <= 1024 && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside 
         className={`fixed inset-y-0 left-0 z-50 bg-slate-900 text-slate-400 transition-all duration-300 ease-in-out border-r border-slate-800 ${
-          isSidebarOpen ? 'w-64' : 'w-20'
+          isSidebarOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="h-20 flex items-center px-6 border-b border-slate-800">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shrink-0">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-blue-900/20">
             S
           </div>
           {isSidebarOpen && (
-            <motion.span 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="ml-3 text-white font-bold text-xl tracking-tight"
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="ml-3 flex flex-col"
             >
-              SIMS
-            </motion.span>
+              <span className="text-white font-bold text-lg tracking-tight leading-none">SIMS</span>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mt-0.5">St. Nicholas</span>
+            </motion.div>
           )}
         </div>
 
@@ -450,10 +480,15 @@ export default function App() {
             return (
               <div key={item.id} className="space-y-1">
                 <button
-                  onClick={() => handleNavClick(item.id, !!item.subItems)}
+                  onClick={() => {
+                    handleNavClick(item.id, !!item.subItems);
+                    if (!item.subItems && window.innerWidth <= 1024) {
+                      setIsSidebarOpen(false);
+                    }
+                  }}
                   className={`w-full flex items-center px-3 py-2.5 rounded-lg transition-all group ${
                     isActive && !item.subItems
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                       : 'hover:bg-slate-800 hover:text-white'
                   }`}
                 >
@@ -478,6 +513,9 @@ export default function App() {
                         onClick={() => {
                           setActiveModule(item.id);
                           setActiveSubItem(sub.id);
+                          if (window.innerWidth <= 1024) {
+                            setIsSidebarOpen(false);
+                          }
                         }}
                         className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all ${
                           activeModule === item.id && activeSubItem === sub.id
@@ -495,7 +533,7 @@ export default function App() {
           })}
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-slate-800">
+        <div className="absolute bottom-0 w-full p-4 border-t border-slate-800 bg-slate-900">
           <button 
             onClick={handleLogout}
             className="w-full flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all group"
@@ -508,21 +546,27 @@ export default function App() {
 
       {/* Main Content */}
       <main 
-        className={`flex-1 transition-all duration-300 ${
-          isSidebarOpen ? 'ml-64' : 'ml-20'
+        className={`flex-1 transition-all duration-300 min-w-0 ${
+          isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
         }`}
       >
         {/* Header */}
-        <header className="h-20 bg-white border-b border-slate-200 sticky top-0 z-40 px-8 flex items-center justify-between">
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
-          >
-            <Menu size={20} />
-          </button>
+        <header className="h-20 bg-white border-b border-slate-200 sticky top-0 z-30 px-4 md:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="lg:hidden flex items-center gap-2">
+              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px]">S</div>
+              <span className="font-bold text-slate-900 text-sm">SIMS</span>
+            </div>
+          </div>
 
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-64">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="hidden lg:flex items-center bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-64">
               <Search size={16} className="text-slate-400" />
               <input 
                 type="text" 
@@ -531,17 +575,17 @@ export default function App() {
               />
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
                 <Bell size={20} />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
               </button>
               
-              <div className="h-8 w-px bg-slate-200 mx-2" />
+              <div className="h-8 w-px bg-slate-200 mx-1 md:mx-2" />
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div className="text-right hidden sm:block">
-                  <div className="text-sm font-bold text-slate-900">{user.name}</div>
+                  <div className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{user.name}</div>
                   <div className="text-[10px] font-bold uppercase text-blue-600 tracking-wider">
                     {user.role.replace('_', ' ')}
                   </div>
@@ -549,7 +593,7 @@ export default function App() {
                 <img 
                   src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} 
                   alt="Profile" 
-                  className="w-10 h-10 rounded-xl border-2 border-white shadow-sm"
+                  className="w-8 h-8 md:w-10 md:h-10 rounded-xl border-2 border-white shadow-sm"
                 />
               </div>
             </div>
@@ -557,7 +601,7 @@ export default function App() {
         </header>
 
         {/* Content Area */}
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeModule + (activeSubItem || '')}

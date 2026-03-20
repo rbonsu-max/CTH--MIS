@@ -17,10 +17,11 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
+    staff_id: '',
+    fullname: '',
     email: '',
     department: '',
-    phoneNumber: ''
+    phone: ''
   });
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
     setSubmitting(true);
     try {
       await api.createLecturer(formData);
-      setFormData({ name: '', email: '', department: '', phoneNumber: '' });
+      setFormData({ staff_id: '', fullname: '', email: '', department: '', phone: '' });
       setShowAddModal(false);
       alert('Lecturer added successfully!');
       fetchLecturers();
@@ -57,7 +58,7 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
   };
 
   const filteredLecturers = lecturers.filter(l => 
-    l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     l.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -91,21 +92,25 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
             <div key={lecturer.id} className="card hover:border-blue-200 transition-all group">
               <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
-                  {lecturer.name.split(' ').pop()?.charAt(0)}
+                  {lecturer.fullname.split(' ').pop()?.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 leading-tight">{lecturer.name}</h3>
+                  <h3 className="font-bold text-slate-900 leading-tight">{lecturer.fullname}</h3>
                   <div className="text-xs font-medium text-blue-600 uppercase tracking-wider mt-1">{lecturer.department}</div>
                 </div>
               </div>
               <div className="p-6 space-y-3">
+                <div className="flex items-center gap-3 text-sm text-slate-600">
+                  <UserCog size={16} className="text-slate-400" />
+                  <span>ID: {lecturer.staff_id}</span>
+                </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <Mail size={16} className="text-slate-400" />
                   <span className="truncate">{lecturer.email}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
                   <Phone size={16} className="text-slate-400" />
-                  <span>{lecturer.phoneNumber}</span>
+                  <span>{lecturer.phone}</span>
                 </div>
                 <div className="pt-4 flex items-center justify-end border-t border-slate-100">
                   <div className="flex gap-1">
@@ -137,27 +142,53 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
               </button>
             </div>
             <form className="p-6 space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <label className="label">Full Name</label>
-                <input 
-                  type="text" 
-                  className="input" 
-                  placeholder="e.g. Dr. Samuel Mensah" 
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="label">Staff ID</label>
+                  <input 
+                    type="text" 
+                    className="input" 
+                    placeholder="e.g. LEC001" 
+                    required
+                    value={formData.staff_id}
+                    onChange={e => setFormData({...formData, staff_id: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Full Name</label>
+                  <input 
+                    type="text" 
+                    className="input" 
+                    placeholder="e.g. Dr. Samuel Mensah" 
+                    required
+                    value={formData.fullname}
+                    onChange={e => setFormData({...formData, fullname: e.target.value})}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="label">Email Address</label>
-                <input 
-                  type="email" 
-                  className="input" 
-                  placeholder="e.g. s.mensah@olacoe.edu.gh" 
-                  required
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="label">Email Address</label>
+                  <input 
+                    type="email" 
+                    className="input" 
+                    placeholder="e.g. s.mensah@snsanglican.org" 
+                    required
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    className="input" 
+                    placeholder="e.g. 0244123456" 
+                    required
+                    value={formData.phone}
+                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="label">Department</label>
@@ -174,17 +205,6 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
                   <option value="Social Science Education">Social Science Education</option>
                   <option value="Vocational & Technical Education">Vocational & Technical Education</option>
                 </select>
-              </div>
-              <div className="space-y-2">
-                <label className="label">Phone Number</label>
-                <input 
-                  type="tel" 
-                  className="input" 
-                  placeholder="e.g. 0244123456" 
-                  required
-                  value={formData.phoneNumber}
-                  onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
-                />
               </div>
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>

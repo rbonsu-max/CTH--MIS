@@ -55,10 +55,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       if (editingYear) {
-        await api.updateAcademicYear(editingYear.id, { year: newYear });
+        await api.updateAcademicYear(editingYear.code, { code: newYear });
         alert('Academic year updated successfully!');
       } else {
-        await api.createAcademicYear({ year: newYear, isCurrent: academicYears.length === 0 });
+        await api.createAcademicYear({ code: newYear, is_current: academicYears.length === 0 });
         alert('Academic year added successfully!');
       }
       setNewYear('');
@@ -73,10 +73,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     }
   };
 
-  const handleDeleteYear = async (id: string) => {
+  const handleDeleteYear = async (code: string) => {
     if (!window.confirm('Are you sure you want to delete this academic year?')) return;
     try {
-      await api.deleteAcademicYear(id);
+      await api.deleteAcademicYear(code);
       alert('Academic year deleted!');
       fetchData();
     } catch (error) {
@@ -90,7 +90,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     if (!editingSemester) return;
     setSubmitting(true);
     try {
-      await api.updateSemester(editingSemester.id, { name: editingSemester.name });
+      await api.updateSemester(editingSemester.sid, { name: editingSemester.name });
       alert('Semester updated successfully!');
       setEditingSemester(null);
       fetchData();
@@ -102,9 +102,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     }
   };
 
-  const handleSetCurrentYear = async (id: string) => {
+  const handleSetCurrentYear = async (code: string) => {
     try {
-      await api.setCurrentAcademicYear(id);
+      await api.setCurrentAcademicYear(code);
       alert('Current academic year updated!');
       fetchData();
     } catch (error) {
@@ -113,9 +113,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     }
   };
 
-  const handleSetCurrentSemester = async (id: string) => {
+  const handleSetCurrentSemester = async (sid: string) => {
     try {
-      await api.setCurrentSemester(id);
+      await api.setCurrentSemester(sid);
       alert('Current semester updated!');
       fetchData();
     } catch (error) {
@@ -190,25 +190,25 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
               <p className="text-slate-500">Loading academic years...</p>
             </div>
           ) : academicYears.length > 0 ? academicYears.map((item) => (
-            <div key={item.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-              item.isCurrent ? 'border-blue-200 bg-blue-50/50' : 'border-slate-100 bg-white'
+            <div key={item.code} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+              item.is_current ? 'border-blue-200 bg-blue-50/50' : 'border-slate-100 bg-white'
             }`}>
               <div className="flex items-center gap-4">
-                <div className={`p-2 rounded-lg ${item.isCurrent ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <div className={`p-2 rounded-lg ${item.is_current ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
                   <Calendar size={20} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-900">{item.year} Academic Year</div>
-                  <div className="text-xs text-slate-400">{item.isCurrent ? 'Active' : 'Archived'}</div>
+                  <div className="text-sm font-bold text-slate-900">{item.code} Academic Year</div>
+                  <div className="text-xs text-slate-400">{item.is_current ? 'Active' : 'Archived'}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {item.isCurrent ? (
+                {item.is_current ? (
                   <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-600 text-white">Current</span>
                 ) : (
                   <button 
                     className="text-blue-600 text-xs font-bold hover:underline"
-                    onClick={() => handleSetCurrentYear(item.id)}
+                    onClick={() => handleSetCurrentYear(item.code)}
                   >
                     Set as Current
                   </button>
@@ -216,13 +216,13 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                 <div className="flex gap-1">
                   <button 
                     className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
-                    onClick={() => { setEditingYear(item); setNewYear(item.year); setShowAddYearModal(true); }}
+                    onClick={() => { setEditingYear(item); setNewYear(item.code); setShowAddYearModal(true); }}
                   >
                     <Edit size={16} />
                   </button>
                   <button 
                     className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
-                    onClick={() => handleDeleteYear(item.id)}
+                    onClick={() => handleDeleteYear(item.code)}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -284,14 +284,14 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
               <p className="text-slate-500">Loading semesters...</p>
             </div>
           ) : semesters.map((sem) => (
-            <div key={sem.id} className={`p-6 rounded-2xl border transition-all ${
-              sem.isCurrent ? 'border-blue-200 bg-blue-50/50 ring-4 ring-blue-500/5' : 'border-slate-100 bg-white'
+            <div key={sem.sid} className={`p-6 rounded-2xl border transition-all ${
+              sem.is_current ? 'border-blue-200 bg-blue-50/50' : 'border-slate-100 bg-white'
             }`}>
               <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl ${sem.isCurrent ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <div className={`p-3 rounded-xl ${sem.is_current ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
                   <Clock size={24} />
                 </div>
-                {sem.isCurrent && (
+                {sem.is_current && (
                   <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-600 text-white">Active</span>
                 )}
               </div>
@@ -299,11 +299,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
               <p className="text-sm text-slate-500 mt-1">Current Academic Year</p>
               <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
                 <button 
-                  className={`text-sm font-bold ${sem.isCurrent ? 'text-slate-400 cursor-not-allowed' : 'text-blue-600 hover:underline'}`} 
-                  disabled={sem.isCurrent}
-                  onClick={() => handleSetCurrentSemester(sem.id)}
+                  className={`text-sm font-bold ${sem.is_current ? 'text-slate-400 cursor-not-allowed' : 'text-blue-600 hover:underline'}`} 
+                  disabled={sem.is_current}
+                  onClick={() => handleSetCurrentSemester(sem.sid)}
                 >
-                  {sem.isCurrent ? 'Currently Active' : 'Activate Semester'}
+                  {sem.is_current ? 'Currently Active' : 'Activate Semester'}
                 </button>
                 <div className="flex gap-1">
                   <button 
@@ -356,12 +356,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const renderUserManagement = () => (
     <div className="space-y-6">
       <div className="card">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="font-bold text-lg">User Management</h2>
             <p className="text-slate-500 text-sm">Manage system administrators and lecturers.</p>
           </div>
-          <button className="btn btn-primary gap-2" onClick={() => setShowAddUserModal(true)}>
+          <button className="btn btn-primary gap-2 w-full sm:w-auto justify-center" onClick={() => setShowAddUserModal(true)}>
             <Plus size={18} />
             New User
           </button>
@@ -372,8 +372,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                   <th className="px-6 py-3 font-semibold">User</th>
-                  <th className="px-6 py-3 font-semibold">Role</th>
-                  <th className="px-6 py-3 font-semibold">Actions</th>
+                  <th className="px-6 py-3 font-semibold hidden md:table-cell">Role</th>
+                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -384,15 +384,23 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                         <img 
                           src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`} 
                           alt="" 
-                          className="w-8 h-8 rounded-lg"
+                          className="w-8 h-8 rounded-lg flex-shrink-0"
                         />
-                        <div>
-                          <div className="text-sm font-bold text-slate-900">{u.name}</div>
-                          <div className="text-xs text-slate-400">{u.email}</div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold text-slate-900 truncate">{u.name}</div>
+                          <div className="text-xs text-slate-400 truncate">{u.email}</div>
+                          <div className="md:hidden mt-1">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                              u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
+                              u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                            }`}>
+                              {u.role.replace('_', ' ')}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden md:table-cell">
                       <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
                         u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
                         u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
@@ -400,8 +408,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                         {u.role.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
                         <button 
                           className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
                           title="Change Password"
