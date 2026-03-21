@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, GraduationCap, Building2, Clock, Loader2 } from 'lucide-react';
-import { Program } from '../types';
+import { Plus, Search, Edit, Trash2, GraduationCap, Building2, Clock, Loader2, Users } from 'lucide-react';
+import { Program, Department, Student } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
 
@@ -10,267 +10,243 @@ interface ProgramsModuleProps {
 
 export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem }) => {
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '', progid: '', department: '', duration_years: 4 });
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    progid: '',
-    department: '',
-    duration_years: 4
-  });
-
+  // Mount curriculum state
   const [courses, setCourses] = useState<any[]>([]);
-  const [selectedProgram, setSelectedProgram] = useState<string>('');
-  const [selectedLevel, setSelectedLevel] = useState<number>(100);
-  const [selectedSemester, setSelectedSemester] = useState<string>('');
+  const [selectedProgram, setSelectedProgram] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState(100);
+  const [selectedSemester, setSelectedSemester] = useState('');
   const [semesters, setSemesters] = useState<any[]>([]);
   const [curriculum, setCurriculum] = useState<any[]>([]);
 
+  // Populate program state
+  const [students, setStudents] = useState<Student[]>([]);
+  const [populateSearch, setPopulateSearch] = useState('');
+  const [populateProgid, setPopulateProgid] = useState('');
+
+  useEffect(() => { fetchData(); }, []);
   useEffect(() => {
-    fetchData();
-    if (activeSubItem === 'mount_curriculum') {
-      fetchMountData();
+    if (activeSubItem === 'populate_program') {
+      api.getStudents().then(setStudents).catch(console.error);
     }
+    if (activeSubItem === 'mount_curriculum') fetchMountData();
   }, [activeSubItem]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await api.getPrograms();
-      setPrograms(data);
-    } catch (error) {
-      console.error('Failed to fetch programs:', error);
-    } finally {
-      setLoading(false);
-    }
+      const [p, d] = await Promise.all([api.getPrograms(), api.getDepartments()]);
+      setPrograms(p);
+      setDepartments(d);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
   const fetchMountData = async () => {
     try {
-      const [courseData, semesterData] = await Promise.all([
-        api.getCourses(),
-        api.getSemesters()
-      ]);
-      setCourses(courseData);
-      setSemesters(semesterData);
-      const currentSem = semesterData.find((s: any) => s.is_current);
-      if (currentSem) setSelectedSemester(currentSem.sid);
-    } catch (error) {
-      console.error('Failed to fetch mounting data:', error);
-    }
-  };
-
-  const handleMountCourse = async (course_code: string) => {
-    if (!selectedProgram || !selectedSemester) {
-      alert('Please select program and semester first');
-      return;
-    }
-    try {
-      await api.mountCurriculum(selectedProgram, {
-        semester_sid: selectedSemester,
-        course_code,
-        level: selectedLevel
-      });
-      alert('Course mounted successfully!');
-      fetchCurriculum();
-    } catch (error) {
-      console.error('Failed to mount course:', error);
-      alert('Failed to mount course');
-    }
+      const [c, s] = await Promise.all([api.getCourses(), api.getSemesters()]);
+      setCourses(c);
+      setSemesters(s);
+      const cur = s.find((x: any) => x.is_current);
+      if (cur) setSelectedSemester(cur.sid);
+    } catch (e) { console.error(e); }
   };
 
   const fetchCurriculum = async () => {
     if (!selectedProgram) return;
     try {
-      const data = await api.getCurriculum(selectedProgram, selectedLevel, selectedSemester);
-      setCurriculum(data);
-    } catch (error) {
-      console.error('Failed to fetch curriculum:', error);
-    }
+      setCurriculum(await api.getCurriculum(selectedProgram, selectedLevel, selectedSemester));
+    } catch (e) { console.error(e); }
   };
 
   useEffect(() => {
-    if (selectedProgram && selectedSemester) {
-      fetchCurriculum();
-    }
+    if (selectedProgram && selectedSemester) fetchCurriculum();
   }, [selectedProgram, selectedLevel, selectedSemester]);
 
-  const renderMountCurriculum = () => (
-    <div className="space-y-6">
-      <div className="card p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <label className="label">Select Program</label>
-            <select 
-              className="input"
-              value={selectedProgram}
-              onChange={e => setSelectedProgram(e.target.value)}
-            >
-              <option value="">Select Program</option>
-              {programs.map(p => <option key={p.progid} value={p.progid}>{p.name}</option>)}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="label">Level</label>
-            <select 
-              className="input"
-              value={selectedLevel}
-              onChange={e => setSelectedLevel(parseInt(e.target.value))}
-            >
-              <option value="100">Level 100</option>
-              <option value="200">Level 200</option>
-              <option value="300">Level 300</option>
-              <option value="400">Level 400</option>
-            </select>
-          </div>
-          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-            <label className="label">Semester</label>
-            <select 
-              className="input"
-              value={selectedSemester}
-              onChange={e => setSelectedSemester(e.target.value)}
-            >
-              <option value="">Select Semester</option>
-              {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="font-bold">Available Courses</h3>
-          </div>
-          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
-            {courses.map(course => (
-              <div key={course.code} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 transition-all">
-                <div className="flex-1 min-w-0 mr-4">
-                  <div className="text-sm font-bold truncate">{course.code}</div>
-                  <div className="text-xs text-slate-500 truncate">{course.title} ({course.credit_hours} Credits)</div>
-                </div>
-                <button 
-                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all flex-shrink-0"
-                  onClick={() => handleMountCourse(course.code)}
-                >
-                  <Plus size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="p-4 border-b border-slate-100 bg-blue-50/50">
-            <h3 className="font-bold text-blue-900">Mounted Curriculum</h3>
-          </div>
-          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
-            {curriculum.length > 0 ? curriculum.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-white border border-blue-100 rounded-lg">
-                <div className="flex-1 min-w-0 mr-4">
-                  <div className="text-sm font-bold truncate">{item.course_code}</div>
-                  <div className="text-xs text-slate-500 truncate">{item.course_title}</div>
-                </div>
-                <button className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all flex-shrink-0">
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            )) : (
-              <div className="p-12 text-center text-slate-400 italic">No courses mounted for this selection.</div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const handleMountCourse = async (cid: string) => {
+    if (!selectedProgram || !selectedSemester) return alert('Please select program and semester first');
+    try {
+      await api.mountCurriculum(selectedProgram, { cid, level: selectedLevel, semester_sid: selectedSemester });
+      alert('Course mounted!');
+      fetchCurriculum();
+    } catch (e: any) { alert(e.message || 'Failed'); }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       await api.createProgram(formData);
-      setFormData({
-        name: '',
-        progid: '',
-        department: '',
-        duration_years: 4
-      });
-      alert('Program created successfully!');
+      setFormData({ name: '', progid: '', department: '', duration_years: 4 });
+      alert('Program created!');
       fetchData();
-    } catch (error) {
-      console.error('Failed to save program:', error);
-      alert('Failed to save program');
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (e) { alert('Failed to save program'); }
+    finally { setSubmitting(false); }
   };
+
+  const handlePopulate = async (student: Student) => {
+    if (!populateProgid) return alert('Please select a program first');
+    try {
+      await api.updateStudent(student.iid, { ...student, progid: populateProgid });
+      alert(`${student.full_name} assigned to program!`);
+      setStudents(prev => prev.map(s => s.iid === student.iid ? { ...s, progid: populateProgid } : s));
+    } catch (e) { alert('Failed to assign'); }
+  };
+
+  const filteredPopulate = students.filter(s =>
+    (s.full_name || '').toLowerCase().includes(populateSearch.toLowerCase()) ||
+    (s.index_number || '').toLowerCase().includes(populateSearch.toLowerCase())
+  );
+
+  const renderPopulateProgram = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-bold text-lg mb-1">Populate Program</h2>
+        <p className="text-slate-500 text-sm mb-4">Assign students to a program.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="label">Select Program</label>
+            <select className="input" value={populateProgid} onChange={e => setPopulateProgid(e.target.value)}>
+              <option value="">Select Program</option>
+              {programs.map(p => <option key={p.progid} value={p.progid}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Search Student</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input type="text" className="input pl-10" placeholder="Search by name or index..." value={populateSearch} onChange={e => setPopulateSearch(e.target.value)} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="card overflow-hidden">
+        <table className="w-full text-left">
+          <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+            <th className="px-6 py-3 font-semibold">Student</th>
+            <th className="px-6 py-3 font-semibold hidden sm:table-cell">Current Program</th>
+            <th className="px-6 py-3 font-semibold hidden md:table-cell">Level</th>
+            <th className="px-6 py-3 font-semibold text-right">Action</th>
+          </tr></thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredPopulate.length > 0 ? filteredPopulate.map(s => (
+              <tr key={s.iid} className="hover:bg-slate-50/50">
+                <td className="px-6 py-3">
+                  <div className="text-sm font-bold">{s.full_name}</div>
+                  <div className="text-xs text-slate-500 font-mono">{s.index_number}</div>
+                </td>
+                <td className="px-6 py-3 text-sm text-slate-600 hidden sm:table-cell">{programs.find(p => p.progid === s.progid)?.name || s.progid || 'None'}</td>
+                <td className="px-6 py-3 text-sm hidden md:table-cell">{s.current_level}</td>
+                <td className="px-6 py-3 text-right">
+                  <button onClick={() => handlePopulate(s)} disabled={!populateProgid} className="btn btn-primary text-xs py-1 px-3 disabled:opacity-50">
+                    <Users size={14} className="mr-1" /> Assign
+                  </button>
+                </td>
+              </tr>
+            )) : <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-400">No students found.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderMountCurriculum = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="label">Program</label>
+            <select className="input" value={selectedProgram} onChange={e => setSelectedProgram(e.target.value)}>
+              <option value="">Select Program</option>
+              {programs.map(p => <option key={p.progid} value={p.progid}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Level</label>
+            <select className="input" value={selectedLevel} onChange={e => setSelectedLevel(parseInt(e.target.value))}>
+              {[100,200,300,400].map(l => <option key={l} value={l}>Level {l}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Semester</label>
+            <select className="input" value={selectedSemester} onChange={e => setSelectedSemester(e.target.value)}>
+              <option value="">Select Semester</option>
+              {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="card">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50"><h3 className="font-bold">Available Courses</h3></div>
+          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
+            {courses.map(c => (
+              <div key={c.cid} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 transition-all">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="text-sm font-bold">{c.cid}</div>
+                  <div className="text-xs text-slate-500">{c.title} ({c.credits} Credits)</div>
+                </div>
+                <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" onClick={() => handleMountCourse(c.cid)}>
+                  <Plus size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="p-4 border-b border-slate-100 bg-blue-50/50"><h3 className="font-bold text-blue-900">Mounted Curriculum</h3></div>
+          <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
+            {curriculum.length > 0 ? curriculum.map(item => (
+              <div key={item.id} className="flex items-center justify-between p-3 bg-white border border-blue-100 rounded-lg">
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="text-sm font-bold">{item.cid || item.course_code}</div>
+                  <div className="text-xs text-slate-500">{item.course_title || item.title}</div>
+                </div>
+                <button className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
+              </div>
+            )) : <div className="p-12 text-center text-slate-400 italic">No courses mounted.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderSetupProgram = () => (
     <div className="card">
       <div className="p-6 border-b border-slate-100">
         <h2 className="font-bold text-lg">Setup New Program</h2>
-        <p className="text-slate-500 text-sm">Define a new academic program for the institution.</p>
+        <p className="text-slate-500 text-sm">Define a new academic program.</p>
       </div>
       <form className="p-6 space-y-6" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="label">Program Name</label>
-            <input 
-              type="text" 
-              className="input" 
-              placeholder="e.g. B.Ed Mathematics" 
-              required
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-            />
+            <input type="text" className="input" placeholder="e.g. Bachelor of Theology" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
           </div>
           <div className="space-y-2">
             <label className="label">Program Code</label>
-            <input 
-              type="text" 
-              className="input" 
-              placeholder="e.g. BED-MAT" 
-              required
-              value={formData.progid}
-              onChange={e => setFormData({...formData, progid: e.target.value})}
-            />
+            <input type="text" className="input" placeholder="e.g. B.TH" required value={formData.progid} onChange={e => setFormData({...formData, progid: e.target.value})} />
           </div>
           <div className="space-y-2">
             <label className="label">Department</label>
-            <select 
-              className="input"
-              required
-              value={formData.department}
-              onChange={e => setFormData({...formData, department: e.target.value})}
-            >
+            <select className="input" required value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
               <option value="">Select Department</option>
-              <option value="Mathematics Education">Mathematics Education</option>
-              <option value="Languages Education">Languages Education</option>
-              <option value="Science Education">Science Education</option>
-              <option value="ICT Education">ICT Education</option>
+              {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <label className="label">Duration (Years)</label>
-            <select 
-              className="input"
-              required
-              value={formData.duration_years}
-              onChange={e => setFormData({...formData, duration_years: parseInt(e.target.value)})}
-            >
-              <option value="1">1 Year</option>
-              <option value="2">2 Years</option>
-              <option value="3">3 Years</option>
-              <option value="4">4 Years</option>
+            <select className="input" value={formData.duration_years} onChange={e => setFormData({...formData, duration_years: parseInt(e.target.value)})}>
+              {[1,2,3,4].map(y => <option key={y} value={y}>{y} Year{y>1?'s':''}</option>)}
             </select>
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
-          <button type="button" className="btn btn-secondary" onClick={() => setFormData({
-            name: '', progid: '', department: '', duration_years: 4
-          })}>Cancel</button>
+          <button type="button" className="btn btn-secondary" onClick={() => setFormData({name:'',progid:'',department:'',duration_years:4})}>Cancel</button>
           <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
             {submitting ? 'Creating...' : 'Create Program'}
@@ -289,20 +265,14 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
         </div>
       ) : (
         <>
-          {programs.map((program) => (
+          {programs.map(program => (
             <div key={program.id} className="card hover:border-blue-200 transition-all group">
               <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                 <div className="flex items-start justify-between">
-                  <div className="p-3 bg-white rounded-xl shadow-sm">
-                    <GraduationCap className="text-blue-600" size={24} />
-                  </div>
+                  <div className="p-3 bg-white rounded-xl shadow-sm"><GraduationCap className="text-blue-600" size={24} /></div>
                   <div className="flex gap-1">
-                    <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all">
-                      <Edit size={16} />
-                    </button>
-                    <button className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all">
-                      <Trash2 size={16} />
-                    </button>
+                    <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg"><Edit size={16} /></button>
+                    <button className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg"><Trash2 size={16} /></button>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -311,24 +281,13 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
                 </div>
               </div>
               <div className="p-6 space-y-4">
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Building2 size={16} className="text-slate-400" />
-                  <span>{program.department}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Clock size={16} className="text-slate-400" />
-                  <span>{program.duration_years} Years</span>
-                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-600"><Building2 size={16} className="text-slate-400" /><span>{program.department || 'N/A'}</span></div>
+                <div className="flex items-center gap-3 text-sm text-slate-600"><Clock size={16} className="text-slate-400" /><span>{program.duration_years} Years</span></div>
               </div>
             </div>
           ))}
-          <button 
-            onClick={() => {/* handle navigate to setup */}}
-            className="card border-dashed border-2 border-slate-200 bg-slate-50/30 flex flex-col items-center justify-center p-8 hover:bg-slate-50 hover:border-blue-300 transition-all group min-h-[200px]"
-          >
-            <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
-              <Plus className="text-slate-400 group-hover:text-blue-600" size={32} />
-            </div>
+          <button className="card border-dashed border-2 border-slate-200 bg-slate-50/30 flex flex-col items-center justify-center p-8 hover:bg-slate-50 hover:border-blue-300 transition-all group min-h-[200px]">
+            <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform"><Plus className="text-slate-400 group-hover:text-blue-600" size={32} /></div>
             <span className="font-bold text-slate-500 group-hover:text-blue-600">Add New Program</span>
           </button>
         </>
@@ -337,20 +296,11 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem })
   );
 
   switch (activeSubItem) {
-    case 'setup_program':
-      return renderSetupProgram();
-    case 'mount_curriculum':
-      return renderMountCurriculum();
-    case 'view_programs':
-    case null:
-      return renderViewPrograms();
-    case 'bulk_upload':
-      return <BulkUploadModule />;
-    default:
-      return (
-        <div className="card p-12 text-center">
-          <p className="text-slate-500">The {activeSubItem} feature is coming soon.</p>
-        </div>
-      );
+    case 'setup_program': return renderSetupProgram();
+    case 'populate_program': return renderPopulateProgram();
+    case 'mount_curriculum': return renderMountCurriculum();
+    case 'view_programs': case null: return renderViewPrograms();
+    case 'bulk_upload': return <BulkUploadModule />;
+    default: return <div className="card p-12 text-center"><p className="text-slate-500">The {activeSubItem} feature is coming soon.</p></div>;
   }
 };

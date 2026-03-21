@@ -24,6 +24,8 @@ import { RegistrationModule } from './components/RegistrationModule';
 import { AssessmentModule } from './components/AssessmentModule';
 import { LecturersModule } from './components/LecturersModule';
 import { SettingsModule } from './components/SettingsModule';
+import { AcademicRecordsModule } from './components/AcademicRecordsModule';
+import { StatisticsModule } from './components/StatisticsModule';
 import { Login } from './components/Login';
 import { api } from './services/api';
 
@@ -408,6 +410,12 @@ export default function App() {
         break;
       case 'settings':
         content = <SettingsModule activeSubItem={activeSubItem} />;
+        break;
+      case 'academic_records':
+        content = <AcademicRecordsModule activeSubItem={activeSubItem} />;
+        break;
+      case 'statistics':
+        content = <StatisticsModule activeSubItem={activeSubItem} />;
         break;
       default:
         content = (

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import 'express-async-errors';
 
@@ -18,10 +19,7 @@ declare global {
 import compression from 'compression';
 import morgan from 'morgan';
 import hpp from 'hpp';
-import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
-
-dotenv.config();
 import path from 'path';
 import cors from 'cors';
 import { initDb } from './db';
@@ -33,57 +31,72 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './src/server/routes/auth';
 import studentRoutes from './src/server/routes/students';
 import programRoutes from './src/server/routes/programs';
+import courseRoutes from './src/server/routes/courses';
 import registrationRoutes from './src/server/routes/registrations';
 import assessmentRoutes from './src/server/routes/assessments';
 import lecturerRoutes from './src/server/routes/lecturers';
 import bulkRoutes from './src/server/routes/bulk';
 import academicRoutes from './src/server/routes/academic';
 import userRoutes from './src/server/routes/users';
+import calendarRoutes from './src/server/routes/calendar';
+import departmentRoutes from './src/server/routes/departments';
 
 // Middleware Imports
 import { authenticate, checkRole } from './src/server/middleware/auth';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || '3005', 10);
+  const isProd = process.env.NODE_ENV === 'production';
 
-  // Trust proxy for express-rate-limit behind Nginx
+  // Trust proxy for express-rate-limit behind Nginx/aaPanel
   app.set('trust proxy', 1);
 
   // Initialize DB
   initDb();
 
   // CORS
-  const corsOptions = {
-    origin: process.env.APP_URL || true,
+  const corsOptions: cors.CorsOptions = {
+    origin: isProd
+      ? (process.env.APP_URL || false)
+      : true,
     credentials: true,
   };
   app.use(cors(corsOptions));
 
   // Security Middlewares
-  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+  app.use(morgan(isProd ? 'combined' : 'dev'));
   app.use(hpp());
   app.use(compression());
   app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for development with Vite
-    crossOriginEmbedderPolicy: false
+    contentSecurityPolicy: isProd ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'https://ui-avatars.com'],
+        connectSrc: ["'self'"],
+      },
+    } : false,
+    crossOriginEmbedderPolicy: false,
   }));
 
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: isProd ? 200 : 1000,  // more lenient in dev
     message: 'Too many requests from this IP, please try again after 15 minutes',
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    validate: { 
-      trustProxy: false, 
-      forwardedHeader: false 
-    }, // Disable the trust proxy and forwarded header validation checks
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: {
+      trustProxy: false,
+      forwardedHeader: false,
+    },
   });
 
   app.use('/api/', limiter);
 
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
   app.use(cookieParser());
 
   // Health check
@@ -97,17 +110,20 @@ async function startServer() {
   api.use('/auth', authRoutes);
   api.use('/students', authenticate, studentRoutes);
   api.use('/programs', authenticate, programRoutes);
+  api.use('/courses', authenticate, courseRoutes);          // standalone /api/courses
   api.use('/registrations', authenticate, registrationRoutes);
   api.use('/assessments', authenticate, assessmentRoutes);
   api.use('/lecturers', authenticate, lecturerRoutes);
   api.use('/bulk', authenticate, checkRole(['SuperAdmin', 'Administrator']), bulkRoutes);
   api.use('/academic', authenticate, academicRoutes);
   api.use('/users', authenticate, checkRole(['SuperAdmin', 'Administrator']), userRoutes);
+  api.use('/departments', authenticate, departmentRoutes);
+  api.use('/calendar-events', authenticate, calendarRoutes);
 
   app.use('/api', api);
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -115,14 +131,26 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, { maxAge: '1d' }));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
+  // Global error handler - MUST be last
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[ERROR]', err.stack || err.message || err);
+    const statusCode = err.statusCode || err.status || 500;
+    res.status(statusCode).json({
+      error: isProd ? 'Internal server error' : (err.message || 'Internal server error'),
+    });
+  });
+
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`[SIMS] Server running on http://0.0.0.0:${PORT} (${isProd ? 'production' : 'development'})`);
+    if (!isProd && !process.env.JWT_SECRET) {
+      console.warn('[WARN] JWT_SECRET not set — using insecure default. Set it in .env before deploying!');
+    }
   });
 }
 

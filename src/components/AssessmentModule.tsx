@@ -228,7 +228,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             >
               <option value="">Select Course</option>
               {courses.map(c => (
-                <option key={c.id} value={c.cid}>{c.code} - {c.title}</option>
+                <option key={c.id} value={c.cid}>{c.cid} - {c.title}</option>
               ))}
             </select>
             <button 
@@ -346,9 +346,144 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     </div>
   );
 
+  // ─── BY INDIVIDUAL ────────────────────────────────────────────
+  const [indSearch, setIndSearch] = useState('');
+  const [indStudent, setIndStudent] = useState<any>(null);
+  const [indAssessments, setIndAssessments] = useState<any[]>([]);
+  const [indScores, setIndScores] = useState<Record<string, { class_score: number, exam_score: number }>>({});
+  const [indSaving, setIndSaving] = useState(false);
+  const [allStudents, setAllStudents] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (activeSubItem === 'by_individual') {
+      api.getStudents().then(setAllStudents).catch(console.error);
+    }
+  }, [activeSubItem]);
+
+  const handleFindIndividual = async () => {
+    const student = allStudents.find((s: any) =>
+      s.index_number === indSearch || (s.full_name || '').toLowerCase().includes(indSearch.toLowerCase())
+    );
+    if (!student) return alert('Student not found');
+    setIndStudent(student);
+    try {
+      const regs = await api.getRegistrations(student.iid, currentYear, currentSemester);
+      const existing = await api.getAssessmentsByStudent(student.iid, currentYear, currentSemester);
+      setIndAssessments(regs);
+      const scores: Record<string, { class_score: number, exam_score: number }> = {};
+      regs.forEach((r: any) => {
+        const ex = existing.find((a: any) => a.cid === r.cid);
+        scores[r.cid] = { class_score: ex?.class_score || 0, exam_score: ex?.exam_score || 0 };
+      });
+      setIndScores(scores);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleSaveIndividual = async () => {
+    if (!indStudent || !currentYear || !currentSemester) return;
+    setIndSaving(true);
+    try {
+      await Promise.all(Object.entries(indScores).map(([cid, scores]: [string, { class_score: number; exam_score: number }]) => {
+        const total = scores.class_score + scores.exam_score;
+        const { grade, point } = calculateGrade(total);
+        return api.createAssessment({
+          iid: indStudent.iid, cid, academic_year: currentYear, semester_sid: currentSemester,
+          class_score: scores.class_score, exam_score: scores.exam_score, total_score: total, grade, gp: point
+        });
+      }));
+      alert('Scores saved!');
+    } catch (e) { alert('Failed'); }
+    finally { setIndSaving(false); }
+  };
+
+  const handleDownloadTemplate = () => {
+    const csv = 'iid,class_score,exam_score\n';
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assessment_template_${selectedCourseId || 'course'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const renderByIndividual = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-bold text-lg mb-1">Assessment by Individual</h2>
+        <p className="text-slate-500 text-sm mb-4">Search for a student and enter their scores for all registered courses.</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2 md:col-span-2">
+            <label className="label">Search Student</label>
+            <div className="flex gap-2">
+              <input type="text" className="input flex-1" placeholder="Index or name..." value={indSearch} onChange={e => setIndSearch(e.target.value)} />
+              <button className="btn btn-primary" onClick={handleFindIndividual}><Search size={18} /></button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Academic Year</label>
+            <select className="input" value={currentYear} onChange={e => setCurrentYear(e.target.value)}>
+              {academicYears.map(y => <option key={y.code} value={y.code}>{y.code}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Semester</label>
+            <select className="input" value={currentSemester} onChange={e => setCurrentSemester(e.target.value)}>
+              {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+      {indStudent && (
+        <div className="card overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-blue-50/50">
+            <h3 className="font-bold text-blue-900">{indStudent.full_name} — {indStudent.index_number}</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                <th className="px-6 py-3">Course</th>
+                <th className="px-4 py-3 w-28">CA (0-40)</th>
+                <th className="px-4 py-3 w-28">Exam (0-60)</th>
+                <th className="px-4 py-3">Total</th>
+                <th className="px-4 py-3">Grade</th>
+              </tr></thead>
+              <tbody className="divide-y divide-slate-100">
+                {indAssessments.length > 0 ? indAssessments.map(r => {
+                  const scores = indScores[r.cid] || { class_score: 0, exam_score: 0 };
+                  const total = scores.class_score + scores.exam_score;
+                  const { grade, color } = calculateGrade(total);
+                  return (
+                    <tr key={r.cid}>
+                      <td className="px-6 py-3"><div className="text-sm font-bold">{r.cid}</div><div className="text-xs text-slate-500">{r.course_title}</div></td>
+                      <td className="px-4 py-3"><input type="number" className="input w-20 text-center" min="0" max="40" value={scores.class_score} onChange={e => setIndScores(prev => ({ ...prev, [r.cid]: { ...prev[r.cid], class_score: Math.min(40, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-4 py-3"><input type="number" className="input w-20 text-center" min="0" max="60" value={scores.exam_score} onChange={e => setIndScores(prev => ({ ...prev, [r.cid]: { ...prev[r.cid], exam_score: Math.min(60, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-4 py-3 text-sm font-bold">{total}</td>
+                      <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-bold ${color}`}>{grade}</span></td>
+                    </tr>
+                  );
+                }) : <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No registered courses found.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          {indAssessments.length > 0 && (
+            <div className="p-4 border-t border-slate-100 flex justify-end">
+              <button onClick={handleSaveIndividual} disabled={indSaving} className="btn btn-primary px-8">
+                {indSaving ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
+                {indSaving ? 'Saving...' : 'Save Scores'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   switch (activeSubItem) {
     case 'by_course':
       return renderByCourse();
+    case 'by_individual':
+      return renderByIndividual();
     default:
       return (
         <div className="card p-12 text-center">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, Edit, Trash2, Filter, Download, Loader2, Key, X, CheckCircle, FileText, FileSpreadsheet } from 'lucide-react';
+import { UserPlus, Search, Edit, Trash2, Filter, Download, Loader2, Key, X, CheckCircle, FileText, FileSpreadsheet, Camera } from 'lucide-react';
 import { Student, Program } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
@@ -39,6 +39,62 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     phone: '',
     admission_year: new Date().getFullYear().toString()
   });
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+
+  // System-defined passport photo dimensions
+  const PHOTO_MAX_WIDTH = 200;
+  const PHOTO_MAX_HEIGHT = 250;
+  const PHOTO_QUALITY = 0.8;
+
+  const resizeImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Scale to fit within passport photo dimensions
+          const ratio = Math.min(PHOTO_MAX_WIDTH / width, PHOTO_MAX_HEIGHT / height);
+          if (ratio < 1) {
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', PHOTO_QUALITY);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    try {
+      const resized = await resizeImage(file);
+      setPhotoPreview(resized);
+      setPhotoBase64(resized);
+    } catch (err) {
+      console.error('Failed to process image:', err);
+      alert('Failed to process image');
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -64,7 +120,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.createStudent(formData);
+      await api.createStudent({ ...formData, photo: photoBase64 });
       setFormData({
         index_number: '',
         surname: '',
@@ -77,6 +133,8 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
         phone: '',
         admission_year: new Date().getFullYear().toString()
       });
+      setPhotoPreview(null);
+      setPhotoBase64(null);
       alert('Student added successfully!');
       fetchData();
     } catch (error) {
@@ -137,9 +195,9 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
   };
 
   const filteredStudents = students.filter(s => 
-    s.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.index_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.index_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const renderAddStudent = () => (
@@ -267,10 +325,57 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
             </div>
           </div>
 
+          {/* Passport Photo Upload */}
+          <div className="pt-2">
+            <label className="label mb-3">Passport Photo</label>
+            <div className="flex items-start gap-6">
+              <div className="relative group">
+                {photoPreview ? (
+                  <div className="relative">
+                    <img 
+                      src={photoPreview} 
+                      alt="Student photo" 
+                      className="w-[120px] h-[150px] object-cover rounded-xl border-2 border-slate-200 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setPhotoPreview(null); setPhotoBase64(null); }}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-md"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer flex flex-col items-center justify-center w-[120px] h-[150px] rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/50 transition-all group">
+                    <Camera size={28} className="text-slate-400 group-hover:text-blue-500 mb-2 transition-colors" />
+                    <span className="text-[10px] text-slate-500 group-hover:text-blue-600 font-medium text-center px-2">Click to upload photo</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handlePhotoSelect}
+                    />
+                  </label>
+                )}
+              </div>
+              <div className="text-xs text-slate-400 space-y-1 pt-1">
+                <p className="font-medium text-slate-500">Guidelines:</p>
+                <p>• Passport-size photo</p>
+                <p>• JPG, PNG or WebP format</p>
+                <p>• Auto-resized to {PHOTO_MAX_WIDTH}×{PHOTO_MAX_HEIGHT}px</p>
+                <p>• Max file size ~50KB after resize</p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
-            <button type="button" className="btn btn-secondary" onClick={() => setFormData({
-              index_number: '', surname: '', other_names: '', email: '', progid: '', current_level: 100, gender: 'Male', dob: '', phone: '', admission_year: new Date().getFullYear().toString()
-            })}>Clear Form</button>
+            <button type="button" className="btn btn-secondary" onClick={() => {
+              setFormData({
+                index_number: '', surname: '', other_names: '', email: '', progid: '', current_level: 100, gender: 'Male', dob: '', phone: '', admission_year: new Date().getFullYear().toString()
+              });
+              setPhotoPreview(null);
+              setPhotoBase64(null);
+            }}>Clear Form</button>
             <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
               {submitting ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
               {submitting ? 'Saving...' : 'Save Student'}
@@ -328,10 +433,19 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                 {filteredStudents.length > 0 ? filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-900">{student.full_name}</span>
-                        <span className="text-xs font-mono text-slate-500">{student.index_number}</span>
-                        <span className="text-[10px] text-slate-400 sm:hidden">{student.progid} • L{student.current_level}</span>
+                      <div className="flex items-center gap-3">
+                        {student.photo ? (
+                          <img src={student.photo} alt="" className="w-9 h-9 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                            {(student.surname || '?').charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-900">{student.full_name}</span>
+                          <span className="text-xs font-mono text-slate-500">{student.index_number}</span>
+                          <span className="text-[10px] text-slate-400 sm:hidden">{student.progid} • L{student.current_level}</span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">
@@ -484,12 +598,86 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     </div>
   );
 
+  const [resetSearch, setResetSearch] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const filteredResetStudents = students.filter(s =>
+    (s.full_name || '').toLowerCase().includes(resetSearch.toLowerCase()) ||
+    (s.index_number || '').toLowerCase().includes(resetSearch.toLowerCase())
+  );
+
+  const handleResetPassword = async (student: Student) => {
+    if (!resetPassword) return alert('Please enter a new password');
+    setResetLoading(true);
+    try {
+      await api.resetStudentPassword(student.iid, resetPassword);
+      alert(`Password reset for ${student.full_name}!`);
+      setResetPassword('');
+    } catch (e: any) {
+      alert(e.message || 'Failed to reset password');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const renderResetPassword = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-bold text-lg mb-1">Reset Student Password</h2>
+        <p className="text-slate-500 text-sm mb-4">Search for a student and reset their portal login password.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="label">Search Student</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input type="text" className="input pl-10" placeholder="Name or index number..." value={resetSearch} onChange={e => setResetSearch(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="label">New Password</label>
+            <input type="password" className="input" placeholder="Enter new password" value={resetPassword} onChange={e => setResetPassword(e.target.value)} />
+          </div>
+        </div>
+      </div>
+      <div className="card overflow-hidden">
+        <table className="w-full text-left">
+          <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+            <th className="px-6 py-3 font-semibold">Student</th>
+            <th className="px-6 py-3 font-semibold hidden sm:table-cell">Program</th>
+            <th className="px-6 py-3 font-semibold text-right">Action</th>
+          </tr></thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredResetStudents.length > 0 ? filteredResetStudents.slice(0, 20).map(s => (
+              <tr key={s.iid} className="hover:bg-slate-50/50">
+                <td className="px-6 py-3">
+                  <div className="text-sm font-bold">{s.full_name}</div>
+                  <div className="text-xs text-slate-500 font-mono">{s.index_number}</div>
+                </td>
+                <td className="px-6 py-3 text-sm hidden sm:table-cell">{s.program_name || s.progid || 'N/A'}</td>
+                <td className="px-6 py-3 text-right">
+                  <button onClick={() => handleResetPassword(s)} disabled={!resetPassword || resetLoading} className="btn btn-primary text-xs py-1 px-3 disabled:opacity-50">
+                    {resetLoading ? <Loader2 size={14} className="animate-spin" /> : <Key size={14} />}
+                    <span className="ml-1">Reset</span>
+                  </button>
+                </td>
+              </tr>
+            )) : <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-400">{resetSearch ? 'No students found.' : 'Type to search students.'}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
   switch (activeSubItem) {
     case 'add_student':
       return renderAddStudent();
+    case 'update_student':
     case 'view_students':
     case null:
       return renderViewStudents();
+    case 'reset_password':
+      return renderResetPassword();
     case 'bulk_upload':
       return <BulkUploadModule />;
     default:

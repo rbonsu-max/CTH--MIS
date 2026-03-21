@@ -374,11 +374,195 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
     </div>
   );
 
+  // ─── RESIT ─────────────────────────────────────────────────────
+  const [resitSearch, setResitSearch] = useState('');
+  const [resitStudent, setResitStudent] = useState<Student | null>(null);
+  const [failedCourses, setFailedCourses] = useState<any[]>([]);
+  const [resitYear, setResitYear] = useState('');
+  const [resitSemester, setResitSemester] = useState('');
+  const [allYears, setAllYears] = useState<any[]>([]);
+  const [allSemesters, setAllSemesters] = useState<any[]>([]);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    if (activeSubItem === 'resit' || activeSubItem === 'view_registration') {
+      Promise.all([api.getAcademicYears(), api.getSemesters(), api.getStudents()]).then(([y, s, st]) => {
+        setAllYears(y); setAllSemesters(s); setAllStudents(st);
+        const curY = y.find((x: any) => x.is_current);
+        const curS = s.find((x: any) => x.is_current);
+        if (curY) { setResitYear(curY.code); setViewYear(curY.code); }
+        if (curS) { setResitSemester(curS.sid); setViewSemester(curS.sid); }
+      }).catch(console.error);
+    }
+  }, [activeSubItem]);
+
+  const handleFindResit = async () => {
+    const student = allStudents.find(s => s.index_number === resitSearch || (s.full_name || '').toLowerCase().includes(resitSearch.toLowerCase()));
+    if (!student) return alert('Student not found');
+    setResitStudent(student);
+    try {
+      const assessments = await api.getAssessmentsByStudent(student.iid);
+      const failed = assessments.filter((a: any) => a.grade === 'F' || a.grade === 'E' || a.total_score < 50);
+      setFailedCourses(failed);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleResitRegister = async (course: any) => {
+    if (!resitStudent || !resitYear || !resitSemester) return;
+    try {
+      await api.createRegistration({ iid: resitStudent.iid, cid: course.cid, academic_year: resitYear, semester_sid: resitSemester, status: 'pending' });
+      alert(`${course.course_title || course.cid} registered for resit!`);
+    } catch (e: any) { alert(e.message || 'Failed'); }
+  };
+
+  const renderResit = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-bold text-lg mb-1">Resit Registration</h2>
+        <p className="text-slate-500 text-sm mb-4">Find a student's failed courses and register them for resit.</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2 md:col-span-2">
+            <label className="label">Search Student (Index or Name)</label>
+            <div className="flex gap-2">
+              <input type="text" className="input flex-1" placeholder="Index number or name..." value={resitSearch} onChange={e => setResitSearch(e.target.value)} />
+              <button className="btn btn-primary" onClick={handleFindResit}><Search size={18} /></button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Year</label>
+            <select className="input" value={resitYear} onChange={e => setResitYear(e.target.value)}>
+              {allYears.map(y => <option key={y.code} value={y.code}>{y.code}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Semester</label>
+            <select className="input" value={resitSemester} onChange={e => setResitSemester(e.target.value)}>
+              {allSemesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+      {resitStudent && (
+        <div className="card overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-red-50/50">
+            <h3 className="font-bold text-red-900">Failed Courses for {resitStudent.full_name}</h3>
+          </div>
+          <table className="w-full text-left">
+            <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-3">Code</th>
+              <th className="px-6 py-3">Course</th>
+              <th className="px-6 py-3 hidden sm:table-cell">Score</th>
+              <th className="px-6 py-3 hidden sm:table-cell">Grade</th>
+              <th className="px-6 py-3 text-right">Action</th>
+            </tr></thead>
+            <tbody className="divide-y divide-slate-100">
+              {failedCourses.length > 0 ? failedCourses.map((c, i) => (
+                <tr key={i} className="hover:bg-slate-50/50">
+                  <td className="px-6 py-3 text-sm font-mono font-bold">{c.cid}</td>
+                  <td className="px-6 py-3 text-sm">{c.course_title}</td>
+                  <td className="px-6 py-3 text-sm hidden sm:table-cell">{c.total_score}</td>
+                  <td className="px-6 py-3 hidden sm:table-cell"><span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-bold">{c.grade}</span></td>
+                  <td className="px-6 py-3 text-right">
+                    <button onClick={() => handleResitRegister(c)} className="btn btn-primary text-xs py-1 px-3"><Plus size={14} className="mr-1" /> Register</button>
+                  </td>
+                </tr>
+              )) : <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No failed courses found.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+
+  // ─── VIEW REGISTRATION ────────────────────────────────────────
+  const [viewYear, setViewYear] = useState('');
+  const [viewSemester, setViewSemester] = useState('');
+  const [viewRegs, setViewRegs] = useState<any[]>([]);
+  const [viewLoading, setViewLoading] = useState(false);
+
+  const fetchViewRegs = async () => {
+    if (!viewYear || !viewSemester) return;
+    setViewLoading(true);
+    try {
+      const data = await api.getRegistrations(undefined, viewYear, viewSemester);
+      setViewRegs(data);
+    } catch (e) { console.error(e); }
+    finally { setViewLoading(false); }
+  };
+
+  useEffect(() => {
+    if (activeSubItem === 'view_registration' && viewYear && viewSemester) fetchViewRegs();
+  }, [viewYear, viewSemester, activeSubItem]);
+
+  const renderViewRegistration = () => (
+    <div className="space-y-6">
+      <div className="card p-6">
+        <h2 className="font-bold text-lg mb-1">View Registrations</h2>
+        <p className="text-slate-500 text-sm mb-4">View all course registrations for a period.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <label className="label">Academic Year</label>
+            <select className="input" value={viewYear} onChange={e => setViewYear(e.target.value)}>
+              {allYears.map(y => <option key={y.code} value={y.code}>{y.code}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Semester</label>
+            <select className="input" value={viewSemester} onChange={e => setViewSemester(e.target.value)}>
+              {allSemesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button className="btn btn-primary w-full" onClick={() => window.print()}>🖨️ Print</button>
+          </div>
+        </div>
+      </div>
+      <div className="card overflow-hidden" id="print-registrations">
+        {viewLoading ? (
+          <div className="p-12 flex flex-col items-center"><Loader2 size={32} className="text-blue-600 animate-spin mb-4" /><p className="text-slate-500">Loading...</p></div>
+        ) : (
+          <table className="w-full text-left">
+            <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+              <th className="px-6 py-3">#</th>
+              <th className="px-6 py-3">Student</th>
+              <th className="px-6 py-3">Course</th>
+              <th className="px-6 py-3 hidden sm:table-cell">Status</th>
+              <th className="px-6 py-3 hidden md:table-cell">Date</th>
+            </tr></thead>
+            <tbody className="divide-y divide-slate-100">
+              {viewRegs.length > 0 ? viewRegs.map((r, i) => (
+                <tr key={i} className="hover:bg-slate-50/50">
+                  <td className="px-6 py-3 text-sm text-slate-400">{i + 1}</td>
+                  <td className="px-6 py-3">
+                    <div className="text-sm font-bold">{r.full_name || `${r.surname || ''}, ${r.other_names || ''}`}</div>
+                    <div className="text-xs text-slate-500 font-mono">{r.iid}</div>
+                  </td>
+                  <td className="px-6 py-3">
+                    <div className="text-sm font-medium">{r.course_title || r.cid}</div>
+                    <div className="text-xs text-slate-400">{r.credits} credits</div>
+                  </td>
+                  <td className="px-6 py-3 hidden sm:table-cell">
+                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : r.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{r.status}</span>
+                  </td>
+                  <td className="px-6 py-3 text-sm text-slate-500 hidden md:table-cell">{r.registration_date ? new Date(r.registration_date).toLocaleDateString() : 'N/A'}</td>
+                </tr>
+              )) : <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No registrations found.</td></tr>}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+
   switch (activeSubItem) {
     case 'open_close':
       return renderOpenClose();
     case 'register_student':
       return renderRegisterStudent();
+    case 'resit':
+      return renderResit();
+    case 'view_registration':
+      return renderViewRegistration();
     default:
       return (
         <div className="card p-12 text-center">

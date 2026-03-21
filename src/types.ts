@@ -4,9 +4,11 @@ export interface User {
   id: string;
   uid: string;
   fullname: string;
+  name: string;       // returned by JWT (same as fullname)
   username: string;
   role: UserRole;
   status: 'active' | 'inactive' | 'locked';
+  avatar?: string;
 }
 
 export interface Student {
@@ -24,6 +26,7 @@ export interface Student {
   admission_year: string;
   current_level: number;
   status: 'active' | 'withdrawn' | 'graduated' | 'suspended' | 'deferred';
+  photo?: string;
   user_uid?: string;
   program_name?: string;
   admission_year_code?: string;
@@ -55,8 +58,10 @@ export interface Registration {
   status: 'pending' | 'approved' | 'rejected';
   surname?: string;
   other_names?: string;
+  full_name?: string;
   course_title?: string;
   credits?: number;
+  createdAt?: string;
 }
 
 export interface Assessment {
@@ -123,8 +128,25 @@ export interface CalendarEvent {
   id: string;
   date: string;
   event: string;
-  academicYear?: string;
+  academic_year?: string;
   semester?: string;
+}
+
+export interface Department {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface LecturerAssignment {
+  id: number;
+  lid: string;
+  cid: string;
+  academic_year: string;
+  semester_sid: string;
+  lecturer_name?: string;
+  course_title?: string;
+  credits?: number;
 }
 
 export type ModuleType = 

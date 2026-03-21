@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Settings, Calendar, Clock, UserCog, CheckCircle, Loader2, X, Upload } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Settings, Calendar, Clock, UserCog, CheckCircle, Loader2, X, Upload, Lock } from 'lucide-react';
 import { AcademicYear, Semester, User, CalendarEvent } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
@@ -21,7 +21,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'admin' });
+  const [newUser, setNewUser] = useState({ fullname: '', username: '', password: '', role: 'Administrator' });
   const [newEvent, setNewEvent] = useState({ date: '', event: '' });
   const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -130,7 +130,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     try {
       await api.createUser(newUser);
       alert('User created successfully!');
-      setNewUser({ name: '', email: '', password: '', role: 'admin' });
+      setNewUser({ fullname: '', username: '', password: '', role: 'Administrator' });
       setShowAddUserModal(false);
       fetchData();
     } catch (error) {
@@ -146,7 +146,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     if (!changingPasswordUser) return;
     setSubmitting(true);
     try {
-      await api.updateUserPassword(changingPasswordUser.id, newPassword);
+      await api.updateUserPassword(changingPasswordUser.uid, newPassword);
       alert('Password updated successfully!');
       setNewPassword('');
       setChangingPasswordUser(null);
@@ -158,10 +158,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
+  const handleDeleteUser = async (uid: string) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await api.deleteUser(id);
+      await api.deleteUser(uid);
       alert('User deleted!');
       fetchData();
     } catch (error) {
@@ -382,19 +382,19 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img 
-                          src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`} 
+                          src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullname || u.username)}&background=random`} 
                           alt="" 
                           className="w-8 h-8 rounded-lg flex-shrink-0"
                         />
                         <div className="min-w-0">
-                          <div className="text-sm font-bold text-slate-900 truncate">{u.name}</div>
-                          <div className="text-xs text-slate-400 truncate">{u.email}</div>
+                          <div className="text-sm font-bold text-slate-900 truncate">{u.fullname}</div>
+                          <div className="text-xs text-slate-400 truncate">{u.username}</div>
                           <div className="md:hidden mt-1">
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
-                              u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
-                              u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                              u.role === 'SuperAdmin' ? 'bg-purple-100 text-purple-700' :
+                              u.role === 'Administrator' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                             }`}>
-                              {u.role.replace('_', ' ')}
+                              {u.role}
                             </span>
                           </div>
                         </div>
@@ -402,10 +402,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                        u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
-                        u.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                        u.role === 'SuperAdmin' ? 'bg-purple-100 text-purple-700' :
+                        u.role === 'Administrator' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                       }`}>
-                        {u.role.replace('_', ' ')}
+                        {u.role}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -420,7 +420,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                         <button 
                           className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
                           title="Delete User"
-                          onClick={() => handleDeleteUser(u.id)}
+                          onClick={() => handleDeleteUser(u.uid)}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -450,18 +450,18 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                   type="text" 
                   className="input" 
                   required
-                  value={newUser.name}
-                  onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+                  value={newUser.fullname}
+                  onChange={e => setNewUser({ ...newUser, fullname: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <label className="label">Email Address</label>
+                <label className="label">Username / Email</label>
                 <input 
-                  type="email" 
+                  type="text" 
                   className="input" 
                   required
-                  value={newUser.email}
-                  onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                  value={newUser.username}
+                  onChange={e => setNewUser({ ...newUser, username: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -481,9 +481,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
                   value={newUser.role}
                   onChange={e => setNewUser({ ...newUser, role: e.target.value })}
                 >
-                  <option value="admin">Admin</option>
-                  <option value="lecturer">Lecturer</option>
-                  <option value="super_admin">Super Admin</option>
+                  <option value="Administrator">Administrator</option>
+                  <option value="Lecturer">Lecturer</option>
+                  <option value="SuperAdmin">Super Admin</option>
+                  <option value="Registry">Registry</option>
+                  <option value="Finance">Finance</option>
                 </select>
               </div>
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
@@ -509,7 +511,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
             </div>
             <form className="p-6 space-y-4" onSubmit={handleChangePassword}>
               <div className="p-4 bg-blue-50 rounded-xl mb-4">
-                <p className="text-sm text-blue-700">Changing password for <strong>{changingPasswordUser.name}</strong></p>
+                <p className="text-sm text-blue-700">Changing password for <strong>{changingPasswordUser.fullname}</strong></p>
               </div>
               <div className="space-y-2">
                 <label className="label">New Password</label>

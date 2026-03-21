@@ -3,7 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import path from 'path';
 
-const db = new Database('sims.db');
+import fs from 'fs';
+
+const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'sims.db');
+const dbDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+const db = new Database(DB_PATH);
+
+// Production-grade SQLite settings
+db.pragma('journal_mode = WAL');     // WAL for concurrent reads
+db.pragma('busy_timeout = 5000');    // wait 5s before SQLITE_BUSY error
+db.pragma('synchronous = NORMAL');   // safe trade-off between speed & durability
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -40,6 +52,13 @@ export function initDb() {
       sort_order INTEGER,
       is_current INTEGER NOT NULL DEFAULT 0 CHECK (is_current IN (0,1)),
       created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS departments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL UNIQUE,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -92,6 +111,7 @@ export function initDb() {
       admission_year TEXT REFERENCES academic_years(code),
       current_level INTEGER DEFAULT 100,
       status TEXT DEFAULT 'active' CHECK (status IN ('active','withdrawn','graduated','suspended','deferred')),
+      photo TEXT,
       user_uid TEXT REFERENCES users(uid),
       created_by TEXT REFERENCES users(uid),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -239,6 +259,17 @@ export function initDb() {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 7. CALENDAR EVENTS
+    CREATE TABLE IF NOT EXISTS calendar_events (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      event TEXT NOT NULL,
+      academic_year TEXT REFERENCES academic_years(code),
+      semester TEXT REFERENCES semesters(sid),
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- PERFORMANCE INDEXES
     CREATE INDEX IF NOT EXISTS idx_students_prog ON students(progid);
     CREATE INDEX IF NOT EXISTS idx_students_iid ON students(iid);
@@ -268,15 +299,57 @@ export function initDb() {
     JOIN courses c ON sa.cid = c.cid;
   `);
 
+  // ── Migrations: add columns to existing tables safely ──
+  try {
+    const columns = db.prepare("PRAGMA table_info(students)").all() as { name: string }[];
+    if (!columns.find(c => c.name === 'photo')) {
+      db.prepare('ALTER TABLE students ADD COLUMN photo TEXT').run();
+    }
+  } catch (e) {}
+
+  // Ensure departments table exists (migration for existing DBs)
+  try {
+    db.prepare('SELECT 1 FROM departments LIMIT 1').get();
+  } catch (_) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS departments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  }
+
+  // Seed departments if empty
+  const deptCount = db.prepare('SELECT COUNT(*) as count FROM departments').get() as { count: number };
+  if (deptCount.count === 0) {
+    const depts = [
+      ['THEO', 'Theology'],
+      ['BIBL', 'Biblical Studies'],
+      ['PAST', 'Pastoral Studies'],
+      ['MISS', 'Mission Studies'],
+      ['HIST', 'Church History'],
+      ['PHIL', 'Philosophy & Ethics'],
+      ['EDUC', 'Religious Education'],
+      ['LANG', 'Languages'],
+      ['GEN', 'General Studies']
+    ];
+    const insertDept = db.prepare('INSERT INTO departments (code, name) VALUES (?, ?)');
+    for (const [code, name] of depts) {
+      insertDept.run(code, name);
+    }
+  }
+
   // Seed initial SuperAdmin if not exists
   const superAdmin = db.prepare('SELECT * FROM users WHERE role = ?').get('SuperAdmin');
   if (!superAdmin) {
     const uid = uuidv4();
-    const passwordHash = bcrypt.hashSync('admin123', 10);
+    const passwordHash = bcrypt.hashSync('$$Ecg$$', 10);
     db.prepare(`
       INSERT INTO users (id, uid, fullname, username, password_hash, role, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(uuidv4(), uid, 'Richard Bonsu', 'admin', passwordHash, 'SuperAdmin', 'active');
+    `).run(uuidv4(), uid, 'Richard Bonsu', 'youroger1@gmail.com', passwordHash, 'SuperAdmin', 'active');
   }
 
   // Seed default academic year and semester if empty

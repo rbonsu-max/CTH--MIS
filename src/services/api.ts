@@ -1,4 +1,4 @@
-import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent } from '../types';
+import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment } from '../types';
 
 const API_URL = '/api';
 
@@ -47,6 +47,17 @@ export const api = {
     });
     return res.json();
   },
+  updateStudent: async (iid: string, student: Partial<Student>): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/students/${iid}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(student),
+    });
+    return res.json();
+  },
+  deleteStudent: async (iid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/students/${iid}`, { method: 'DELETE' });
+  },
   getStudentLogin: async (iid: string): Promise<any> => {
     const res = await fetchWithAuth(`${API_URL}/students/${iid}/login`);
     return res.json();
@@ -77,6 +88,17 @@ export const api = {
     });
     return res.json();
   },
+  updateProgram: async (progid: string, program: Partial<Program>): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/programs/${progid}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(program),
+    });
+    return res.json();
+  },
+  deleteProgram: async (progid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/programs/${progid}`, { method: 'DELETE' });
+  },
 
   // Courses
   getCourses: async (): Promise<Course[]> => {
@@ -91,10 +113,26 @@ export const api = {
     });
     return res.json();
   },
+  updateCourse: async (cid: string, course: Partial<Course>): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/courses/${cid}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(course),
+    });
+    return res.json();
+  },
+  deleteCourse: async (cid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/courses/${cid}`, { method: 'DELETE' });
+  },
 
   // Registrations
-  getRegistrations: async (): Promise<Registration[]> => {
-    const res = await fetchWithAuth(`${API_URL}/registrations`);
+  getRegistrations: async (iid?: string, academic_year?: string, semester_sid?: string): Promise<Registration[]> => {
+    const params = new URLSearchParams();
+    if (iid) params.append('iid', iid);
+    if (academic_year) params.append('academic_year', academic_year);
+    if (semester_sid) params.append('semester_sid', semester_sid);
+    const queryStr = params.toString();
+    const res = await fetchWithAuth(`${API_URL}/registrations${queryStr ? '?' + queryStr : ''}`);
     return res.json();
   },
   createRegistration: async (reg: Partial<Registration>): Promise<Registration> => {
@@ -104,6 +142,10 @@ export const api = {
       body: JSON.stringify(reg),
     });
     return res.json();
+  },
+  deleteRegistration: async (iid: string, cid: string, academic_year: string, semester_sid: string): Promise<void> => {
+    const params = new URLSearchParams({ iid, cid, academic_year, semester_sid });
+    await fetchWithAuth(`${API_URL}/registrations?${params.toString()}`, { method: 'DELETE' });
   },
 
   // Assessments
@@ -123,6 +165,26 @@ export const api = {
     });
     return res.json();
   },
+  getAssessmentsByStudent: async (iid: string, academic_year?: string, semester_sid?: string): Promise<Assessment[]> => {
+    const params = new URLSearchParams({ iid });
+    if (academic_year) params.append('academic_year', academic_year);
+    if (semester_sid) params.append('semester_sid', semester_sid);
+    const res = await fetchWithAuth(`${API_URL}/assessments?${params.toString()}`);
+    return res.json();
+  },
+  computeGPA: async (academic_year: string, semester_sid: string): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/assessments/compute-gpa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ academic_year, semester_sid }),
+    });
+    return res.json();
+  },
+  getBoardsheet: async (iid: string, academic_year: string, semester_sid: string): Promise<any> => {
+    const params = new URLSearchParams({ iid, academic_year, semester_sid });
+    const res = await fetchWithAuth(`${API_URL}/assessments/boardsheet?${params.toString()}`);
+    return res.json();
+  },
 
   // Lecturers
   getLecturers: async (): Promise<Lecturer[]> => {
@@ -136,6 +198,36 @@ export const api = {
       body: JSON.stringify(lecturer),
     });
     return res.json();
+  },
+  updateLecturer: async (lid: string, lecturer: Partial<Lecturer>): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/lecturers/${lid}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lecturer),
+    });
+    return res.json();
+  },
+  deleteLecturer: async (lid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/lecturers/${lid}`, { method: 'DELETE' });
+  },
+  getLecturerAssignments: async (lid?: string, academic_year?: string, semester_sid?: string): Promise<LecturerAssignment[]> => {
+    const params = new URLSearchParams();
+    if (lid) params.append('lid', lid);
+    if (academic_year) params.append('academic_year', academic_year);
+    if (semester_sid) params.append('semester_sid', semester_sid);
+    const res = await fetchWithAuth(`${API_URL}/lecturers/assignments?${params.toString()}`);
+    return res.json();
+  },
+  assignLecturer: async (data: { lid: string; cid: string; academic_year: string; semester_sid: string }): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/lecturers/assignments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  deleteAssignment: async (id: number): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/lecturers/assignments/${id}`, { method: 'DELETE' });
   },
 
   // Bulk Uploads
@@ -207,12 +299,12 @@ export const api = {
     });
   },
   deleteAcademicYear: async (code: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/academic/years/${code}`, {
+    await fetchWithAuth(`${API_URL}/academic/years/${encodeURIComponent(code)}`, {
       method: 'DELETE',
     });
   },
   updateAcademicYear: async (code: string, data: Partial<AcademicYear>): Promise<AcademicYear> => {
-    const res = await fetchWithAuth(`${API_URL}/academic/years/${code}`, {
+    const res = await fetchWithAuth(`${API_URL}/academic/years/${encodeURIComponent(code)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -223,6 +315,14 @@ export const api = {
   // Semesters
   getSemesters: async (): Promise<Semester[]> => {
     const res = await fetchWithAuth(`${API_URL}/academic/semesters`);
+    return res.json();
+  },
+  createSemester: async (data: Partial<Semester>): Promise<Semester> => {
+    const res = await fetchWithAuth(`${API_URL}/academic/semesters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
     return res.json();
   },
   setCurrentSemester: async (sid: string): Promise<void> => {
@@ -237,6 +337,11 @@ export const api = {
       body: JSON.stringify(data),
     });
     return res.json();
+  },
+  deleteSemester: async (sid: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/academic/semesters/${sid}`, {
+      method: 'DELETE',
+    });
   },
 
   // Curriculum
@@ -321,5 +426,41 @@ export const api = {
     await fetchWithAuth(`${API_URL}/calendar-events/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  // Departments
+  getDepartments: async (): Promise<Department[]> => {
+    const res = await fetchWithAuth(`${API_URL}/departments`);
+    return res.json();
+  },
+  createDepartment: async (data: Partial<Department>): Promise<Department> => {
+    const res = await fetchWithAuth(`${API_URL}/departments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  deleteDepartment: async (id: number): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/departments/${id}`, { method: 'DELETE' });
+  },
+
+  // Student password reset
+  resetStudentPassword: async (iid: string, password: string): Promise<any> => {
+    const res = await fetchWithAuth(`${API_URL}/students/${iid}/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    return res.json();
+  },
+
+  // Statistics
+  getStudentStats: async (): Promise<any> => {
+    const [students, programs] = await Promise.all([
+      fetchWithAuth(`${API_URL}/students`).then(r => r.json()),
+      fetchWithAuth(`${API_URL}/programs`).then(r => r.json())
+    ]);
+    return { students, programs };
   },
 };

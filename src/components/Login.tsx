@@ -20,7 +20,7 @@ export function Login({ onLogin }: LoginProps) {
     setIsLoading(true);
 
     try {
-      const user = await api.login({ email, password });
+      const user = await api.login({ username: email, password });
       onLogin(user);
     } catch (err: any) {
       setError(err.message || 'Invalid email or password');

@@ -102,15 +102,12 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                 </div>
               </div>
               <div className="flex-1 space-y-1">
-                <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase text-slate-900">St. Nicholas Anglican Seminary</h1>
-                <p className="text-sm md:text-base font-bold uppercase tracking-[0.2em] text-slate-600">Cape Coast, Ghana</p>
-                <div className="h-1 w-24 bg-blue-600 mx-auto md:mx-0 my-2"></div>
-                <p className="text-xs md:text-sm font-mono text-slate-500 uppercase">
-                  P.O.Box AD162, Cape Coast || Tel: +233-3321-33174 || Email: registrar@snsanglican.org
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight uppercase text-slate-900">ST NICHOLAS SEMINARY</h1>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Academic Section</p>
+                <p className="text-xs font-bold uppercase text-slate-700">{title}</p>
+                <p className="text-[10px] text-slate-500">
+                  P.O.Box AD162, Cape Coast, Ghana || Tel: +233-3321-33174 || Email: registrar@snsanglican.org
                 </p>
-                <div className="mt-4 inline-block px-6 py-1 bg-slate-900 text-white text-lg md:text-xl font-bold uppercase tracking-widest">
-                  {title}
-                </div>
               </div>
             </div>
 
@@ -164,21 +161,25 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                           <table className="w-full text-[11px]">
                             <thead>
                               <tr className="bg-slate-900 text-white text-left">
-                                <th className="px-4 py-2 w-24">COURSE CODE</th>
-                                <th className="px-4 py-2">COURSE TITLE</th>
-                                <th className="px-4 py-2 w-12 text-center">CR</th>
-                                <th className="px-4 py-2 w-12 text-center">GD</th>
-                                <th className="px-4 py-2 w-12 text-center">GP</th>
+                                <th className="px-3 py-2 w-20">CODE</th>
+                                <th className="px-3 py-2">TITLE</th>
+                                <th className="px-3 py-2 w-14 text-center">CA</th>
+                                <th className="px-3 py-2 w-14 text-center">EXAM</th>
+                                <th className="px-3 py-2 w-10 text-center">CR</th>
+                                <th className="px-3 py-2 w-10 text-center">GD</th>
+                                <th className="px-3 py-2 w-12 text-center">GP</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                               {results.map(res => (
                                 <tr key={res.id} className="hover:bg-slate-50">
-                                  <td className="px-4 py-2 font-bold text-slate-700">{res.cid}</td>
-                                  <td className="px-4 py-2 uppercase font-medium">{res.course_title || 'N/A'}</td>
-                                  <td className="px-4 py-2 text-center font-bold">{res.credits}</td>
-                                  <td className="px-4 py-2 text-center font-black text-blue-700">{res.grade}</td>
-                                  <td className="px-4 py-2 text-center font-mono">{res.gp.toFixed(1)}</td>
+                                  <td className="px-3 py-1.5 font-bold text-slate-700 text-[11px]">{res.cid}</td>
+                                  <td className="px-3 py-1.5 uppercase font-medium text-[11px]">{res.course_title || 'N/A'}</td>
+                                  <td className="px-3 py-1.5 text-center text-[11px]">{(res as any).class_score?.toFixed(2) || '-'}</td>
+                                  <td className="px-3 py-1.5 text-center text-[11px]">{(res as any).exam_score?.toFixed(2) || '-'}</td>
+                                  <td className="px-3 py-1.5 text-center font-bold text-[11px]">{res.credits}</td>
+                                  <td className="px-3 py-1.5 text-center font-black text-blue-700 text-[11px]">{res.grade}</td>
+                                  <td className="px-3 py-1.5 text-center font-mono text-[11px]">{res.gp?.toFixed ? res.gp.toFixed(1) : res.gp}</td>
                                 </tr>
                               ))}
                             </tbody>

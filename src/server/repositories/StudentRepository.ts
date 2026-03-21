@@ -15,6 +15,7 @@ export interface Student {
   admission_year: string;
   current_level: number;
   status: string;
+  photo: string;
   user_uid: string;
   created_by: string;
   created_at: string;
@@ -46,17 +47,17 @@ export class StudentRepository {
 
   static createStudent(student: Partial<Student>): void {
     db.prepare(`
-      INSERT INTO students (iid, index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, status, user_uid, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(student.iid, student.index_number, student.surname, student.other_names, student.gender, student.dob, student.email, student.phone, student.progid, student.admission_year, student.current_level, student.status, student.user_uid, student.created_by);
+      INSERT INTO students (iid, index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, status, photo, user_uid, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(student.iid, student.index_number, student.surname, student.other_names, student.gender, student.dob, student.email, student.phone, student.progid, student.admission_year, student.current_level, student.status, student.photo || null, student.user_uid, student.created_by);
   }
 
   static updateStudent(iid: string, student: Partial<Student>): void {
     db.prepare(`
       UPDATE students 
-      SET surname = ?, other_names = ?, gender = ?, dob = ?, email = ?, phone = ?, progid = ?, current_level = ?, status = ?
+      SET surname = ?, other_names = ?, gender = ?, dob = ?, email = ?, phone = ?, progid = ?, current_level = ?, status = ?, photo = COALESCE(?, photo)
       WHERE iid = ?
-    `).run(student.surname, student.other_names, student.gender, student.dob, student.email, student.phone, student.progid, student.current_level, student.status, iid);
+    `).run(student.surname, student.other_names, student.gender, student.dob, student.email, student.phone, student.progid, student.current_level, student.status, student.photo || null, iid);
   }
 
   static deleteStudent(iid: string): void {
