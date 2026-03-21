@@ -136,7 +136,7 @@ router.post('/assessments', async (req, res) => {
     
     // Compute GPA for all affected students
     if (academicYear && semesterSid) {
-      for (const iid of uniqueIids) {
+      for (const iid of Array.from(uniqueIids)) {
         await AssessmentService.computeGPA(iid, academicYear, semesterSid);
       }
     }

@@ -53,7 +53,7 @@ nano .env
 | Variable      | Description                                        |
 | ------------- | -------------------------------------------------- |
 | `NODE_ENV`    | Set to `production`                                |
-| `PORT`        | `3005` (or your preferred port)                    |
+| `PORT`        | `3006` (or your preferred port)                    |
 | `JWT_SECRET`  | A long random string (32+ chars). Generate with: `openssl rand -base64 32` |
 | `DB_PATH`     | `/www/wwwroot/cthmis/sims.db`                      |
 | `APP_URL`     | Your domain, e.g. `https://sims.yourdomain.com`    |
@@ -88,14 +88,14 @@ pm2 status            # see all processes
 | Setting          | Value                        |
 | ---------------- | ---------------------------- |
 | Proxy Name       | `cthmis`                     |
-| Target URL       | `http://127.0.0.1:3005`     |
+| Target URL       | `http://127.0.0.1:3006`     |
 | Send Domain      | `$host`                      |
 
 Or manually add to the Nginx config:
 
 ```nginx
 location / {
-    proxy_pass http://127.0.0.1:3005;
+    proxy_pass http://127.0.0.1:3006;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
@@ -120,14 +120,14 @@ location / {
 
 ## 8. Firewall
 
-Ensure port `3005` is **NOT** exposed publicly (Nginx proxies it):
+Ensure port `3006` is **NOT** exposed publicly (Nginx proxies it):
 
 ```bash
 # aaPanel Security → Firewall — only allow 80, 443, 22
 ufw allow 80
 ufw allow 443
 ufw allow 22
-ufw deny 3005
+ufw deny 3006
 ufw enable
 ```
 

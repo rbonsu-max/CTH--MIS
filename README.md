@@ -28,7 +28,7 @@ npm run build
 Create a `.env` file in the root directory (copy from `.env.example`):
 ```env
 JWT_SECRET=your_very_secure_random_secret
-PORT=3000
+PORT=3006
 DATABASE_PATH=./data/database.sqlite
 NODE_ENV=production
 ```
@@ -38,12 +38,12 @@ In aaPanel's Node.js Manager, add a new project:
 - **Project Path**: `/www/wwwroot/your-site`
 - **Startup File**: `server.ts`
 - **Run Command**: `tsx server.ts` (or use the start script from package.json)
-- **Port**: `3000`
+- **Port**: `3006`
 
 ### 6. Reverse Proxy
 In aaPanel's Website Settings, go to Reverse Proxy and add a new proxy:
 - **Proxy Name**: backend
-- **Target URL**: `http://127.0.0.1:3000`
+- **Target URL**: `http://127.0.0.1:3006`
 
 ### 7. Permissions
 Ensure the `data` and `uploads` directories are writable by the `www` user.

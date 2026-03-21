@@ -46,7 +46,7 @@ import { authenticate, checkRole } from './src/server/middleware/auth';
 
 async function startServer() {
   const app = express();
-  const PORT = parseInt(process.env.PORT || '3005', 10);
+  const PORT = parseInt(process.env.PORT || '3006', 10);
   const isProd = process.env.NODE_ENV === 'production';
 
   // Trust proxy for express-rate-limit behind Nginx/aaPanel
