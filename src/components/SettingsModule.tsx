@@ -28,6 +28,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const [editingYear, setEditingYear] = useState<AcademicYear | null>(null);
   const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [userSearchInput, setUserSearchInput] = useState('');
+  const [userSearch, setUserSearch] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const [userTotal, setUserTotal] = useState(0);
+  const [userTotalPages, setUserTotalPages] = useState(1);
+  const userPageSize = 8;
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
@@ -55,20 +61,22 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     if (shouldLoadAdminData) {
       fetchData();
     }
-  }, [shouldLoadAdminData]);
+  }, [shouldLoadAdminData, userSearch, userPage]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [years, sems, allUsers, events] = await Promise.all([
+      const [years, sems, userResponse, events] = await Promise.all([
         api.getAcademicYears(),
         api.getSemesters(),
-        api.getUsers(),
+        api.getUsers({ q: userSearch, page: userPage, pageSize: userPageSize }),
         api.getCalendarEvents()
       ]);
       setAcademicYears(years);
       setSemesters(sems);
-      setUsers(allUsers);
+      setUsers(userResponse.data);
+      setUserTotal(userResponse.total);
+      setUserTotalPages(userResponse.totalPages);
       setCalendarEvents(events);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -159,6 +167,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
       success('User created successfully!');
       setNewUser({ fullname: '', username: '', password: '', role: 'Administrator' });
       setShowAddUserModal(false);
+      setUserPage(1);
       fetchData();
     } catch (error) {
       console.error('Failed to create user:', error);
@@ -190,6 +199,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     try {
       await api.deleteUser(uid);
       success('User deleted!');
+      if (users.length === 1 && userPage > 1) {
+        setUserPage(prev => prev - 1);
+      }
       fetchData();
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -400,6 +412,50 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
           </div>
         </div>
         <div className="p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <form
+              className="flex flex-col sm:flex-row gap-3 w-full lg:max-w-2xl"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setUserPage(1);
+                setUserSearch(userSearchInput.trim());
+              }}
+            >
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  className="input pl-10"
+                  placeholder="Search by full name, username, or role"
+                  value={userSearchInput}
+                  onChange={e => setUserSearchInput(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary gap-2 justify-center">
+                <Search size={16} />
+                Search
+              </button>
+              {(userSearch || userSearchInput) && (
+                <button
+                  type="button"
+                  className="btn btn-secondary justify-center"
+                  onClick={() => {
+                    setUserSearchInput('');
+                    setUserSearch('');
+                    setUserPage(1);
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+            </form>
+
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span className="font-semibold text-slate-700">{userTotal}</span>
+              <span>user{userTotal === 1 ? '' : 's'} found</span>
+            </div>
+          </div>
+
           <div className="overflow-x-auto" id="print-users">
             <table className="w-full text-left">
               <thead>
@@ -461,8 +517,37 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                     </td>
                   </tr>
                 ))}
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-6 py-16 text-center text-slate-400">
+                      No users matched your current search.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="text-sm text-slate-500">
+              Page <span className="font-semibold text-slate-700">{userPage}</span> of <span className="font-semibold text-slate-700">{userTotalPages}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="btn btn-secondary"
+                disabled={userPage <= 1}
+                onClick={() => setUserPage(prev => Math.max(1, prev - 1))}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-secondary"
+                disabled={userPage >= userTotalPages}
+                onClick={() => setUserPage(prev => Math.min(userTotalPages, prev + 1))}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>

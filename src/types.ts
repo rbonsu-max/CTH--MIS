@@ -104,6 +104,14 @@ export interface NotificationItem {
   read_at?: string | null;
 }
 
+export interface PaginatedUsers {
+  data: User[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface BoardsheetCache {
   id: number;
   index_no: string;

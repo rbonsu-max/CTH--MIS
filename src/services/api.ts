@@ -1,4 +1,4 @@
-import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest, NotificationItem } from '../types';
+import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest, NotificationItem, PaginatedUsers } from '../types';
 
 const API_URL = '/api';
 
@@ -420,8 +420,13 @@ export const api = {
   },
 
   // Users
-  getUsers: async (): Promise<User[]> => {
-    const res = await fetchWithAuth(`${API_URL}/users`);
+  getUsers: async (params?: { q?: string; page?: number; pageSize?: number }): Promise<PaginatedUsers> => {
+    const search = new URLSearchParams();
+    if (params?.q) search.append('q', params.q);
+    if (params?.page) search.append('page', String(params.page));
+    if (params?.pageSize) search.append('pageSize', String(params.pageSize));
+    const query = search.toString();
+    const res = await fetchWithAuth(`${API_URL}/users${query ? `?${query}` : ''}`);
     return res.json();
   },
   createUser: async (data: any): Promise<User> => {

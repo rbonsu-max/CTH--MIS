@@ -6,8 +6,46 @@ import bcrypt from 'bcryptjs';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const users = db.prepare('SELECT id, uid, fullname, username, role, status FROM users').all();
-  res.json(users);
+  const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
+  const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '10'), 10) || 10));
+  const offset = (page - 1) * pageSize;
+  const where = q ? 'WHERE fullname LIKE ? OR username LIKE ? OR role LIKE ?' : '';
+  const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`] : [];
+
+  const count = db.prepare(`
+    SELECT COUNT(*) as total
+    FROM users
+    ${where}
+  `).get(...params) as { total: number };
+
+  const users = db.prepare(`
+    SELECT id, uid, fullname, username, role, status
+    FROM users
+    ${where}
+    ORDER BY
+      CASE role
+        WHEN 'SuperAdmin' THEN 1
+        WHEN 'Administrator' THEN 2
+        WHEN 'Registry' THEN 3
+        WHEN 'Finance' THEN 4
+        WHEN 'Lecturer' THEN 5
+        WHEN 'Student' THEN 6
+        ELSE 7
+      END,
+      fullname ASC,
+      username ASC
+    LIMIT ? OFFSET ?
+  `).all(...params, pageSize, offset);
+
+  const total = count?.total || 0;
+  res.json({
+    data: users,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  });
 });
 
 router.post('/', async (req, res) => {
