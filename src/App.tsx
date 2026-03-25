@@ -26,6 +26,7 @@ import { LecturersModule } from './components/LecturersModule';
 import { SettingsModule } from './components/SettingsModule';
 import { AcademicRecordsModule } from './components/AcademicRecordsModule';
 import { StatisticsModule } from './components/StatisticsModule';
+import { StudentPortalModule } from './components/StudentPortalModule';
 import { Login } from './components/Login';
 import { api } from './services/api';
 
@@ -66,11 +67,38 @@ export default function App() {
     checkAuth();
   }, []);
 
+  // Idle Timer logic
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    const INACTIVITY_TIME = 3 * 60 * 1000; // 3 minutes
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      if (user) {
+        timeoutId = setTimeout(() => {
+          handleLogout();
+        }, INACTIVITY_TIME);
+      }
+    };
+
+    if (user) {
+      resetTimer();
+      const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+      events.forEach(event => document.addEventListener(event, resetTimer));
+
+      return () => {
+        clearTimeout(timeoutId);
+        events.forEach(event => document.removeEventListener(event, resetTimer));
+      };
+    }
+  }, [user]);
+
   const checkAuth = async () => {
     try {
       const currentUser = await api.me();
       setUser(currentUser);
       if (currentUser) {
+        if (currentUser.role === 'Student') setActiveModule('student_portal');
         fetchDashboardData();
       }
     } catch (error) {
@@ -100,22 +128,28 @@ export default function App() {
       const sems = Array.isArray(semsData) ? semsData : [];
       const events = Array.isArray(eventsData) ? eventsData : [];
 
+      const activeYear = years.find(y => y.is_current);
+      const activeSem = sems.find(s => s.is_current);
+      
+      const currentRegs = activeYear && activeSem 
+        ? registrations.filter(r => r.academic_year === activeYear.code && r.semester_sid === activeSem.sid)
+        : [];
+      
+      const registeredStudentCount = new Set(currentRegs.map(r => r.index_no)).size;
+      
       setStats({
         totalStudents: students.length,
         totalPrograms: programs.length,
         totalCourses: courses.length,
         registrationRate: students.length > 0 
-          ? `${Math.round((registrations.length / students.length) * 100)}%` 
+          ? `${Math.round((registeredStudentCount / students.length) * 100)}%` 
           : '0%'
       });
 
       setRecentRegistrations(registrations.slice(0, 5));
       setCalendarEvents(events.slice(0, 4));
       
-      const activeYear = years.find(y => y.is_current);
       if (activeYear) setCurrentYear(activeYear.code);
-      
-      const activeSem = sems.find(s => s.is_current);
       if (activeSem) setCurrentSemester(activeSem.name);
 
     } catch (error) {
@@ -161,10 +195,21 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login onLogin={(u) => { setUser(u); fetchDashboardData(); }} />;
+    return <Login onLogin={(u) => { 
+      setUser(u); 
+      if (u.role === 'Student') setActiveModule('student_portal');
+      fetchDashboardData(); 
+    }} />;
   }
 
-  const filteredNavItems = NAV_ITEMS.filter(item => item.roles.includes(user.role));
+  const filteredNavItems = NAV_ITEMS
+    .filter(item => item.roles.includes(user.role))
+    .map(item => ({
+      ...item,
+      subItems: item.subItems 
+        ? item.subItems.filter(sub => !sub.roles || sub.roles.includes(user.role))
+        : undefined
+    }));
 
   const renderDashboard = () => (
     <div className="space-y-8">
@@ -269,18 +314,19 @@ export default function App() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-slate-600">{reg.cid}</div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase">{reg.status}</div>
+                          <div className="text-sm text-slate-600">{reg.course_code}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase">{reg.course_name}</div>
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                            reg.status === 'Registered' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                            reg.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 
+                            reg.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
                           }`}>
                             {reg.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-xs text-slate-500">
-                          {reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A'}
+                          {reg.registration_date ? new Date(reg.registration_date).toLocaleDateString() : 'N/A'}
                         </td>
                       </tr>
                     ))
@@ -362,10 +408,6 @@ export default function App() {
             <FileSpreadsheet size={18} />
             Export
           </button>
-          <button className="btn btn-primary gap-2">
-            <Plus size={18} />
-            New {module?.label.replace(/s$/, '')}
-          </button>
         </div>
       </div>
     );
@@ -390,11 +432,14 @@ export default function App() {
 
     let content;
     switch (activeModule) {
+      case 'student_portal':
+        content = <StudentPortalModule activeSubItem={activeSubItem} />;
+        break;
       case 'students':
         content = <StudentsModule activeSubItem={activeSubItem} />;
         break;
       case 'programs':
-        content = <ProgramsModule activeSubItem={activeSubItem} />;
+        content = <ProgramsModule activeSubItem={activeSubItem} onSubItemChange={setActiveSubItem} />;
         break;
       case 'courses':
         content = <CoursesModule activeSubItem={activeSubItem} />;
@@ -403,10 +448,10 @@ export default function App() {
         content = <RegistrationModule activeSubItem={activeSubItem} />;
         break;
       case 'assessment':
-        content = <AssessmentModule activeSubItem={activeSubItem} />;
+        content = <AssessmentModule activeSubItem={activeSubItem} user={user} />;
         break;
       case 'lecturers':
-        content = <LecturersModule activeSubItem={activeSubItem} />;
+        content = <LecturersModule activeSubItem={activeSubItem} onSubItemChange={setActiveSubItem} />;
         break;
       case 'settings':
         content = <SettingsModule activeSubItem={activeSubItem} />;

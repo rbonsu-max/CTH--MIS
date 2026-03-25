@@ -36,11 +36,22 @@ export interface NavItem {
   label: string;
   icon: React.ReactNode;
   roles: UserRole[];
-  subItems?: { id: string; label: string }[];
+  subItems?: { id: string; label: string; roles?: UserRole[] }[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'Administrator', 'Lecturer', 'Student'] },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['SuperAdmin', 'Administrator', 'Lecturer'] },
+  { 
+    id: 'student_portal', 
+    label: 'My Portal', 
+    icon: <GraduationCap size={20} />,
+    roles: ['Student', 'SuperAdmin'],
+    subItems: [
+      { id: 'overview', label: 'Overview' },
+      { id: 'registration', label: 'Course Registration' },
+      { id: 'results', label: 'Academic Results' }
+    ]
+  },
   { 
     id: 'students', 
     label: 'Students', 
@@ -72,17 +83,17 @@ export const NAV_ITEMS: NavItem[] = [
     icon: <BookOpen size={20} />,
     roles: ['SuperAdmin', 'Administrator', 'Lecturer'],
     subItems: [
-      { id: 'setup_course', label: 'Setup Course' },
-      { id: 'mount_course', label: 'Mount Course' },
-      { id: 'view_courses', label: 'View Courses' },
-      { id: 'bulk_upload', label: 'Bulk Upload' }
+      { id: 'setup_course', label: 'Setup Course', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'mount_course', label: 'Mount Course', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'view_courses', label: 'View Courses', roles: ['SuperAdmin', 'Administrator', 'Lecturer'] },
+      { id: 'bulk_upload', label: 'Bulk Upload', roles: ['SuperAdmin', 'Administrator'] }
     ]
   },
   { 
     id: 'registration', 
     label: 'Registration', 
     icon: <BookMarked size={20} />,
-    roles: ['SuperAdmin', 'Administrator', 'Student'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'open_close', label: 'Open/Close Registration' },
       { id: 'register_student', label: 'Register Student' },
@@ -104,13 +115,14 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'academic_records', 
     label: 'Academic Records', 
     icon: <FileText size={20} />,
-    roles: ['SuperAdmin', 'Administrator', 'Student'],
+    roles: ['SuperAdmin', 'Administrator'],
     subItems: [
       { id: 'course_results', label: 'Course Results' },
       { id: 'composite_results', label: 'Composite Results' },
       { id: 'broadsheet', label: 'Broadsheet' },
       { id: 'statement_results', label: 'Statement of Results' },
-      { id: 'transcript', label: 'Transcript' }
+      { id: 'transcript', label: 'Transcript' },
+      { id: 'graduation_list', label: 'Graduation List' }
     ]
   },
   { 
@@ -125,7 +137,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { 
     id: 'lecturers', 
-    label: 'Lecturer', 
+    label: 'Lecturers', 
     icon: <UserCog size={20} />,
     roles: ['SuperAdmin', 'Administrator'],
     subItems: [
@@ -145,7 +157,11 @@ export const NAV_ITEMS: NavItem[] = [
       { id: 'semesters', label: 'Semesters' },
       { id: 'academic_calendar', label: 'Academic Calendar' },
       { id: 'grading_points', label: 'Grading Points' },
+      { id: 'departments', label: 'Departments' },
       { id: 'user_management', label: 'User Management' },
+      { id: 'assessment_control', label: 'Assessment Control' },
+      { id: 'access_requests', label: 'Access Requests' },
+      { id: 'system_settings', label: 'System Settings' },
       { id: 'bulk_upload', label: 'Bulk Upload' }
     ]
   }

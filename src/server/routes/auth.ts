@@ -3,10 +3,10 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../../../db';
+import { authenticate } from '../middleware/auth';
+import { JWT_SECRET, IS_PROD } from '../config';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'sims-secret-key';
-const isProd = process.env.NODE_ENV === 'production';
 
 router.post('/login', (req, res) => {
   const loginSchema = z.object({
@@ -20,9 +20,35 @@ router.post('/login', (req, res) => {
   }
 
   const { username, password } = validation.data;
-  const user = db.prepare('SELECT * FROM users WHERE username = ? AND status = ?').get(username, 'active') as any;
+  let user = db.prepare('SELECT * FROM users WHERE username = ? AND status = ?').get(username, 'active') as any;
+  
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    // Try student logins
+    const studentLogin = db.prepare(`
+      SELECT sl.iid, sl.password_hash, s.full_name as fullname, s.status, sl.requires_reset
+      FROM student_logins sl
+      JOIN students s ON s.iid = sl.iid
+      WHERE sl.username = ?
+    `).get(username) as any;
+
+    if (studentLogin && bcrypt.compareSync(password, studentLogin.password_hash)) {
+      if (studentLogin.status !== 'active') {
+        return res.status(403).json({ error: 'Student account is ' + studentLogin.status });
+      }
+      if (studentLogin.requires_reset === 1) {
+        return res.status(403).json({ error: 'REQUIRES_RESET' });
+      }
+      user = {
+        id: studentLogin.iid,
+        uid: studentLogin.iid,
+        fullname: studentLogin.fullname,
+        username: username,
+        role: 'Student',
+        status: studentLogin.status
+      };
+    } else {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
   }
 
   if (user.status === 'locked') {
@@ -37,9 +63,10 @@ router.post('/login', (req, res) => {
 
   res.cookie('token', token, {
     httpOnly: true,
-    secure: isProd,           // only require HTTPS in production
-    sameSite: isProd ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    secure: IS_PROD,
+    sameSite: IS_PROD ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/'
   });
 
   res.json({
@@ -56,15 +83,69 @@ router.post('/login', (req, res) => {
 router.post('/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: IS_PROD,
+    sameSite: IS_PROD ? 'none' : 'lax',
+    path: '/'
   });
   res.json({ success: true });
 });
 
-router.get('/me', (req: any, res) => {
-  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+router.get('/me', authenticate, (req: any, res) => {
   res.json(req.user);
+});
+
+router.post('/setup-password', async (req, res) => {
+  const { username, currentPassword, newPassword } = req.body;
+  if (!username || !currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  const studentLogin = db.prepare(`
+    SELECT sl.iid, sl.password_hash, s.full_name as fullname, s.status, sl.requires_reset
+    FROM student_logins sl
+    JOIN students s ON s.iid = sl.iid
+    WHERE sl.username = ?
+  `).get(username) as any;
+
+  if (!studentLogin || !bcrypt.compareSync(currentPassword, studentLogin.password_hash)) {
+    return res.status(401).json({ error: 'Invalid current credentials' });
+  }
+
+  if (studentLogin.status !== 'active') {
+    return res.status(403).json({ error: 'Student account is ' + studentLogin.status });
+  }
+
+  if (studentLogin.requires_reset !== 1) {
+    return res.status(400).json({ error: 'Password reset is not required for this account' });
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 10);
+  db.prepare('UPDATE student_logins SET password_hash = ?, requires_reset = 0 WHERE iid = ?')
+    .run(newHash, studentLogin.iid);
+
+  const token = jwt.sign(
+    { id: studentLogin.iid, uid: studentLogin.iid, role: 'Student', name: studentLogin.fullname, username: username },
+    JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+
+  res.json({
+    id: studentLogin.iid,
+    uid: studentLogin.iid,
+    name: studentLogin.fullname,
+    fullname: studentLogin.fullname,
+    username: username,
+    role: 'Student',
+    status: studentLogin.status,
+  });
 });
 
 export default router;

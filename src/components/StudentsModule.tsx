@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, Edit, Trash2, Filter, Download, Loader2, Key, X, CheckCircle, FileText, FileSpreadsheet, Camera } from 'lucide-react';
+import { UserPlus, Search, Edit, Trash2, Filter, Download, Loader2, Key, X, CheckCircle, FileText, FileSpreadsheet, Camera, Printer, Eye, User, Calendar, Mail, Phone, Shield } from 'lucide-react';
 import { Student, Program } from '../types';
 import { api } from '../services/api';
+import { printElement } from '../utils/print';
 import { BulkUploadModule } from './BulkUploadModule';
 import { TranscriptModal } from './TranscriptModal';
+import { useToast } from '../context/ToastContext';
 
 interface StudentsModuleProps {
   activeSubItem: string | null;
@@ -25,6 +27,11 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
   const [transcriptData, setTranscriptData] = useState<any>(null);
   const [transcriptTitle, setTranscriptTitle] = useState('');
   const [loadingTranscript, setLoadingTranscript] = useState(false);
+
+  // New Custom hooks and states for Edit / Toast
+  const { success, error: toastError } = useToast();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -83,7 +90,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toastError('Please select an image file');
       return;
     }
     try {
@@ -92,7 +99,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
       setPhotoBase64(resized);
     } catch (err) {
       console.error('Failed to process image:', err);
-      alert('Failed to process image');
+      toastError('Failed to process image');
     }
   };
 
@@ -135,13 +142,40 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
       });
       setPhotoPreview(null);
       setPhotoBase64(null);
-      alert('Student added successfully!');
+      success('Student added successfully!');
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save student:', error);
-      alert('Failed to save student');
+      toastError(error.message || 'Failed to save student');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudent) return;
+    setSubmitting(true);
+    try {
+      await api.updateStudent(selectedStudent.iid, { ...formData, photo: photoBase64 });
+      success('Student updated successfully!');
+      setShowEditModal(false);
+      fetchData();
+    } catch (err: any) {
+      toastError(err.message || 'Failed to update student');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (student: Student) => {
+    if (!window.confirm(`Are you sure you want to completely delete ${student.full_name}? This action cannot be undone and will delete all associated records.`)) return;
+    try {
+      await api.deleteStudent(student.iid);
+      success('Student deleted successfully!');
+      fetchData();
+    } catch (err: any) {
+      toastError(err.message || 'Failed to delete student');
     }
   };
 
@@ -169,11 +203,11 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       await api.createStudentLogin(selectedStudent.iid, loginData);
-      alert('Student login saved successfully!');
+      success('Student login saved successfully!');
       setShowLoginModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save student login:', error);
-      alert('Failed to save student login');
+      toastError(error.message || 'Failed to save student login');
     } finally {
       setSubmitting(false);
     }
@@ -186,9 +220,9 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
       const data = await api.getTranscript(student.iid);
       setTranscriptData(data);
       setShowTranscriptModal(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch transcript:', error);
-      alert('Failed to generate ' + title);
+      toastError('Failed to generate ' + title);
     } finally {
       setLoadingTranscript(false);
     }
@@ -404,9 +438,12 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
             <Filter size={18} />
             Filter
           </button>
-          <button className="btn btn-secondary gap-2 whitespace-nowrap flex-1 lg:flex-none">
-            <Download size={18} />
-            Export PDF
+          <button 
+            className="btn btn-secondary gap-2 whitespace-nowrap flex-1 lg:flex-none"
+            onClick={() => printElement('print-students', 'Student Directory')}
+          >
+            <Printer size={18} />
+            Print List
           </button>
         </div>
       </div>
@@ -418,7 +455,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
             <p className="text-slate-500">Loading students...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" id="print-students">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
@@ -460,32 +497,73 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1 md:gap-2">
+                      <div className="flex justify-end gap-2 flex-wrap max-w-[300px] ml-auto">
+                        <button 
+                          onClick={() => { setSelectedStudent(student); setShowViewModal(true); }}
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                          title="View Full Profile"
+                        >
+                          <Eye size={14} />
+                          <span className="text-[10px] font-bold uppercase">View</span>
+                        </button>
                         <button 
                           onClick={() => handleGenerateTranscript(student, 'Statement of Results')}
-                          className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
                           title="Statement of Results"
                           disabled={loadingTranscript}
                         >
-                          <FileText size={16} />
+                          <FileText size={14} />
+                          <span className="text-[10px] font-bold uppercase">SOR</span>
                         </button>
                         <button 
                           onClick={() => handleGenerateTranscript(student, 'Transcript')}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                           title="Full Transcript"
                           disabled={loadingTranscript}
                         >
-                          <FileSpreadsheet size={16} />
+                          <FileSpreadsheet size={14} />
+                          <span className="text-[10px] font-bold uppercase">Trans.</span>
                         </button>
                         <button 
                           onClick={() => handleManageLogin(student)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                           title="Manage Login"
                         >
-                          <Key size={16} />
+                          <Key size={14} />
+                          <span className="text-[10px] font-bold uppercase">Login</span>
                         </button>
-                        <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all hidden sm:block">
-                          <Edit size={16} />
+                        <button 
+                          onClick={() => {
+                            setSelectedStudent(student);
+                            setFormData({
+                              index_number: student.index_number,
+                              surname: student.surname,
+                              other_names: student.other_names,
+                              email: student.email || '',
+                              progid: student.progid || '',
+                              current_level: student.current_level || 100,
+                              gender: student.gender || 'Male',
+                              dob: student.dob || '',
+                              phone: student.phone || '',
+                              admission_year: student.admission_year || ''
+                            });
+                            setPhotoPreview(student.photo || null);
+                            setPhotoBase64(student.photo || null);
+                            setShowEditModal(true);
+                          }}
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                          title="Edit Profile"
+                        >
+                          <Edit size={14} />
+                          <span className="text-[10px] font-bold uppercase">Edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(student)}
+                          className="flex items-center gap-1.5 px-2 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                          title="Delete Student"
+                        >
+                          <Trash2 size={14} />
+                          <span className="text-[10px] font-bold uppercase">Del</span>
                         </button>
                       </div>
                     </td>
@@ -535,13 +613,12 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
               ) : (
                 <>
                   <div className="space-y-2">
-                    <label className="label">Username</label>
+                    <label className="label">Username (Index Number)</label>
                     <input 
                       type="text" 
-                      className="input" 
-                      value={loginData.username}
-                      onChange={e => setLoginData({...loginData, username: e.target.value})}
-                      required
+                      className="input bg-slate-100 text-slate-500 cursor-not-allowed" 
+                      value={selectedStudent?.index_number || ''}
+                      readOnly
                     />
                   </div>
                   <div className="space-y-2">
@@ -589,6 +666,237 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
         </div>
       )}
 
+      {showEditModal && selectedStudent && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div>
+                <h3 className="font-bold text-slate-900">Edit Student Biodata</h3>
+                <p className="text-xs text-slate-500">Update information for {selectedStudent.full_name}</p>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form className="p-6 space-y-8" onSubmit={handleEditSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="label">Index Number</label>
+                  <input type="text" className="input" required value={formData.index_number} onChange={e => setFormData({...formData, index_number: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Surname</label>
+                  <input type="text" className="input" required value={formData.surname} onChange={e => setFormData({...formData, surname: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Other Names</label>
+                  <input type="text" className="input" required value={formData.other_names} onChange={e => setFormData({...formData, other_names: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Email Address</label>
+                  <input type="email" className="input" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Gender</label>
+                  <select className="input" value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value as any})}>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Date of Birth</label>
+                  <input type="date" className="input" required value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Phone Number</label>
+                  <input type="tel" className="input" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Program</label>
+                  <select className="input" required value={formData.progid} onChange={e => setFormData({...formData, progid: e.target.value})}>
+                    <option value="">Select Program</option>
+                    {programs.map(p => <option key={p.id} value={p.progid}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Level</label>
+                  <select className="input" value={formData.current_level} onChange={e => setFormData({...formData, current_level: parseInt(e.target.value)})}>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="300">300</option>
+                    <option value="400">400</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Admission Year</label>
+                  <input type="text" className="input" value={formData.admission_year} onChange={e => setFormData({...formData, admission_year: e.target.value})} />
+                </div>
+              </div>
+              <div className="pt-2">
+                <label className="label mb-3">Passport Photo</label>
+                <div className="flex justify-start gap-4">
+                  {photoPreview ? (
+                    <div className="relative">
+                      <img src={photoPreview} alt="Student photo" className="w-[120px] h-[150px] object-cover rounded-xl border" />
+                      <button type="button" onClick={() => { setPhotoPreview(null); setPhotoBase64(null); }} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <input type="file" accept="image/*" onChange={handlePhotoSelect} />
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Edit size={18} />}
+                  {submitting ? 'Saving...' : 'Update Student'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showViewModal && selectedStudent && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white relative">
+              <button 
+                onClick={() => setShowViewModal(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="relative group">
+                  {selectedStudent.photo ? (
+                    <img 
+                      src={selectedStudent.photo} 
+                      alt={selectedStudent.full_name} 
+                      className="w-32 h-40 object-cover rounded-2xl border-4 border-white/30 shadow-2xl"
+                    />
+                  ) : (
+                    <div className="w-32 h-40 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border-4 border-white/20">
+                      <User size={64} className="text-white/40" />
+                    </div>
+                  )}
+                  <div className={`absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg ${
+                    selectedStudent.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-slate-500 text-white'
+                  }`}>
+                    {selectedStudent.status}
+                  </div>
+                </div>
+                
+                <div className="text-center md:text-left space-y-2">
+                  <h2 className="text-3xl font-black tracking-tight">{selectedStudent.full_name}</h2>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                    <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold border border-white/10 uppercase">{selectedStudent.index_number}</span>
+                    <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold border border-white/10 uppercase">Level {selectedStudent.current_level}</span>
+                  </div>
+                  <p className="text-blue-100 font-medium">{programs.find(p => p.progid === selectedStudent.progid)?.name || selectedStudent.progid}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 bg-white">
+              <div className="space-y-6">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <User size={14} className="text-blue-500" />
+                  Personal Information
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <User size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Gender</p>
+                      <p className="font-bold text-slate-700">{selectedStudent.gender || 'Not specified'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <Calendar size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date of Birth</p>
+                      <p className="font-bold text-slate-700">{selectedStudent.dob ? new Date(selectedStudent.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not specified'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Phone size={14} className="text-blue-500" />
+                  Contact Details
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <Mail size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Email Address</p>
+                      <p className="font-bold text-slate-700 truncate max-w-[180px]">{selectedStudent.email || 'N/A'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <Phone size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Phone Number</p>
+                      <p className="font-bold text-slate-700">{selectedStudent.phone || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="md:col-span-2 pt-4 flex gap-3">
+                <button 
+                  onClick={() => setShowViewModal(false)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all uppercase text-xs tracking-widest"
+                >
+                  Close Profile
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowViewModal(false);
+                    // Open Edit Modal logic (same as in table)
+                    setFormData({
+                      index_number: selectedStudent.index_number,
+                      surname: selectedStudent.surname,
+                      other_names: selectedStudent.other_names,
+                      email: selectedStudent.email || '',
+                      progid: selectedStudent.progid || '',
+                      current_level: selectedStudent.current_level || 100,
+                      gender: selectedStudent.gender || 'Male',
+                      dob: selectedStudent.dob || '',
+                      phone: selectedStudent.phone || '',
+                      admission_year: selectedStudent.admission_year || ''
+                    });
+                    setPhotoPreview(selectedStudent.photo || null);
+                    setPhotoBase64(selectedStudent.photo || null);
+                    setShowEditModal(true);
+                  }}
+                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2"
+                >
+                  <Edit size={16} />
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <TranscriptModal 
         isOpen={showTranscriptModal}
         onClose={() => setShowTranscriptModal(false)}
@@ -608,14 +916,14 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
   );
 
   const handleResetPassword = async (student: Student) => {
-    if (!resetPassword) return alert('Please enter a new password');
+    if (!resetPassword) return toastError('Please enter a new password');
     setResetLoading(true);
     try {
       await api.resetStudentPassword(student.iid, resetPassword);
-      alert(`Password reset for ${student.full_name}!`);
+      success(`Password reset for ${student.full_name}!`);
       setResetPassword('');
     } catch (e: any) {
-      alert(e.message || 'Failed to reset password');
+      toastError(e.message || 'Failed to reset password');
     } finally {
       setResetLoading(false);
     }

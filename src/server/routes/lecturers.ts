@@ -5,22 +5,22 @@ const router = express.Router();
 
 // GET all lecturers
 router.get('/', (req, res) => {
-  const lecturers = db.prepare('SELECT * FROM lecturers ORDER BY fullname ASC').all();
+  const lecturers = db.prepare('SELECT * FROM lecturers ORDER BY name ASC').all();
   res.json(lecturers);
 });
 
 // POST create lecturer
 router.post('/', (req, res) => {
-  const { lid, fullname, email, phone, department, designation } = req.body;
-  if (!lid || !fullname) {
-    return res.status(400).json({ error: 'lid and fullname are required' });
+  const { lid, title, name, email, tel, department, designation, user_uid } = req.body;
+  if (!lid || !name) {
+    return res.status(400).json({ error: 'lid and name are required' });
   }
   try {
     db.prepare(`
-      INSERT INTO lecturers (lid, fullname, email, phone, department, designation, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(lid, fullname, email || null, phone || null, department || null, designation || null, (req as any).user.uid);
-    res.status(201).json({ lid, fullname, email, phone, department, designation });
+      INSERT INTO lecturers (lid, user_uid, title, name, email, tel, department, designation, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(lid, user_uid || null, title || null, name, email || null, tel || null, department || null, designation || null, (req as any).user.uid);
+    res.status(201).json({ lid, user_uid, title, name, email, tel, department, designation });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
@@ -29,13 +29,13 @@ router.post('/', (req, res) => {
 // PUT update lecturer
 router.put('/:lid', (req, res) => {
   const { lid } = req.params;
-  const { fullname, email, phone, department, designation } = req.body;
+  const { title, name, email, tel, department, designation, user_uid } = req.body;
   try {
     db.prepare(`
       UPDATE lecturers
-      SET fullname = ?, email = ?, phone = ?, department = ?, designation = ?
+      SET title = ?, name = ?, email = ?, tel = ?, department = ?, designation = ?, user_uid = ?
       WHERE lid = ?
-    `).run(fullname, email || null, phone || null, department || null, designation || null, lid);
+    `).run(title || null, name, email || null, tel || null, department || null, designation || null, user_uid || null, lid);
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -46,7 +46,10 @@ router.put('/:lid', (req, res) => {
 router.delete('/:lid', (req, res) => {
   const { lid } = req.params;
   try {
-    db.prepare('DELETE FROM lecturers WHERE lid = ?').run(lid);
+    db.transaction(() => {
+      db.prepare('DELETE FROM lecturer_course_assignments WHERE lid = ?').run(lid);
+      db.prepare('DELETE FROM lecturers WHERE lid = ?').run(lid);
+    })();
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -57,10 +60,10 @@ router.delete('/:lid', (req, res) => {
 router.get('/assignments', (req, res) => {
   const { lid, academic_year, semester_sid } = req.query;
   let sql = `
-    SELECT lca.*, l.fullname as lecturer_name, c.title as course_title, c.credits
+    SELECT lca.*, l.name as lecturer_name, c.name as course_name, c.credit_hours
     FROM lecturer_course_assignments lca
     JOIN lecturers l ON lca.lid = l.lid
-    JOIN courses c ON lca.cid = c.cid
+    JOIN courses c ON lca.course_code = c.code
     WHERE 1=1
   `;
   const params: any[] = [];
@@ -74,17 +77,20 @@ router.get('/assignments', (req, res) => {
 
 // POST assign lecturer to course
 router.post('/assignments', (req, res) => {
-  const { lid, cid, academic_year, semester_sid } = req.body;
-  if (!lid || !cid || !academic_year || !semester_sid) {
-    return res.status(400).json({ error: 'lid, cid, academic_year, and semester_sid are required' });
+  const { lid, course_code, academic_year, semester_sid } = req.body;
+  if (!lid || !course_code || !academic_year || !semester_sid) {
+    return res.status(400).json({ error: 'lid, course_code, academic_year, and semester_sid are required' });
   }
   try {
+    const exists = db.prepare('SELECT 1 FROM lecturer_course_assignments WHERE lid = ? AND course_code = ? AND academic_year = ? AND semester_sid = ?').get(lid, course_code, academic_year, semester_sid);
+    if (exists) {
+      return res.status(409).json({ error: 'Lecturer is already assigned to this course for the selected academic year and semester' });
+    }
     db.prepare(`
-      INSERT INTO lecturer_course_assignments (lid, cid, academic_year, semester_sid, assigned_by)
+      INSERT INTO lecturer_course_assignments (lid, course_code, academic_year, semester_sid, assigned_by)
       VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(lid, cid, academic_year, semester_sid) DO NOTHING
-    `).run(lid, cid, academic_year, semester_sid, (req as any).user.uid);
-    res.status(201).json({ lid, cid, academic_year, semester_sid });
+    `).run(lid, course_code, academic_year, semester_sid, (req as any).user.uid);
+    res.status(201).json({ lid, course_code, academic_year, semester_sid });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

@@ -1,30 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, ClipboardCheck, FileSpreadsheet, Filter, CheckCircle, Loader2, BookOpen, Download } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, ClipboardCheck, FileSpreadsheet, Filter, CheckCircle, Loader2, BookOpen, Download, Lock, AlertTriangle, Send, X } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 import { Course, Registration, Assessment } from '../types';
 import { api } from '../services/api';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { printElement } from '../utils/print';
 
 interface AssessmentModuleProps {
   activeSubItem: string | null;
+  user?: any;
 }
 
-export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubItem }) => {
+export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubItem, user }) => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [assessments, setAssessments] = useState<Record<string, { class_score: number, exam_score: number }>>({});
+  const [assessments, setAssessments] = useState<Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }>>({});
   const [loading, setLoading] = useState(false);
   const [fetchingStudents, setFetchingStudents] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { success, error: toastError } = useToast();
 
   const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
   const [currentYear, setCurrentYear] = useState('');
   const [currentSemester, setCurrentSemester] = useState('');
+  
+  const [accessInfo, setAccessInfo] = useState<{ hasAccess: boolean; accessSource: string | null; window: any | null } | null>(null);
+  const [checkingAccess, setCheckingAccess] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestReason, setRequestReason] = useState('');
+  const [requestType, setRequestType] = useState<'upload' | 'edit'>('upload');
+  const [requestStudentId, setRequestStudentId] = useState('');
 
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    if (selectedCourseId && currentYear && currentSemester) {
+      checkAccess();
+    }
+  }, [selectedCourseId, currentYear, currentSemester]);
+
+  const checkAccess = async () => {
+    if (user?.role === 'SuperAdmin') {
+      setAccessInfo({ hasAccess: true, accessSource: 'SuperAdmin', window: null });
+      return;
+    }
+    setCheckingAccess(true);
+    try {
+      const info = await api.checkAssessmentAccess({
+        academic_year: currentYear,
+        semester_id: currentSemester,
+        course_code: selectedCourseId
+      });
+      setAccessInfo(info);
+    } catch (error) {
+      console.error('Failed to check access:', error);
+    } finally {
+      setCheckingAccess(false);
+    }
+  };
+
+  const handleCreateRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.createAssessmentRequest({
+        course_code: selectedCourseId,
+        academic_year: currentYear,
+        semester_id: currentSemester,
+        request_type: requestType,
+        index_no: requestStudentId || undefined,
+        reason: requestReason
+      });
+      success('Access request submitted to SuperAdmin!');
+      setShowRequestModal(false);
+      setRequestReason('');
+      setRequestStudentId('');
+    } catch (error: any) {
+      toastError(error.message || 'Failed to submit request');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -58,15 +120,18 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
         api.getAssessments(selectedCourseId, currentYear, currentSemester)
       ]);
       
-      const courseRegs = regData.filter(r => r.cid === selectedCourseId && r.academic_year === currentYear && r.semester_sid === currentSemester);
+      const courseRegs = regData.filter(r => r.course_code === selectedCourseId && r.academic_year === currentYear && r.semester_sid === currentSemester);
       setRegistrations(courseRegs);
       
       // Initialize assessments state with existing data if available
-      const initialAssessments: Record<string, { class_score: number, exam_score: number }> = {};
+      const initialAssessments: Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }> = {};
       courseRegs.forEach(reg => {
-        const existing = assessData.find((a: any) => a.iid === reg.iid);
-        initialAssessments[reg.iid] = { 
-          class_score: existing ? existing.class_score : 0, 
+        const existing = assessData.find((a: any) => a.index_no === reg.index_no);
+        initialAssessments[reg.index_no] = { 
+          a1: existing ? existing.a1 : 0, 
+          a2: existing ? existing.a2 : 0, 
+          a3: existing ? existing.a3 : 0, 
+          a4: existing ? existing.a4 : 0, 
           exam_score: existing ? existing.exam_score : 0 
         };
       });
@@ -78,15 +143,15 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     }
   };
 
-  const handleScoreChange = (iid: string, type: 'class_score' | 'exam_score', value: string) => {
+  const handleScoreChange = (index_no: string, type: 'a1' | 'a2' | 'a3' | 'a4' | 'exam_score', value: string) => {
     const numValue = parseInt(value) || 0;
-    const max = type === 'class_score' ? 30 : 70;
+    const max = type === 'exam_score' ? 60 : 10;
     const clampedValue = Math.min(Math.max(0, numValue), max);
     
     setAssessments(prev => ({
       ...prev,
-      [iid]: {
-        ...prev[iid],
+      [index_no]: {
+        ...prev[index_no],
         [type]: clampedValue
       }
     }));
@@ -105,30 +170,38 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
 
   const handleSaveAll = async () => {
     if (registrations.length === 0 || !currentYear || !currentSemester) return;
+    if (accessInfo && !accessInfo.hasAccess) {
+      toastError('You do not have access to save results at this time.');
+      return;
+    }
     setSubmitting(true);
     try {
       await Promise.all(registrations.map(reg => {
-        const scores = assessments[reg.iid];
-        const total = scores.class_score + scores.exam_score;
+        const scores = assessments[reg.index_no];
+        const total_ca = scores.a1 + scores.a2 + scores.a3 + scores.a4;
+        const total = total_ca + scores.exam_score;
         const { grade, point } = calculateGrade(total);
         
         return api.createAssessment({
-          iid: reg.iid,
-          cid: reg.cid,
+          index_no: reg.index_no,
+          course_code: reg.course_code,
           academic_year: currentYear,
-          semester_sid: currentSemester,
-          class_score: scores.class_score,
+          semester_id: currentSemester,
+          a1: scores.a1,
+          a2: scores.a2,
+          a3: scores.a3,
+          a4: scores.a4,
           exam_score: scores.exam_score,
           total_score: total,
           grade,
-          gp: point
+          grade_point: point
         });
       }));
       
-      alert('Assessments saved successfully!');
+      success('Assessments saved successfully!');
     } catch (error) {
       console.error('Failed to save assessments:', error);
-      alert('Failed to save assessments');
+      toastError('Failed to save assessments');
     } finally {
       setSubmitting(false);
     }
@@ -137,44 +210,71 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedCourseId || !currentYear || !currentSemester) return;
+    if (accessInfo && !accessInfo.hasAccess) {
+      toastError('You do not have access to upload results at this time.');
+      return;
+    }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        const importData = results.data.map((row: any) => ({
-          iid: row.iid || row.index_number,
-          cid: selectedCourseId,
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        setSubmitting(true);
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        const importData = data.map((row: any) => ({
+          index_no: row.index_no || row.index_number || row.iid || row['Index Number'],
+          course_code: selectedCourseId,
           academic_year: currentYear,
-          semester_sid: currentSemester,
-          class_score: parseFloat(row.class_score) || 0,
-          exam_score: parseFloat(row.exam_score) || 0
+          semester_id: currentSemester,
+          a1: parseFloat(row.a1 || row['CA1'] || 0),
+          a2: parseFloat(row.a2 || row['CA2'] || 0),
+          a3: parseFloat(row.a3 || row['CA3'] || 0),
+          a4: parseFloat(row.a4 || row['CA4'] || 0),
+          exam_score: parseFloat(row.exam_score || row['Exam Score'] || 0)
         }));
 
-        try {
-          setSubmitting(true);
-          await api.bulkUploadAssessments(importData);
-          alert('Assessments imported successfully!');
-          handleLoadStudents(); // Refresh list
-        } catch (error) {
-          console.error('Failed to import assessments:', error);
-          alert('Failed to import assessments');
-        } finally {
-          setSubmitting(false);
-        }
+        await api.bulkUploadAssessments(importData);
+        success('Assessments imported successfully!');
+        handleLoadStudents(); // Refresh list
+      } catch (error) {
+        console.error('Failed to import assessments:', error);
+        toastError('Failed to import assessments. Ensure the file format is correct.');
+      } finally {
+        setSubmitting(false);
       }
-    });
+    };
+    reader.readAsBinaryString(file);
   };
 
   const downloadTemplate = () => {
-    const headers = ['iid', 'class_score', 'exam_score'];
-    const csv = Papa.unparse([headers]);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `assessment_template_${selectedCourseId}.csv`);
-    link.click();
+    const data = [
+      { 'Index Number': '', 'CA1': '', 'CA2': '', 'CA3': '', 'CA4': '', 'Exam Score': '' }
+    ];
+    
+    // If we have registrations, pre-populate them
+    const templateData = registrations.length > 0 
+      ? registrations.map(r => ({
+          'Index Number': r.index_no,
+          'Student Name': r.full_name,
+          'CA1': '',
+          'CA2': '',
+          'CA3': '',
+          'CA4': '',
+          'Exam Score': ''
+        }))
+      : data;
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Assessment Template');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `assessment_template_${selectedCourseId}.xlsx`);
   };
 
   const renderByCourse = () => (
@@ -194,15 +294,15 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
               <Download size={16} />
               Template
             </button>
-            <label className={`bg-slate-800 hover:bg-slate-700 text-white rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2 transition-colors border border-slate-700 cursor-pointer ${(!selectedCourseId || !currentYear || !currentSemester) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`bg-slate-800 hover:bg-slate-700 text-white rounded-lg px-4 py-2 text-sm flex items-center justify-center gap-2 transition-colors border border-slate-700 cursor-pointer ${(!selectedCourseId || !currentYear || !currentSemester || (accessInfo && !accessInfo.hasAccess)) ? 'opacity-50 cursor-not-allowed' : ''}`}>
               <FileSpreadsheet size={16} />
-              Import CSV
+              Import Excel/CSV
               <input 
                 type="file" 
-                accept=".csv" 
+                accept=".xlsx,.xls,.csv" 
                 className="hidden" 
                 onChange={handleImport}
-                disabled={!selectedCourseId || !currentYear || !currentSemester}
+                disabled={!selectedCourseId || !currentYear || !currentSemester || (accessInfo && !accessInfo.hasAccess)}
               />
             </label>
             <select 
@@ -228,7 +328,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             >
               <option value="">Select Course</option>
               {courses.map(c => (
-                <option key={c.id} value={c.cid}>{c.cid} - {c.title}</option>
+                <option key={c.id} value={c.code}>{c.code} - {c.name}</option>
               ))}
             </select>
             <button 
@@ -240,6 +340,42 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             </button>
           </div>
         </div>
+
+        {selectedCourseId && accessInfo && !accessInfo.hasAccess && (
+          <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-500 text-white rounded-lg shadow-lg shadow-orange-500/20">
+                <Lock size={18} />
+              </div>
+              <div>
+                <div className="text-sm font-bold text-orange-200">Upload Access Restricted</div>
+                <p className="text-xs text-orange-200/70">The assessment window is closed or you don't have permission to edit existing results.</p>
+              </div>
+            </div>
+            <button 
+              className="btn py-1.5 px-4 bg-orange-500 hover:bg-orange-600 text-white border-none text-xs font-bold gap-2 shadow-lg shadow-orange-500/20"
+              onClick={() => {
+                setRequestType('upload');
+                setShowRequestModal(true);
+              }}
+            >
+              <Send size={14} />
+              Request Access
+            </button>
+          </div>
+        )}
+
+        {selectedCourseId && accessInfo?.hasAccess && accessInfo.accessSource === 'Request' && (
+          <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+            <div className="p-2 bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-500/20">
+              <CheckCircle size={18} />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-emerald-200">Temporary Access Granted</div>
+              <p className="text-xs text-emerald-200/70">You have been granted access to upload/edit results for this course.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {registrations.length > 0 && (
@@ -251,68 +387,75 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
               </div>
               <div className="min-w-0">
                 <div className="text-sm font-bold text-slate-900 truncate">
-                  {courses.find(c => c.cid === selectedCourseId)?.cid} - {courses.find(c => c.cid === selectedCourseId)?.title}
+                  {courses.find(c => c.code === selectedCourseId)?.code} - {courses.find(c => c.code === selectedCourseId)?.name}
                 </div>
                 <div className="text-xs text-slate-400">{registrations.length} Students Registered</div>
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <button className="btn btn-secondary py-1.5 px-3 text-xs gap-2 flex-1 sm:flex-none justify-center">
-                <FileSpreadsheet size={14} />
-                Import Excel
+              <button 
+                className="btn btn-secondary py-1.5 px-3 text-xs gap-2 flex-1 sm:flex-none justify-center"
+                onClick={() => printElement('print-assessment', `Assessment Sheet - ${selectedCourseId}`)}
+              >
+                🖨️ Print Sheet
               </button>
               <button 
                 className="btn btn-primary py-1.5 px-3 text-xs gap-2 flex-1 sm:flex-none justify-center"
                 onClick={handleSaveAll}
-                disabled={submitting}
+                disabled={submitting || (accessInfo && !accessInfo.hasAccess)}
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                 {submitting ? 'Saving...' : 'Save All'}
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" id="print-assessment">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-100">
                   <th className="px-6 py-4 font-semibold">Student ID</th>
                   <th className="px-6 py-4 font-semibold">Student Name</th>
-                  <th className="px-6 py-4 font-semibold text-center w-24 sm:w-32">Mid-Sem</th>
-                  <th className="px-6 py-4 font-semibold text-center w-24 sm:w-32">Exam</th>
-                  <th className="px-6 py-4 font-semibold text-center w-20 sm:w-24">Total</th>
-                  <th className="px-6 py-4 font-semibold text-center w-20 sm:w-24 hidden sm:table-cell">Grade</th>
+                  <th className="px-2 py-4 font-semibold text-center w-16">A1</th>
+                  <th className="px-2 py-4 font-semibold text-center w-16">A2</th>
+                  <th className="px-2 py-4 font-semibold text-center w-16">A3</th>
+                  <th className="px-2 py-4 font-semibold text-center w-16">A4</th>
+                  <th className="px-4 py-4 font-semibold text-center w-24">Exam</th>
+                  <th className="px-4 py-4 font-semibold text-center w-20">Total</th>
+                  <th className="px-4 py-4 font-semibold text-center w-20">GP</th>
+                  <th className="px-4 py-4 font-semibold text-center w-20 hidden sm:table-cell">Grade</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {registrations.map((reg) => {
-                  const scores = assessments[reg.iid] || { class_score: 0, exam_score: 0 };
-                  const total = scores.class_score + scores.exam_score;
-                  const { grade, color } = calculateGrade(total);
+                  const scores = assessments[reg.index_no] || { a1: 0, a2: 0, a3: 0, a4: 0, exam_score: 0 };
+                  const total_ca = scores.a1 + scores.a2 + scores.a3 + scores.a4;
+                  const total = total_ca + scores.exam_score;
+                  const { grade, color, point } = calculateGrade(total);
                   
                   return (
                     <tr key={reg.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-mono text-slate-600">{reg.iid}</td>
+                      <td className="px-6 py-4 text-sm font-mono text-slate-600">{reg.index_no}</td>
                       <td className="px-6 py-4 text-sm font-medium text-slate-900">{reg.full_name || 'Loading...'}</td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="number" 
-                          className="input text-center py-1 px-1 h-8" 
-                          value={scores.class_score} 
-                          onChange={e => handleScoreChange(reg.iid, 'class_score', e.target.value)}
-                          max={30} 
-                        />
+                      <td className="px-2 py-4">
+                        <input type="number" className="input text-center py-1 px-1 h-8" value={scores.a1} onChange={e => handleScoreChange(reg.index_no, 'a1', e.target.value)} max={10} disabled={accessInfo && !accessInfo.hasAccess} />
                       </td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="number" 
-                          className="input text-center py-1 px-1 h-8" 
-                          value={scores.exam_score} 
-                          onChange={e => handleScoreChange(reg.iid, 'exam_score', e.target.value)}
-                          max={70} 
-                        />
+                      <td className="px-2 py-4">
+                        <input type="number" className="input text-center py-1 px-1 h-8" value={scores.a2} onChange={e => handleScoreChange(reg.index_no, 'a2', e.target.value)} max={10} disabled={accessInfo && !accessInfo.hasAccess} />
                       </td>
-                      <td className="px-6 py-4 text-center font-bold text-slate-900">
+                      <td className="px-2 py-4">
+                        <input type="number" className="input text-center py-1 px-1 h-8" value={scores.a3} onChange={e => handleScoreChange(reg.index_no, 'a3', e.target.value)} max={10} disabled={accessInfo && !accessInfo.hasAccess} />
+                      </td>
+                      <td className="px-2 py-4">
+                        <input type="number" className="input text-center py-1 px-1 h-8" value={scores.a4} onChange={e => handleScoreChange(reg.index_no, 'a4', e.target.value)} max={10} disabled={accessInfo && !accessInfo.hasAccess} />
+                      </td>
+                      <td className="px-4 py-4">
+                        <input type="number" className="input text-center py-1 px-1 h-8" value={scores.exam_score} onChange={e => handleScoreChange(reg.index_no, 'exam_score', e.target.value)} max={60} disabled={accessInfo && !accessInfo.hasAccess} />
+                      </td>
+                      <td className="px-4 py-4 text-center font-bold text-slate-900">
                         {total}
+                      </td>
+                      <td className="px-4 py-4 text-center font-mono text-sm text-blue-600">
+                        {point.toFixed(1)}
                         <div className="sm:hidden mt-1">
                           <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase ${color}`}>
                             {grade}
@@ -335,7 +478,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             <button 
               className="btn btn-primary px-8 w-full sm:w-auto"
               onClick={handleSaveAll}
-              disabled={submitting}
+              disabled={submitting || (accessInfo && !accessInfo.hasAccess)}
             >
               {submitting ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
               {submitting ? 'Saving...' : 'Save & Submit Results'}
@@ -350,7 +493,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   const [indSearch, setIndSearch] = useState('');
   const [indStudent, setIndStudent] = useState<any>(null);
   const [indAssessments, setIndAssessments] = useState<any[]>([]);
-  const [indScores, setIndScores] = useState<Record<string, { class_score: number, exam_score: number }>>({});
+  const [indScores, setIndScores] = useState<Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }>>({});
   const [indSaving, setIndSaving] = useState(false);
   const [allStudents, setAllStudents] = useState<any[]>([]);
 
@@ -364,16 +507,16 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     const student = allStudents.find((s: any) =>
       s.index_number === indSearch || (s.full_name || '').toLowerCase().includes(indSearch.toLowerCase())
     );
-    if (!student) return alert('Student not found');
+    if (!student) return toastError('Student not found');
     setIndStudent(student);
     try {
-      const regs = await api.getRegistrations(student.iid, currentYear, currentSemester);
-      const existing = await api.getAssessmentsByStudent(student.iid, currentYear, currentSemester);
+      const regs = await api.getRegistrations(student.index_no || student.iid, currentYear, currentSemester);
+      const existing = await api.getAssessmentsByStudent(student.index_no || student.iid, currentYear, currentSemester);
       setIndAssessments(regs);
-      const scores: Record<string, { class_score: number, exam_score: number }> = {};
+      const scores: Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }> = {};
       regs.forEach((r: any) => {
-        const ex = existing.find((a: any) => a.cid === r.cid);
-        scores[r.cid] = { class_score: ex?.class_score || 0, exam_score: ex?.exam_score || 0 };
+        const ex = existing.find((a: any) => a.course_code === r.course_code);
+        scores[r.course_code] = { a1: ex?.a1||0, a2: ex?.a2||0, a3: ex?.a3||0, a4: ex?.a4||0, exam_score: ex?.exam_score || 0 };
       });
       setIndScores(scores);
     } catch (e) { console.error(e); }
@@ -383,28 +526,17 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     if (!indStudent || !currentYear || !currentSemester) return;
     setIndSaving(true);
     try {
-      await Promise.all(Object.entries(indScores).map(([cid, scores]: [string, { class_score: number; exam_score: number }]) => {
-        const total = scores.class_score + scores.exam_score;
+      await Promise.all(Object.entries(indScores).map(([course_code, scores]: [string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }]) => {
+        const total = scores.a1 + scores.a2 + scores.a3 + scores.a4 + scores.exam_score;
         const { grade, point } = calculateGrade(total);
         return api.createAssessment({
-          iid: indStudent.iid, cid, academic_year: currentYear, semester_sid: currentSemester,
-          class_score: scores.class_score, exam_score: scores.exam_score, total_score: total, grade, gp: point
+          index_no: indStudent.index_no || indStudent.iid, course_code, academic_year: currentYear, semester_id: currentSemester,
+          a1: scores.a1, a2: scores.a2, a3: scores.a3, a4: scores.a4, exam_score: scores.exam_score, total_score: total, grade, grade_point: point
         });
       }));
-      alert('Scores saved!');
-    } catch (e) { alert('Failed'); }
+      success('Scores saved!');
+    } catch (e) { toastError('Failed'); }
     finally { setIndSaving(false); }
-  };
-
-  const handleDownloadTemplate = () => {
-    const csv = 'iid,class_score,exam_score\n';
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `assessment_template_${selectedCourseId || 'course'}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const renderByIndividual = () => (
@@ -443,21 +575,27 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             <table className="w-full text-left">
               <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <th className="px-6 py-3">Course</th>
-                <th className="px-4 py-3 w-28">CA (0-40)</th>
-                <th className="px-4 py-3 w-28">Exam (0-60)</th>
+                <th className="px-2 py-3 w-16">A1</th>
+                <th className="px-2 py-3 w-16">A2</th>
+                <th className="px-2 py-3 w-16">A3</th>
+                <th className="px-2 py-3 w-16">A4</th>
+                <th className="px-4 py-3 w-24">Exam</th>
                 <th className="px-4 py-3">Total</th>
                 <th className="px-4 py-3">Grade</th>
               </tr></thead>
               <tbody className="divide-y divide-slate-100">
                 {indAssessments.length > 0 ? indAssessments.map(r => {
-                  const scores = indScores[r.cid] || { class_score: 0, exam_score: 0 };
-                  const total = scores.class_score + scores.exam_score;
+                  const scores = indScores[r.course_code] || { a1: 0, a2: 0, a3: 0, a4: 0, exam_score: 0 };
+                  const total = scores.a1 + scores.a2 + scores.a3 + scores.a4 + scores.exam_score;
                   const { grade, color } = calculateGrade(total);
                   return (
-                    <tr key={r.cid}>
-                      <td className="px-6 py-3"><div className="text-sm font-bold">{r.cid}</div><div className="text-xs text-slate-500">{r.course_title}</div></td>
-                      <td className="px-4 py-3"><input type="number" className="input w-20 text-center" min="0" max="40" value={scores.class_score} onChange={e => setIndScores(prev => ({ ...prev, [r.cid]: { ...prev[r.cid], class_score: Math.min(40, parseInt(e.target.value) || 0) } }))} /></td>
-                      <td className="px-4 py-3"><input type="number" className="input w-20 text-center" min="0" max="60" value={scores.exam_score} onChange={e => setIndScores(prev => ({ ...prev, [r.cid]: { ...prev[r.cid], exam_score: Math.min(60, parseInt(e.target.value) || 0) } }))} /></td>
+                    <tr key={r.course_code}>
+                      <td className="px-6 py-3"><div className="text-sm font-bold">{r.course_code}</div><div className="text-xs text-slate-500">{r.course_name}</div></td>
+                      <td className="px-2 py-3"><input type="number" className="input text-center p-1 font-mono h-8" min="0" max="10" value={scores.a1} onChange={e => setIndScores(prev => ({ ...prev, [r.course_code]: { ...prev[r.course_code], a1: Math.min(10, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-2 py-3"><input type="number" className="input text-center p-1 font-mono h-8" min="0" max="10" value={scores.a2} onChange={e => setIndScores(prev => ({ ...prev, [r.course_code]: { ...prev[r.course_code], a2: Math.min(10, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-2 py-3"><input type="number" className="input text-center p-1 font-mono h-8" min="0" max="10" value={scores.a3} onChange={e => setIndScores(prev => ({ ...prev, [r.course_code]: { ...prev[r.course_code], a3: Math.min(10, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-2 py-3"><input type="number" className="input text-center p-1 font-mono h-8" min="0" max="10" value={scores.a4} onChange={e => setIndScores(prev => ({ ...prev, [r.course_code]: { ...prev[r.course_code], a4: Math.min(10, parseInt(e.target.value) || 0) } }))} /></td>
+                      <td className="px-4 py-3"><input type="number" className="input text-center p-1 font-mono h-8" min="0" max="60" value={scores.exam_score} onChange={e => setIndScores(prev => ({ ...prev, [r.course_code]: { ...prev[r.course_code], exam_score: Math.min(60, parseInt(e.target.value) || 0) } }))} /></td>
                       <td className="px-4 py-3 text-sm font-bold">{total}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-bold ${color}`}>{grade}</span></td>
                     </tr>
@@ -479,16 +617,87 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     </div>
   );
 
-  switch (activeSubItem) {
-    case 'by_course':
-      return renderByCourse();
-    case 'by_individual':
-      return renderByIndividual();
-    default:
-      return (
-        <div className="card p-12 text-center">
-          <p className="text-slate-500">The {activeSubItem} feature is coming soon.</p>
+  return (
+    <div className="space-y-6">
+      {activeSubItem === 'by_individual' ? renderByIndividual() : renderByCourse()}
+
+      {showRequestModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-lg">Request Access</h2>
+              <button onClick={() => setShowRequestModal(false)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
+                <X size={20} />
+              </button>
+            </div>
+            <form className="p-6 space-y-4" onSubmit={handleCreateRequest}>
+              <div className="p-4 bg-blue-50 rounded-xl mb-4 border border-blue-100 flex gap-3">
+                <AlertTriangle size={20} className="text-blue-600 shrink-0" />
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  Provide a clear reason for why you need access to upload or edit results for <strong>{selectedCourseId}</strong> outside the regular assessment window.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="label">Request Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    className={`py-2 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                      requestType === 'upload' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                    }`}
+                    onClick={() => setRequestType('upload')}
+                  >
+                    Bulk Upload
+                  </button>
+                  <button
+                    type="button"
+                    className={`py-2 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                      requestType === 'edit' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                    }`}
+                    onClick={() => setRequestType('edit')}
+                  >
+                    Specific Student
+                  </button>
+                </div>
+              </div>
+
+              {requestType === 'edit' && (
+                <div className="space-y-1.5">
+                  <label className="label">Student Index Number</label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="e.g. SN-ICT-23-001"
+                    required
+                    value={requestStudentId}
+                    onChange={e => setRequestStudentId(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="label">Reason for Request</label>
+                <textarea
+                  className="input min-h-[100px] py-3"
+                  placeholder="Explain why you need access..."
+                  required
+                  value={requestReason}
+                  onChange={e => setRequestReason(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
+                <button type="button" className="btn btn-secondary px-6" onClick={() => setShowRequestModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary px-8 gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {submitting ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      );
-  }
+      )}
+    </div>
+  );
 };

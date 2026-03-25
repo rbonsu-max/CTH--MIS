@@ -53,7 +53,7 @@ nano .env
 | Variable      | Description                                        |
 | ------------- | -------------------------------------------------- |
 | `NODE_ENV`    | Set to `production`                                |
-| `PORT`        | `3006` (or your preferred port)                    |
+| `PORT`        | `3009` (or your preferred port)                    |
 | `JWT_SECRET`  | A long random string (32+ chars). Generate with: `openssl rand -base64 32` |
 | `DB_PATH`     | `/www/wwwroot/cthmis/sims.db`                      |
 | `APP_URL`     | Your domain, e.g. `https://sims.yourdomain.com`    |
@@ -88,14 +88,14 @@ pm2 status            # see all processes
 | Setting          | Value                        |
 | ---------------- | ---------------------------- |
 | Proxy Name       | `cthmis`                     |
-| Target URL       | `http://127.0.0.1:3006`     |
+| Target URL       | `http://127.0.0.1:3009`     |
 | Send Domain      | `$host`                      |
 
 Or manually add to the Nginx config:
 
 ```nginx
 location / {
-    proxy_pass http://127.0.0.1:3006;
+    proxy_pass http://127.0.0.1:3009;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
@@ -120,14 +120,14 @@ location / {
 
 ## 8. Firewall
 
-Ensure port `3006` is **NOT** exposed publicly (Nginx proxies it):
+Ensure port `3009` is **NOT** exposed publicly (Nginx proxies it):
 
 ```bash
 # aaPanel Security → Firewall — only allow 80, 443, 22
 ufw allow 80
 ufw allow 443
 ufw allow 22
-ufw deny 3006
+ufw deny 3009
 ufw enable
 ```
 
@@ -164,3 +164,24 @@ Set up a daily SQLite backup via aaPanel → Cron:
 | Database locked errors       | Ensure only one PM2 instance (fork mode, not cluster)               |
 | Cookies not working          | Ensure `NODE_ENV=production` and SSL is enabled                     |
 | Port already in use          | Change `PORT` in `.env` or stop the conflicting process             |
+
+---
+
+## 10. SQLite Admin Dashboard (`server-admin.js`)
+
+The application includes a detached, lightweight SQLite Admin Dashboard for direct database management. This is extremely useful for a production environment where you cannot easily download the `.db` file.
+
+### How to Run in Production (aaPanel / PM2)
+You can deploy it as a separate PM2 process.
+
+1. Navigate to your project directory.
+2. Run the admin server using PM2, passing the required environment variables:
+```bash
+ADMIN_USER=your_secure_user ADMIN_PASS=your_secure_password ADMIN_PORT=7070 DB_PATH=/www/wwwroot/cthmis/sims.db pm2 start server-admin.js --name "cthmis-admin"
+pm2 save
+```
+
+### Accessing the Dashboard
+- **URL**: `http://YOUR_VPS_IP:7070`
+- **Login**: When prompted by your browser, enter the `ADMIN_USER` and `ADMIN_PASS` you configured above.
+- **Firewall**: Ensure port `7070` is open in aaPanel's security settings so you can access it externally, or set up a secondary reverse proxy (e.g., `dbadmin.yourdomain.com -> 127.0.0.1:7070`).

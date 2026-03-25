@@ -35,34 +35,36 @@ router.post('/windows/:id/close', (req, res) => {
 
 // GET registrations — supports both param-based and summary (no-params) calls
 router.get('/', (req, res) => {
-  const { iid, academic_year, semester_sid } = req.query;
+  const { index_no, academic_year, semester_sid, course_code } = req.query;
+  const user = (req as any).user;
 
-  // If all params provided, return filtered registrations
-  if (iid && academic_year && semester_sid) {
-    const registrations = RegistrationRepository.getRegistrations(
-      iid as string,
-      academic_year as string,
-      semester_sid as string
+  if (user && user.role === 'Lecturer') {
+    const registrations = RegistrationRepository.getLecturerRegistrations(
+      user.uid,
+      index_no as string | undefined,
+      academic_year as string | undefined,
+      semester_sid as string | undefined,
+      course_code as string | undefined
     );
     return res.json(registrations);
   }
 
-  // Otherwise return recent registrations (for dashboard) using the view
-  const recentRegistrations = db.prepare(`
-    SELECT cr.*, s.surname, s.other_names, 
-           (s.surname || ', ' || s.other_names) as full_name,
-           c.title as course_title, c.credits
-    FROM course_registrations cr
-    JOIN students s ON cr.iid = s.iid
-    JOIN courses c ON cr.cid = c.cid
-    ORDER BY cr.registration_date DESC
-    LIMIT 20
-  `).all();
-  res.json(recentRegistrations);
+  const registrations = RegistrationRepository.getRegistrations(
+    index_no as string | undefined,
+    academic_year as string | undefined,
+    semester_sid as string | undefined
+  );
+  
+  // If no params, limit to 20 for dashboard
+  if (!index_no && !academic_year && !semester_sid) {
+    return res.json(registrations.slice(0, 20));
+  }
+  
+  res.json(registrations);
 });
 
 router.post('/', (req, res) => {
-  const { iid, cid, academic_year, semester_sid, status } = req.body;
+  const { index_no, course_code, academic_year, semester_sid, status } = req.body;
 
   // Check if window is open (students must have an open window)
   const activeWindow = RegistrationRepository.getActiveWindow(academic_year, semester_sid);
@@ -71,20 +73,20 @@ router.post('/', (req, res) => {
   }
 
   try {
-    RegistrationRepository.registerCourse({ iid, cid, academic_year, semester_sid, status: status || 'pending' });
-    res.status(201).json({ iid, cid, academic_year, semester_sid, status: status || 'pending' });
+    RegistrationRepository.registerCourse({ index_no, course_code, academic_year, semester_sid, status: status || 'pending' });
+    res.status(201).json({ index_no, course_code, academic_year, semester_sid, status: status || 'pending' });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
 router.delete('/', (req, res) => {
-  const { iid, cid, academic_year, semester_sid } = req.query;
-  if (!iid || !cid || !academic_year || !semester_sid) {
-    return res.status(400).json({ error: 'iid, cid, academic_year, semester_sid are required' });
+  const { index_no, course_code, academic_year, semester_sid } = req.query;
+  if (!index_no || !course_code || !academic_year || !semester_sid) {
+    return res.status(400).json({ error: 'index_no, course_code, academic_year, semester_sid are required' });
   }
   try {
-    RegistrationRepository.unregisterCourse(iid as string, cid as string, academic_year as string, semester_sid as string);
+    RegistrationRepository.unregisterCourse(index_no as string, course_code as string, academic_year as string, semester_sid as string);
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

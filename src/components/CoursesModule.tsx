@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, BookOpen, Filter, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, BookOpen, Filter, Loader2, Printer } from 'lucide-react';
 import { Course, Program, Department } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
+import { printElement } from '../utils/print';
+import { useToast } from '../context/ToastContext';
+import { X } from 'lucide-react';
 
 interface CoursesModuleProps {
   activeSubItem: string | null;
@@ -15,7 +18,11 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ title: '', cid: '', credits: 3, department: '' });
+  const [formData, setFormData] = useState({ name: '', code: '', credit_hours: 3, department: '' });
+
+  const { success, error: toastError } = useToast();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCourseObj, setSelectedCourseObj] = useState<Course | null>(null);
 
   // Mount course state
   const [mountProgid, setMountProgid] = useState('');
@@ -55,12 +62,21 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
   };
 
   const handleMount = async (cid: string) => {
-    if (!mountProgid || !mountSemester) return alert('Select program & semester');
+    if (!mountProgid || !mountSemester) return toastError('Select program & semester');
     try {
-      await api.mountCurriculum(mountProgid, { cid, level: mountLevel, semester_sid: mountSemester });
-      alert('Course mounted!');
+      await api.mountCurriculum(mountProgid, { course_code: cid, level: mountLevel, semester_sid: mountSemester });
+      success('Course mounted!');
       fetchCurriculum();
-    } catch (e: any) { alert(e.message || 'Failed'); }
+    } catch (e: any) { toastError(e.message || 'Failed'); }
+  };
+
+  const handleUnmountCourse = async (cid: string) => {
+    if (!window.confirm(`Unmount course ${cid}?`)) return;
+    try {
+      await api.unmountCurriculum(mountProgid, cid, mountLevel, mountSemester);
+      success('Course unmounted!');
+      fetchCurriculum();
+    } catch (e: any) { toastError(e.message || 'Failed to unmount course'); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,16 +84,38 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
     setSubmitting(true);
     try {
       await api.createCourse(formData);
-      setFormData({ title: '', cid: '', credits: 3, department: '' });
-      alert('Course created!');
+      setFormData({ name: '', code: '', credit_hours: 3, department: '' });
+      success('Course created!');
       fetchData();
-    } catch (e) { alert('Failed to save course'); }
+    } catch (e: any) { toastError(e.message || 'Failed to save course'); }
     finally { setSubmitting(false); }
   };
 
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseObj) return;
+    setSubmitting(true);
+    try {
+      await api.updateCourse(selectedCourseObj.code, formData);
+      success('Course updated successfully!');
+      setShowEditModal(false);
+      fetchData();
+    } catch (e: any) { toastError(e.message || 'Failed to update course'); }
+    finally { setSubmitting(false); }
+  };
+
+  const handleDelete = async (course: Course) => {
+    if (!window.confirm(`Are you sure you want to completely delete ${course.code} - ${course.name}? All associated curriculum placements, lecturer assignments, and active registrations will be deleted.`)) return;
+    try {
+      await api.deleteCourse(course.code);
+      success('Course deleted successfully!');
+      fetchData();
+    } catch (err: any) { toastError(err.message || 'Failed to delete course'); }
+  };
+
   const filteredCourses = courses.filter(c =>
-    c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.cid.toLowerCase().includes(searchTerm.toLowerCase())
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const renderMountCourse = () => (
@@ -113,12 +151,12 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
           <div className="p-4 border-b border-slate-100 bg-slate-50/50"><h3 className="font-bold">Available Courses</h3></div>
           <div className="p-4 max-h-[500px] overflow-y-auto space-y-2">
             {courses.map(c => (
-              <div key={c.cid} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 transition-all">
+              <div key={c.code} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-lg hover:border-blue-200 transition-all">
                 <div className="flex-1 min-w-0 mr-4">
-                  <div className="text-sm font-bold">{c.cid}</div>
-                  <div className="text-xs text-slate-500">{c.title} ({c.credits} CR)</div>
+                  <div className="text-sm font-bold">{c.code}</div>
+                  <div className="text-xs text-slate-500">{c.name} ({c.credit_hours} CR)</div>
                 </div>
-                <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" onClick={() => handleMount(c.cid)}><Plus size={18} /></button>
+                <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" onClick={() => handleMount(c.code)}><Plus size={18} /></button>
               </div>
             ))}
           </div>
@@ -129,10 +167,10 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
             {curriculum.length > 0 ? curriculum.map(item => (
               <div key={item.id} className="flex items-center justify-between p-3 bg-white border border-blue-100 rounded-lg">
                 <div className="flex-1 min-w-0 mr-4">
-                  <div className="text-sm font-bold">{item.cid || item.course_code}</div>
-                  <div className="text-xs text-slate-500">{item.course_title || item.title}</div>
+                  <div className="text-sm font-bold">{item.course_code}</div>
+                  <div className="text-xs text-slate-500">{item.name || item.course_name}</div>
                 </div>
-                <button className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
+                <button onClick={() => handleUnmountCourse(item.course_code)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
               </div>
             )) : <div className="p-12 text-center text-slate-400 italic">No courses mounted.</div>}
           </div>
@@ -151,15 +189,15 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="label">Course Title</label>
-            <input type="text" className="input" placeholder="e.g. Old Testament Survey" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+            <input type="text" className="input" placeholder="e.g. Old Testament Survey" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
           </div>
           <div className="space-y-2">
             <label className="label">Course Code</label>
-            <input type="text" className="input" placeholder="e.g. BT 101" required value={formData.cid} onChange={e => setFormData({...formData, cid: e.target.value})} />
+            <input type="text" className="input" placeholder="e.g. BT 101" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} />
           </div>
           <div className="space-y-2">
             <label className="label">Credit Hours</label>
-            <input type="number" className="input" required value={formData.credits} onChange={e => setFormData({...formData, credits: parseInt(e.target.value)})} />
+            <input type="number" className="input" required value={formData.credit_hours} onChange={e => setFormData({...formData, credit_hours: parseInt(e.target.value)})} />
           </div>
           <div className="space-y-2">
             <label className="label">Department</label>
@@ -170,7 +208,7 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
-          <button type="button" className="btn btn-secondary" onClick={() => setFormData({title:'',cid:'',credits:3,department:''})}>Cancel</button>
+          <button type="button" className="btn btn-secondary" onClick={() => setFormData({name:'',code:'',credit_hours:3,department:''})}>Cancel</button>
           <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
             {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
             {submitting ? 'Creating...' : 'Create Course'}
@@ -187,12 +225,19 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input type="text" placeholder="Search by title or code..." className="input pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
+        <button 
+          className="btn btn-secondary gap-2 whitespace-nowrap"
+          onClick={() => printElement('print-courses', 'Course Directory')}
+        >
+          <Printer size={18} />
+          Print List
+        </button>
       </div>
       <div className="card overflow-hidden">
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center"><Loader2 size={32} className="text-blue-600 animate-spin mb-4" /><p className="text-slate-500">Loading...</p></div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" id="print-courses">
             <table className="w-full text-left">
               <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <th className="px-6 py-4 font-semibold">Code</th>
@@ -203,13 +248,17 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
               <tbody className="divide-y divide-slate-100">
                 {filteredCourses.length > 0 ? filteredCourses.map(c => (
                   <tr key={c.id} className="hover:bg-slate-50/50">
-                    <td className="px-6 py-4 text-sm font-mono font-bold text-slate-600">{c.cid}</td>
-                    <td className="px-6 py-4"><div className="text-sm font-medium text-slate-900">{c.title}</div><div className="text-xs text-slate-400">{c.department}</div></td>
-                    <td className="px-6 py-4 text-sm hidden sm:table-cell">{c.credits}</td>
+                    <td className="px-6 py-4 text-sm font-mono font-bold text-slate-600">{c.code}</td>
+                    <td className="px-6 py-4"><div className="text-sm font-medium text-slate-900">{c.name}</div><div className="text-xs text-slate-400">{c.department}</div></td>
+                    <td className="px-6 py-4 text-sm hidden sm:table-cell">{c.credit_hours}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={16} /></button>
-                        <button className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                        <button onClick={() => {
+                            setSelectedCourseObj(c);
+                            setFormData({ name: c.name, code: c.code, credit_hours: c.credit_hours, department: c.department || '' });
+                            setShowEditModal(true);
+                        }} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={16} /></button>
+                        <button onClick={() => handleDelete(c)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -219,6 +268,52 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
           </div>
         )}
       </div>
+
+      {showEditModal && selectedCourseObj && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-bold text-slate-900">Edit Course</h3>
+                <p className="text-xs text-slate-500">Update information for {selectedCourseObj.name}</p>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <form className="p-6 space-y-6" onSubmit={handleEditSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="label">Course Title</label>
+                  <input type="text" className="input" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Course Code</label>
+                  <input type="text" disabled value={formData.code} className="input bg-slate-100 text-slate-500 cursor-not-allowed" />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Credit Hours</label>
+                  <input type="number" className="input" required value={formData.credit_hours} onChange={e => setFormData({...formData, credit_hours: parseInt(e.target.value)})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Department</label>
+                  <select className="input" required value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
+                    <option value="">Select Department</option>
+                    {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <Edit size={18} />}
+                  {submitting ? 'Updating...' : 'Update Course'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 

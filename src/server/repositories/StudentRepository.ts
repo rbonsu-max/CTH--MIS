@@ -61,7 +61,18 @@ export class StudentRepository {
   }
 
   static deleteStudent(iid: string): void {
-    db.prepare('DELETE FROM students WHERE iid = ?').run(iid);
+    db.transaction(() => {
+      try {
+        db.prepare('DELETE FROM student_assessments WHERE index_no = ?').run(iid);
+        db.prepare('DELETE FROM course_registrations WHERE index_no = ?').run(iid);
+        db.prepare('DELETE FROM student_levels WHERE iid = ?').run(iid);
+        db.prepare('DELETE FROM student_logins WHERE iid = ?').run(iid);
+        db.prepare('DELETE FROM broadsheet_cache WHERE index_no = ?').run(iid);
+        db.prepare('DELETE FROM students WHERE iid = ?').run(iid);
+      } catch (e) {
+        throw new Error('Database error during deletion process: ' + e.message);
+      }
+    })();
   }
 
   static getStudentLevelHistory(iid: string): StudentLevel[] {

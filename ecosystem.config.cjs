@@ -8,7 +8,7 @@ module.exports = {
       // This prevents crashes if the folder is named 'snsportal', 'sns', or 'cthmis'.
       env: {
         NODE_ENV: 'production',
-        PORT: 3006,
+        PORT: 3009,
       },
       instances: 1, // SQLite doesn't support multiple concurrent writers safely
       exec_mode: 'fork',

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Settings, Calendar, Clock, UserCog, CheckCircle, Loader2, X, Upload, Lock } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Settings, Calendar, Clock, UserCog, CheckCircle, Loader2, X, Upload, Lock, Printer } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 import { AcademicYear, Semester, User, CalendarEvent } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
+import { SettingsDepartments } from './SettingsDepartments';
+import { SettingsGrading } from './SettingsGrading';
+import { SettingsSystem } from './SettingsSystem';
+import { SettingsAssessmentControl } from './SettingsAssessmentControl';
+import { SettingsAccessRequests } from './SettingsAccessRequests';
+import { printElement } from '../utils/print';
 
 interface SettingsModuleProps {
   activeSubItem: string | null;
@@ -25,6 +32,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const [newEvent, setNewEvent] = useState({ date: '', event: '' });
   const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const { success, error: toastError } = useToast();
 
   useEffect(() => {
     fetchData();
@@ -56,10 +64,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     try {
       if (editingYear) {
         await api.updateAcademicYear(editingYear.code, { code: newYear });
-        alert('Academic year updated successfully!');
+        success('Academic year updated successfully!');
       } else {
         await api.createAcademicYear({ code: newYear, is_current: academicYears.length === 0 });
-        alert('Academic year added successfully!');
+        success('Academic year added successfully!');
       }
       setNewYear('');
       setShowAddYearModal(false);
@@ -67,7 +75,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
       fetchData();
     } catch (error) {
       console.error('Failed to save academic year:', error);
-      alert('Failed to save academic year');
+      toastError('Failed to save academic year');
     } finally {
       setSubmitting(false);
     }
@@ -77,11 +85,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     if (!window.confirm('Are you sure you want to delete this academic year?')) return;
     try {
       await api.deleteAcademicYear(code);
-      alert('Academic year deleted!');
+      success('Academic year deleted!');
       fetchData();
     } catch (error) {
       console.error('Failed to delete academic year:', error);
-      alert('Failed to delete academic year');
+      toastError('Failed to delete academic year');
     }
   };
 
@@ -91,12 +99,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       await api.updateSemester(editingSemester.sid, { name: editingSemester.name });
-      alert('Semester updated successfully!');
+      success('Semester updated successfully!');
       setEditingSemester(null);
       fetchData();
     } catch (error) {
       console.error('Failed to update semester:', error);
-      alert('Failed to update semester');
+      toastError('Failed to update semester');
     } finally {
       setSubmitting(false);
     }
@@ -105,22 +113,22 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const handleSetCurrentYear = async (code: string) => {
     try {
       await api.setCurrentAcademicYear(code);
-      alert('Current academic year updated!');
+      success('Current academic year updated!');
       fetchData();
     } catch (error) {
       console.error('Failed to update current year:', error);
-      alert('Failed to update current year');
+      toastError('Failed to update current year');
     }
   };
 
   const handleSetCurrentSemester = async (sid: string) => {
     try {
       await api.setCurrentSemester(sid);
-      alert('Current semester updated!');
+      success('Current semester updated!');
       fetchData();
     } catch (error) {
       console.error('Failed to update current semester:', error);
-      alert('Failed to update current semester');
+      toastError('Failed to update current semester');
     }
   };
 
@@ -129,13 +137,13 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       await api.createUser(newUser);
-      alert('User created successfully!');
+      success('User created successfully!');
       setNewUser({ fullname: '', username: '', password: '', role: 'Administrator' });
       setShowAddUserModal(false);
       fetchData();
     } catch (error) {
       console.error('Failed to create user:', error);
-      alert('Failed to create user');
+      toastError('Failed to create user');
     } finally {
       setSubmitting(false);
     }
@@ -147,12 +155,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       await api.updateUserPassword(changingPasswordUser.uid, newPassword);
-      alert('Password updated successfully!');
+      success('Password updated successfully!');
       setNewPassword('');
       setChangingPasswordUser(null);
     } catch (error) {
       console.error('Failed to update password:', error);
-      alert('Failed to update password');
+      toastError('Failed to update password');
     } finally {
       setSubmitting(false);
     }
@@ -162,11 +170,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       await api.deleteUser(uid);
-      alert('User deleted!');
+      success('User deleted!');
       fetchData();
     } catch (error) {
       console.error('Failed to delete user:', error);
-      alert('Failed to delete user');
+      toastError('Failed to delete user');
     }
   };
 
@@ -361,13 +369,19 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
             <h2 className="font-bold text-lg">User Management</h2>
             <p className="text-slate-500 text-sm">Manage system administrators and lecturers.</p>
           </div>
-          <button className="btn btn-primary gap-2 w-full sm:w-auto justify-center" onClick={() => setShowAddUserModal(true)}>
-            <Plus size={18} />
-            New User
-          </button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button className="btn btn-secondary gap-2 flex-1 sm:flex-none justify-center" onClick={() => printElement('print-users', 'System Users')}>
+              <Printer size={18} />
+              Print List
+            </button>
+            <button className="btn btn-primary gap-2 flex-1 sm:flex-none justify-center" onClick={() => setShowAddUserModal(true)}>
+              <Plus size={18} />
+              New User
+            </button>
+          </div>
         </div>
         <div className="p-6">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" id="print-users">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
@@ -542,13 +556,13 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     setSubmitting(true);
     try {
       await api.createCalendarEvent(newEvent);
-      alert('Calendar event added successfully!');
+      success('Calendar event added successfully!');
       setNewEvent({ date: '', event: '' });
       setShowAddEventModal(false);
       fetchData();
     } catch (error) {
       console.error('Failed to add calendar event:', error);
-      alert('Failed to add calendar event');
+      toastError('Failed to add calendar event');
     } finally {
       setSubmitting(false);
     }
@@ -558,11 +572,11 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
     if (!window.confirm('Are you sure you want to delete this event?')) return;
     try {
       await api.deleteCalendarEvent(id);
-      alert('Calendar event deleted!');
+      success('Calendar event deleted!');
       fetchData();
     } catch (error) {
       console.error('Failed to delete calendar event:', error);
-      alert('Failed to delete calendar event');
+      toastError('Failed to delete calendar event');
     }
   };
 
@@ -676,6 +690,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
       return renderCalendarManagement();
     case 'user_management':
       return renderUserManagement();
+    case 'departments':
+      return <SettingsDepartments />;
+    case 'grading_points':
+      return <SettingsGrading />;
+    case 'system_settings':
+      return <SettingsSystem />;
+    case 'assessment_control':
+      return <SettingsAssessmentControl />;
+    case 'access_requests':
+      return <SettingsAccessRequests />;
     case 'bulk_upload':
       return <BulkUploadModule />;
     default:

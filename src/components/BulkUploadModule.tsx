@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { api } from '../services/api';
 
 const TEMPLATES = {
@@ -16,7 +18,7 @@ const TEMPLATES = {
   },
   courses: {
     label: 'Courses',
-    headers: ['cid', 'title', 'credits', 'department'],
+    headers: ['code', 'name', 'credit_hours', 'department'],
     uploadFn: api.bulkUploadCourses
   },
   lecturers: {
@@ -46,16 +48,18 @@ export const BulkUploadModule: React.FC = () => {
 
   const downloadTemplate = () => {
     const template = TEMPLATES[selectedType];
-    const csv = Papa.unparse([template.headers]);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${selectedType}_template.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const data = [template.headers.reduce((acc: any, header) => {
+      acc[header] = '';
+      return acc;
+    }, {})];
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${template.label} Template`);
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `${selectedType}_template.xlsx`);
   };
 
   const handleUpload = async () => {
@@ -64,35 +68,41 @@ export const BulkUploadModule: React.FC = () => {
     setUploading(true);
     setResult(null);
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        try {
-          const template = TEMPLATES[selectedType];
-          const response = await template.uploadFn(results.data);
-          setResult({
-            success: true,
-            message: `Successfully uploaded ${response.count} ${selectedType}.`
-          });
-          setFile(null);
-        } catch (error: any) {
-          setResult({
-            success: false,
-            message: error.message || 'Failed to upload data. Please check your template and try again.'
-          });
-        } finally {
-          setUploading(false);
-        }
-      },
-      error: (error) => {
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        const template = TEMPLATES[selectedType];
+        const response = await template.uploadFn(data);
+        setResult({
+          success: true,
+          message: `Successfully uploaded ${response.count} ${selectedType}.`
+        });
+        setFile(null);
+      } catch (error: any) {
         setResult({
           success: false,
-          message: `CSV Parsing Error: ${error.message}`
+          message: error.message || 'Failed to upload data. Please check your template and try again.'
         });
+      } finally {
         setUploading(false);
       }
-    });
+    };
+
+    reader.onerror = () => {
+      setResult({
+        success: false,
+        message: 'Failed to read the file.'
+      });
+      setUploading(false);
+    };
+
+    reader.readAsBinaryString(file);
   };
 
   return (
@@ -100,7 +110,7 @@ export const BulkUploadModule: React.FC = () => {
       <div className="card">
         <div className="p-6 border-b border-slate-100">
           <h2 className="font-bold text-lg">Bulk Data Upload</h2>
-          <p className="text-slate-500 text-sm">Upload multiple records at once using CSV templates.</p>
+          <p className="text-slate-500 text-sm">Upload multiple records at once using Excel/CSV templates.</p>
         </div>
         
         <div className="p-6 space-y-8">
@@ -156,14 +166,14 @@ export const BulkUploadModule: React.FC = () => {
                 <div className="p-4 bg-white rounded-full shadow-sm mb-4">
                   <Upload size={32} className="text-blue-600" />
                 </div>
-                <h3 className="font-bold text-slate-900">Upload CSV File</h3>
+                <h3 className="font-bold text-slate-900">Upload Excel/CSV File</h3>
                 <p className="text-sm text-slate-500 mt-1 mb-6 max-w-xs">
                   Make sure your file matches the {TEMPLATES[selectedType].label} template.
                 </p>
                 
                 <input
                   type="file"
-                  accept=".csv"
+                  accept=".xlsx,.xls,.csv"
                   onChange={handleFileChange}
                   className="hidden"
                   id="csv-upload"
@@ -172,7 +182,7 @@ export const BulkUploadModule: React.FC = () => {
                   htmlFor="csv-upload"
                   className="btn btn-secondary cursor-pointer"
                 >
-                  {file ? 'Change File' : 'Select CSV File'}
+                  {file ? 'Change File' : 'Select File'}
                 </label>
                 
                 {file && (
@@ -210,7 +220,7 @@ export const BulkUploadModule: React.FC = () => {
             </h4>
             <ul className="text-sm text-blue-800 space-y-2 list-disc list-inside">
               <li>Download the template for the specific data type you want to upload.</li>
-              <li>Do not change the column headers in the CSV file.</li>
+              <li>Do not change the column headers in the template file.</li>
               <li>Ensure all required fields are filled correctly.</li>
               <li>For <strong>Students</strong>, the <code>programId</code> must match an existing program ID.</li>
               <li>For <strong>Courses</strong>, the <code>programId</code> must match an existing program ID.</li>

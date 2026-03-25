@@ -40,14 +40,16 @@ import academicRoutes from './src/server/routes/academic';
 import userRoutes from './src/server/routes/users';
 import calendarRoutes from './src/server/routes/calendar';
 import departmentRoutes from './src/server/routes/departments';
+import settingsRoutes from './src/server/routes/settings';
+import assessmentControlRoutes from './src/server/routes/assessment-control';
 
 // Middleware Imports
 import { authenticate, checkRole } from './src/server/middleware/auth';
 
+import { PORT, IS_PROD, JWT_SECRET } from './src/server/config';
+
 async function startServer() {
   const app = express();
-  const PORT = parseInt(process.env.PORT || '3006', 10);
-  const isProd = process.env.NODE_ENV === 'production';
 
   // Trust proxy for express-rate-limit behind Nginx/aaPanel
   app.set('trust proxy', 1);
@@ -57,7 +59,7 @@ async function startServer() {
 
   // CORS
   const corsOptions: cors.CorsOptions = {
-    origin: isProd
+    origin: IS_PROD
       ? (process.env.APP_URL || false)
       : true,
     credentials: true,
@@ -65,11 +67,11 @@ async function startServer() {
   app.use(cors(corsOptions));
 
   // Security Middlewares
-  app.use(morgan(isProd ? 'combined' : 'dev'));
+  app.use(morgan(IS_PROD ? 'combined' : 'dev'));
   app.use(hpp());
   app.use(compression());
   app.use(helmet({
-    contentSecurityPolicy: isProd ? {
+    contentSecurityPolicy: IS_PROD ? {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
@@ -84,7 +86,7 @@ async function startServer() {
 
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isProd ? 200 : 1000,  // more lenient in dev
+    max: IS_PROD ? 200 : 1000,  // more lenient in dev
     message: 'Too many requests from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,
@@ -119,11 +121,13 @@ async function startServer() {
   api.use('/users', authenticate, checkRole(['SuperAdmin', 'Administrator']), userRoutes);
   api.use('/departments', authenticate, departmentRoutes);
   api.use('/calendar-events', authenticate, calendarRoutes);
+  api.use('/settings', authenticate, checkRole(['SuperAdmin', 'Administrator']), settingsRoutes);
+  api.use('/assessment-control', authenticate, assessmentControlRoutes);
 
   app.use('/api', api);
 
   // Vite middleware for development
-  if (!isProd) {
+  if (!IS_PROD) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -142,13 +146,13 @@ async function startServer() {
     console.error('[ERROR]', err.stack || err.message || err);
     const statusCode = err.statusCode || err.status || 500;
     res.status(statusCode).json({
-      error: isProd ? 'Internal server error' : (err.message || 'Internal server error'),
+      error: IS_PROD ? 'Internal server error' : (err.message || 'Internal server error'),
     });
   });
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[SIMS] Server running on http://0.0.0.0:${PORT} (${isProd ? 'production' : 'development'})`);
-    if (!isProd && !process.env.JWT_SECRET) {
+    console.log(`[SIMS] Server running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
+    if (!IS_PROD && !process.env.JWT_SECRET) {
       console.warn('[WARN] JWT_SECRET not set — using insecure default. Set it in .env before deploying!');
     }
   });

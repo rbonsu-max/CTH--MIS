@@ -28,7 +28,7 @@ npm run build
 Create a `.env` file in the root directory (copy from `.env.example`):
 ```env
 JWT_SECRET=your_very_secure_random_secret
-PORT=3006
+PORT=3009
 DATABASE_PATH=./data/database.sqlite
 NODE_ENV=production
 ```
@@ -38,15 +38,24 @@ In aaPanel's Node.js Manager, add a new project:
 - **Project Path**: `/www/wwwroot/your-site`
 - **Startup File**: `server.ts`
 - **Run Command**: `tsx server.ts` (or use the start script from package.json)
-- **Port**: `3006`
+- **Port**: `3009`
 
 ### 6. Reverse Proxy
 In aaPanel's Website Settings, go to Reverse Proxy and add a new proxy:
 - **Proxy Name**: backend
-- **Target URL**: `http://127.0.0.1:3006`
+- **Target URL**: `http://127.0.0.1:3009`
 
 ### 7. Permissions
 Ensure the `data` and `uploads` directories are writable by the `www` user.
 
 ## Database
 The application uses SQLite as requested. The database file will be created automatically at the path specified in `DATABASE_PATH`.
+
+## SQLite Admin Dashboard
+A standalone SQLite admin interface is provided in `server-admin.js`. 
+You can run it separately to manage the database directly:
+```bash
+DB_PATH=./sims.db ADMIN_PORT=7070 node server-admin.js
+```
+*Default Credentials: `admin` / `changeme123`*
+See `DEPLOYMENT.md` for instructions on running this securely in production.

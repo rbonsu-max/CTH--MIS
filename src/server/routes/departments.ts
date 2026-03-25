@@ -39,7 +39,15 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
   try {
-    db.prepare('DELETE FROM departments WHERE id = ?').run(Number(id));
+    db.transaction(() => {
+      const dept = db.prepare('SELECT name FROM departments WHERE id = ?').get(Number(id)) as { name: string } | undefined;
+      if (dept) {
+        db.prepare('UPDATE programs SET department = NULL WHERE department = ?').run(dept.name);
+        db.prepare('UPDATE courses SET department = NULL WHERE department = ?').run(dept.name);
+        db.prepare('UPDATE lecturers SET department = NULL WHERE department = ?').run(dept.name);
+      }
+      db.prepare('DELETE FROM departments WHERE id = ?').run(Number(id));
+    })();
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

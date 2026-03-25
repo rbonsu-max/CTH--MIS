@@ -3,8 +3,8 @@ import db from '../../../db';
 export interface AcademicYear {
   id: number;
   code: string;
-  start_date: string;
-  end_date: string;
+  date_from: string;
+  date_to: string;
   is_current: number;
   created_by: string;
   created_at: string;
@@ -35,17 +35,17 @@ export class AcademicRepository {
 
   static createYear(year: Partial<AcademicYear>): void {
     db.prepare(`
-      INSERT INTO academic_years (code, start_date, end_date, is_current, created_by)
+      INSERT INTO academic_years (code, date_from, date_to, is_current, created_by)
       VALUES (?, ?, ?, ?, ?)
-    `).run(year.code, year.start_date, year.end_date, year.is_current, year.created_by);
+    `).run(year.code, year.date_from, year.date_to, year.is_current, year.created_by);
   }
 
   static updateYear(code: string, year: Partial<AcademicYear>): void {
     db.prepare(`
       UPDATE academic_years 
-      SET start_date = ?, end_date = ?, is_current = ?
+      SET date_from = ?, date_to = ?, is_current = ?
       WHERE code = ?
-    `).run(year.start_date, year.end_date, year.is_current, code);
+    `).run(year.date_from, year.date_to, year.is_current, code);
   }
 
   static setCurrentYear(code: string): void {

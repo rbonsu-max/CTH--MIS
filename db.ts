@@ -2,7 +2,6 @@ import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import path from 'path';
-
 import fs from 'fs';
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'sims.db');
@@ -12,17 +11,14 @@ if (!fs.existsSync(dbDir)) {
 }
 const db = new Database(DB_PATH);
 
-// Production-grade SQLite settings
-db.pragma('journal_mode = WAL');     // WAL for concurrent reads
-db.pragma('busy_timeout = 5000');    // wait 5s before SQLITE_BUSY error
-db.pragma('synchronous = NORMAL');   // safe trade-off between speed & durability
-
-// Enable foreign keys
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('synchronous = NORMAL');
 db.pragma('foreign_keys = ON');
 
 export function initDb() {
-  // 1. CORE REFERENCE TABLES
   db.exec(`
+    -- 0. USER DOMAIN
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       uid TEXT NOT NULL UNIQUE,
@@ -35,19 +31,19 @@ export function initDb() {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 1. CORE REFERENCE TABLES
     CREATE TABLE IF NOT EXISTS academic_years (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT NOT NULL UNIQUE,
-      start_date TEXT,
-      end_date TEXT,
+      date_from TEXT,
+      date_to TEXT,
       is_current INTEGER NOT NULL DEFAULT 0 CHECK (is_current IN (0,1)),
       created_by TEXT REFERENCES users(uid),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS semesters (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      sid TEXT NOT NULL UNIQUE,
+      sid TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE,
       sort_order INTEGER,
       is_current INTEGER NOT NULL DEFAULT 0 CHECK (is_current IN (0,1)),
@@ -63,31 +59,32 @@ export function initDb() {
     );
 
     CREATE TABLE IF NOT EXISTS programs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pid TEXT PRIMARY KEY,
       progid TEXT NOT NULL UNIQUE,
       name TEXT NOT NULL,
       department TEXT,
-      duration_years INTEGER DEFAULT 4,
+      duration INTEGER DEFAULT 4,
+      required_ch INTEGER,
       created_by TEXT REFERENCES users(uid),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS courses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cid TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      credits INTEGER NOT NULL DEFAULT 3,
+      code TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      credit_hours INTEGER NOT NULL DEFAULT 3,
       department TEXT,
       created_by TEXT REFERENCES users(uid),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS lecturers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      lid TEXT NOT NULL UNIQUE,
-      fullname TEXT NOT NULL,
+      lid TEXT PRIMARY KEY,
+      title TEXT,
+      name TEXT NOT NULL,
       email TEXT UNIQUE,
-      phone TEXT,
+      tel TEXT,
       department TEXT,
       designation TEXT,
       user_uid TEXT REFERENCES users(uid),
@@ -122,6 +119,7 @@ export function initDb() {
       iid TEXT NOT NULL REFERENCES students(iid),
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
+      requires_reset INTEGER NOT NULL DEFAULT 1 CHECK (requires_reset IN (0,1)),
       last_login TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
@@ -142,23 +140,23 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS program_curriculum (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       progid TEXT NOT NULL REFERENCES programs(progid),
-      cid TEXT NOT NULL REFERENCES courses(cid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
       level INTEGER NOT NULL,
       semester_sid TEXT NOT NULL REFERENCES semesters(sid),
       is_elective INTEGER DEFAULT 0,
       created_by TEXT REFERENCES users(uid),
-      UNIQUE(progid, cid, level, semester_sid)
+      UNIQUE(progid, course_code, level, semester_sid)
     );
 
     CREATE TABLE IF NOT EXISTS lecturer_course_assignments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       lid TEXT NOT NULL REFERENCES lecturers(lid),
-      cid TEXT NOT NULL REFERENCES courses(cid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
       academic_year TEXT NOT NULL REFERENCES academic_years(code),
       semester_sid TEXT NOT NULL REFERENCES semesters(sid),
       assigned_by TEXT REFERENCES users(uid),
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(lid, cid, academic_year, semester_sid)
+      UNIQUE(lid, course_code, academic_year, semester_sid)
     );
 
     -- 4. REGISTRATION
@@ -174,62 +172,100 @@ export function initDb() {
 
     CREATE TABLE IF NOT EXISTS course_registrations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      iid TEXT NOT NULL REFERENCES students(iid),
-      cid TEXT NOT NULL REFERENCES courses(cid),
+      index_no TEXT NOT NULL REFERENCES students(iid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
       academic_year TEXT NOT NULL REFERENCES academic_years(code),
       semester_sid TEXT NOT NULL REFERENCES semesters(sid),
       registration_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
-      UNIQUE(iid, cid, academic_year, semester_sid)
+      UNIQUE(index_no, course_code, academic_year, semester_sid)
     );
 
     -- 5. ASSESSMENT & RESULTS
     CREATE TABLE IF NOT EXISTS student_assessments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      iid TEXT NOT NULL REFERENCES students(iid),
-      cid TEXT NOT NULL REFERENCES courses(cid),
+      index_no TEXT NOT NULL REFERENCES students(iid),
       academic_year TEXT NOT NULL REFERENCES academic_years(code),
-      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
-      class_score REAL DEFAULT 0,
+      level TEXT NOT NULL,
+      semester_id TEXT NOT NULL REFERENCES semesters(sid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
+      a1 REAL DEFAULT 0,
+      a2 REAL DEFAULT 0,
+      a3 REAL DEFAULT 0,
+      a4 REAL DEFAULT 0,
+      total_ca REAL,
       exam_score REAL DEFAULT 0,
-      total_score REAL GENERATED ALWAYS AS (class_score + exam_score) VIRTUAL,
+      total_score REAL,
       grade TEXT,
-      gp REAL,
+      grade_point REAL,
+      weighted_gp REAL,
       entered_by TEXT REFERENCES users(uid),
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(iid, cid, academic_year, semester_sid)
+      UNIQUE(index_no, course_code, academic_year, semester_id)
     );
 
     CREATE TABLE IF NOT EXISTS lecturer_assessments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      iid TEXT NOT NULL REFERENCES students(iid),
-      cid TEXT NOT NULL REFERENCES courses(cid),
+      index_no TEXT NOT NULL REFERENCES students(iid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
       academic_year TEXT NOT NULL REFERENCES academic_years(code),
-      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
-      class_score REAL DEFAULT 0,
+      semester_id TEXT NOT NULL REFERENCES semesters(sid),
+      a1 REAL DEFAULT 0,
+      a2 REAL DEFAULT 0,
+      a3 REAL DEFAULT 0,
+      a4 REAL DEFAULT 0,
+      total_ca REAL,
       exam_score REAL DEFAULT 0,
-      total_score REAL GENERATED ALWAYS AS (class_score + exam_score) VIRTUAL,
+      total_score REAL,
       grade TEXT,
-      gp REAL,
+      grade_point REAL,
+      weighted_gp REAL,
       entered_by TEXT REFERENCES users(uid),
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(iid, cid, academic_year, semester_sid)
+      UNIQUE(index_no, course_code, academic_year, semester_id)
     );
 
-    CREATE TABLE IF NOT EXISTS boardsheet_cache (
+    CREATE TABLE IF NOT EXISTS assessment_windows (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      iid TEXT NOT NULL REFERENCES students(iid),
       academic_year TEXT NOT NULL REFERENCES academic_years(code),
-      semester_sid TEXT NOT NULL REFERENCES semesters(sid),
-      tcr INTEGER,
-      tcp INTEGER,
-      gpa REAL,
-      ctcr INTEGER,
-      ctcp INTEGER,
-      cgpa REAL,
-      remarks TEXT,
+      semester_id TEXT NOT NULL REFERENCES semesters(sid),
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      is_active INTEGER DEFAULT 1,
+      created_by TEXT REFERENCES users(uid),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS assessment_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lid TEXT NOT NULL REFERENCES lecturers(lid),
+      course_code TEXT NOT NULL REFERENCES courses(code),
+      index_no TEXT REFERENCES students(iid), -- NULL if for whole course
+      request_type TEXT CHECK (request_type IN ('upload','edit')),
+      reason TEXT,
+      status TEXT DEFAULT 'pending' CHECK (status IN ('pending','granted','denied')),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      granted_at TEXT,
+      expires_at TEXT,
+      processed_by TEXT REFERENCES users(uid)
+    );
+
+    CREATE TABLE IF NOT EXISTS broadsheet_cache (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      index_no TEXT NOT NULL REFERENCES students(iid),
+      academic_year TEXT NOT NULL REFERENCES academic_years(code),
+      level TEXT NOT NULL,
+      semester_id TEXT NOT NULL REFERENCES semesters(sid),
+      progid TEXT NOT NULL REFERENCES programs(progid),
+      sCH REAL,
+      sGP REAL,
+      sGPA REAL,
+      cCH REAL,
+      cGP REAL,
+      cGPA REAL,
+      class TEXT,
       calculated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(iid, academic_year, semester_sid)
+      UNIQUE(index_no, academic_year, semester_id)
     );
 
     -- 6. AUXILIARY TABLES
@@ -259,6 +295,23 @@ export function initDb() {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS system_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_by TEXT REFERENCES users(uid),
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS grading_points (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      grade TEXT NOT NULL UNIQUE,
+      min_score REAL NOT NULL,
+      max_score REAL NOT NULL,
+      gp REAL NOT NULL,
+      remarks TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- 7. CALENDAR EVENTS
     CREATE TABLE IF NOT EXISTS calendar_events (
       id TEXT PRIMARY KEY,
@@ -273,13 +326,13 @@ export function initDb() {
     -- PERFORMANCE INDEXES
     CREATE INDEX IF NOT EXISTS idx_students_prog ON students(progid);
     CREATE INDEX IF NOT EXISTS idx_students_iid ON students(iid);
-    CREATE INDEX IF NOT EXISTS idx_assessments_iid ON student_assessments(iid);
-    CREATE INDEX IF NOT EXISTS idx_assessments_cid ON student_assessments(cid);
-    CREATE INDEX IF NOT EXISTS idx_assessments_period ON student_assessments(academic_year, semester_sid);
-    CREATE INDEX IF NOT EXISTS idx_registrations_iid ON course_registrations(iid);
+    CREATE INDEX IF NOT EXISTS idx_assessments_idxno ON student_assessments(index_no);
+    CREATE INDEX IF NOT EXISTS idx_assessments_cid ON student_assessments(course_code);
+    CREATE INDEX IF NOT EXISTS idx_assessments_period ON student_assessments(academic_year, semester_id);
+    CREATE INDEX IF NOT EXISTS idx_registrations_iid ON course_registrations(index_no);
     CREATE INDEX IF NOT EXISTS idx_curriculum_prog ON program_curriculum(progid);
 
-    -- LEGACY COMPATIBILITY VIEWS
+    -- COMPATIBILITY VIEWS
     CREATE VIEW IF NOT EXISTS view_student_details AS
     SELECT s.*, p.name as program_name, ay.code as admission_year_code
     FROM students s
@@ -287,38 +340,58 @@ export function initDb() {
     LEFT JOIN academic_years ay ON s.admission_year = ay.code;
 
     CREATE VIEW IF NOT EXISTS view_course_registrations AS
-    SELECT cr.*, s.surname, s.other_names, c.title as course_title, c.credits
+    SELECT cr.*, s.surname, s.other_names, c.name as course_name, c.credit_hours
     FROM course_registrations cr
     JOIN students s ON cr.iid = s.iid
-    JOIN courses c ON cr.cid = c.cid;
+    JOIN courses c ON cr.course_code = c.code;
 
     CREATE VIEW IF NOT EXISTS view_student_results AS
-    SELECT sa.*, s.surname, s.other_names, c.title as course_title, c.credits
+    SELECT sa.*, s.index_number, s.surname, s.other_names, s.progid, c.name as course_name, c.credit_hours
     FROM student_assessments sa
-    JOIN students s ON sa.iid = s.iid
-    JOIN courses c ON sa.cid = c.cid;
+    JOIN students s ON sa.index_no = s.iid
+    JOIN courses c ON sa.course_code = c.code;
   `);
 
-  // ── Migrations: add columns to existing tables safely ──
-  try {
-    const columns = db.prepare("PRAGMA table_info(students)").all() as { name: string }[];
-    if (!columns.find(c => c.name === 'photo')) {
-      db.prepare('ALTER TABLE students ADD COLUMN photo TEXT').run();
-    }
-  } catch (e) {}
+  // Seed default academic year and semester if empty
+  const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };
+  if (yearCount.count === 0) {
+    db.prepare('INSERT INTO academic_years (code, is_current) VALUES (?, ?)').run('2023/2024', 1);
+  }
 
-  // Ensure departments table exists (migration for existing DBs)
-  try {
-    db.prepare('SELECT 1 FROM departments LIMIT 1').get();
-  } catch (_) {
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS departments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        code TEXT NOT NULL UNIQUE,
-        name TEXT NOT NULL UNIQUE,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+  const semCount = db.prepare('SELECT COUNT(*) as count FROM semesters').get() as { count: number };
+  if (semCount.count === 0) {
+    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM1', 'Semester 1', 1, 1);
+    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM2', 'Semester 2', 2, 0);
+  }
+
+  // Seed default grading points if empty
+  const gradingCount = db.prepare('SELECT COUNT(*) as count FROM grading_points').get() as { count: number };
+  if (gradingCount.count === 0) {
+    const scales = [
+      ['A', 80, 100, 4.0, 'Excellent'],
+      ['B+', 75, 79.99, 3.5, 'Very Good'],
+      ['B', 70, 74.99, 3.0, 'Good'],
+      ['C+', 65, 69.99, 2.5, 'Fairly Good'],
+      ['C', 60, 64.99, 2.0, 'Average'],
+      ['D+', 55, 59.99, 1.5, 'Below Average'],
+      ['D', 50, 54.99, 1.0, 'Marginal Pass'],
+      ['E', 0, 49.99, 0.0, 'Fail']
+    ];
+    const insertGp = db.prepare('INSERT INTO grading_points (grade, min_score, max_score, gp, remarks) VALUES (?, ?, ?, ?, ?)');
+    for (const [grade, min, max, gp, rem] of scales) {
+      insertGp.run(grade, min, max, gp, rem);
+    }
+  }
+
+  // Seed initial SuperAdmin if not exists
+  const superAdmin = db.prepare('SELECT * FROM users WHERE role = ?').get('SuperAdmin');
+  if (!superAdmin) {
+    const uid = uuidv4();
+    const passwordHash = bcrypt.hashSync('$$Ecg$$', 10);
+    db.prepare(`
+      INSERT INTO users (id, uid, fullname, username, password_hash, role, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(uuidv4(), uid, 'Richard Bonsu', 'youroger1@gmail.com', passwordHash, 'SuperAdmin', 'active');
   }
 
   // Seed departments if empty
@@ -339,29 +412,6 @@ export function initDb() {
     for (const [code, name] of depts) {
       insertDept.run(code, name);
     }
-  }
-
-  // Seed initial SuperAdmin if not exists
-  const superAdmin = db.prepare('SELECT * FROM users WHERE role = ?').get('SuperAdmin');
-  if (!superAdmin) {
-    const uid = uuidv4();
-    const passwordHash = bcrypt.hashSync('$$Ecg$$', 10);
-    db.prepare(`
-      INSERT INTO users (id, uid, fullname, username, password_hash, role, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(uuidv4(), uid, 'Richard Bonsu', 'youroger1@gmail.com', passwordHash, 'SuperAdmin', 'active');
-  }
-
-  // Seed default academic year and semester if empty
-  const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };
-  if (yearCount.count === 0) {
-    db.prepare('INSERT INTO academic_years (code, is_current) VALUES (?, ?)').run('2023/2024', 1);
-  }
-
-  const semCount = db.prepare('SELECT COUNT(*) as count FROM semesters').get() as { count: number };
-  if (semCount.count === 0) {
-    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM1', 'Semester 1', 1, 1);
-    db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM2', 'Semester 2', 2, 0);
   }
 }
 

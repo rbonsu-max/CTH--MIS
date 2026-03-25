@@ -151,11 +151,11 @@ export const StatisticsModule: React.FC<StatisticsModuleProps> = ({ activeSubIte
           </tr></thead>
           <tbody className="divide-y divide-slate-100">
             {courses.map((c, i) => (
-              <tr key={c.cid} className="hover:bg-slate-50/50">
+              <tr key={c.code} className="hover:bg-slate-50/50">
                 <td className="px-6 py-3 text-sm text-slate-400">{i + 1}</td>
-                <td className="px-6 py-3 text-sm font-mono font-bold">{c.cid}</td>
-                <td className="px-6 py-3 text-sm font-medium">{c.title}</td>
-                <td className="px-6 py-3 text-sm">{c.credits}</td>
+                <td className="px-6 py-3 text-sm font-mono font-bold">{c.code}</td>
+                <td className="px-6 py-3 text-sm font-medium">{c.name}</td>
+                <td className="px-6 py-3 text-sm">{c.credit_hours}</td>
                 <td className="px-6 py-3 text-sm text-slate-500">{c.department || 'N/A'}</td>
               </tr>
             ))}

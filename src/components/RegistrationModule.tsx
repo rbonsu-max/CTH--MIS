@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, BookMarked, CheckCircle, XCircle, Clock, Filter, Loader2, User } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 import { Student, Course, Registration } from '../types';
 import { api } from '../services/api';
+import { printElement } from '../utils/print';
 
 interface RegistrationModuleProps {
   activeSubItem: string | null;
@@ -11,6 +13,8 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  const { success, error: toastError } = useToast();
   
   // Search state
   const [searchIndex, setSearchIndex] = useState('');
@@ -36,11 +40,11 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
         const programCourses = allCourses.filter(c => c.department === student.program_name || true); // Simplified for now
         setAvailableCourses(programCourses);
       } else {
-        alert('Student not found');
+        toastError('Student not found');
       }
     } catch (error) {
       console.error('Search failed:', error);
-      alert('Error searching for student');
+      toastError('Error searching for student');
     } finally {
       setSearching(false);
     }
@@ -61,23 +65,23 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
       const academic_year = '2025/2026'; // Mock current year
       const semester_sid = 'SEM1'; // Mock current semester
       
-      await Promise.all(selectedCourses.map(cid => 
+      await Promise.all(selectedCourses.map(course_code => 
         api.createRegistration({
-          iid: foundStudent.iid,
-          cid,
+          index_no: foundStudent.iid,
+          course_code,
           academic_year,
           semester_sid,
           status: 'pending'
         })
       ));
       
-      alert('Registration completed successfully!');
+      success('Registration completed successfully!');
       setFoundStudent(null);
       setSearchIndex('');
       setSelectedCourses([]);
     } catch (error) {
       console.error('Registration failed:', error);
-      alert('Failed to complete registration');
+      toastError('Failed to complete registration');
     } finally {
       setSubmitting(false);
     }
@@ -134,11 +138,11 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
     setSubmitting(true);
     try {
       await api.openRegistrationWindow(newWindow);
-      alert('Registration window opened successfully!');
+      success('Registration window opened successfully!');
       fetchWindows();
     } catch (error) {
       console.error('Failed to open window:', error);
-      alert('Failed to open window');
+      toastError('Failed to open window');
     } finally {
       setSubmitting(false);
     }
@@ -148,11 +152,11 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
     if (!window.confirm('Are you sure you want to close this registration window?')) return;
     try {
       await api.closeRegistrationWindow(id);
-      alert('Registration window closed!');
+      success('Registration window closed!');
       fetchWindows();
     } catch (error) {
       console.error('Failed to close window:', error);
-      alert('Failed to close window');
+      toastError('Failed to close window');
     }
   };
 
@@ -334,16 +338,16 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
                 <h3 className="font-bold text-slate-900">Available Courses</h3>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
                   {availableCourses.length > 0 ? availableCourses.map((course) => (
-                    <label key={course.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                      <label key={course.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
                       <input 
                         type="checkbox" 
                         className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 flex-shrink-0" 
-                        checked={selectedCourses.includes(course.cid)}
-                        onChange={() => handleToggleCourse(course.cid)}
+                        checked={selectedCourses.includes(course.code)}
+                        onChange={() => handleToggleCourse(course.code)}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold text-slate-900 truncate">{course.cid}: {course.title}</div>
-                        <div className="text-xs text-slate-400">{course.credits} Credits</div>
+                        <div className="text-sm font-bold text-slate-900 truncate">{course.code}: {course.name}</div>
+                        <div className="text-xs text-slate-400">{course.credit_hours} Credits</div>
                       </div>
                     </label>
                   )) : (
@@ -398,7 +402,7 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
 
   const handleFindResit = async () => {
     const student = allStudents.find(s => s.index_number === resitSearch || (s.full_name || '').toLowerCase().includes(resitSearch.toLowerCase()));
-    if (!student) return alert('Student not found');
+    if (!student) return toastError('Student not found');
     setResitStudent(student);
     try {
       const assessments = await api.getAssessmentsByStudent(student.iid);
@@ -410,9 +414,9 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   const handleResitRegister = async (course: any) => {
     if (!resitStudent || !resitYear || !resitSemester) return;
     try {
-      await api.createRegistration({ iid: resitStudent.iid, cid: course.cid, academic_year: resitYear, semester_sid: resitSemester, status: 'pending' });
-      alert(`${course.course_title || course.cid} registered for resit!`);
-    } catch (e: any) { alert(e.message || 'Failed'); }
+      await api.createRegistration({ index_no: resitStudent.iid, course_code: course.course_code, academic_year: resitYear, semester_sid: resitSemester, status: 'pending' });
+      success(`${course.course_name || course.course_code} registered for resit!`);
+    } catch (e: any) { toastError(e.message || 'Failed'); }
   };
 
   const renderResit = () => (
@@ -450,18 +454,18 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
           <table className="w-full text-left">
             <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
               <th className="px-6 py-3">Code</th>
-              <th className="px-6 py-3">Course</th>
-              <th className="px-6 py-3 hidden sm:table-cell">Score</th>
-              <th className="px-6 py-3 hidden sm:table-cell">Grade</th>
+              <th className="px-6 py-3 font-semibold">Course</th>
+              <th className="px-6 py-3 font-semibold text-center">CH</th>
+              <th className="px-6 py-3 font-semibold text-center">Grade</th>
               <th className="px-6 py-3 text-right">Action</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
               {failedCourses.length > 0 ? failedCourses.map((c, i) => (
                 <tr key={i} className="hover:bg-slate-50/50">
-                  <td className="px-6 py-3 text-sm font-mono font-bold">{c.cid}</td>
-                  <td className="px-6 py-3 text-sm">{c.course_title}</td>
-                  <td className="px-6 py-3 text-sm hidden sm:table-cell">{c.total_score}</td>
-                  <td className="px-6 py-3 hidden sm:table-cell"><span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-bold">{c.grade}</span></td>
+                  <td className="px-6 py-3 text-sm font-mono font-bold">{c.course_code}</td>
+                  <td className="px-6 py-3 text-sm">{c.course_name}</td>
+                  <td className="px-6 py-3 text-sm text-center">{c.credit_hours}</td>
+                  <td className="px-6 py-3 text-sm text-center"><span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-bold">{c.grade}</span></td>
                   <td className="px-6 py-3 text-right">
                     <button onClick={() => handleResitRegister(c)} className="btn btn-primary text-xs py-1 px-3"><Plus size={14} className="mr-1" /> Register</button>
                   </td>
@@ -494,6 +498,15 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
     if (activeSubItem === 'view_registration' && viewYear && viewSemester) fetchViewRegs();
   }, [viewYear, viewSemester, activeSubItem]);
 
+  const handleDeleteRegistration = async (r: any) => {
+    if (!window.confirm(`Are you sure you want to un-register ${r.index_no} from ${r.course_code}? Any recorded assessments or grading data will be deleted permanently.`)) return;
+    try {
+      await api.deleteRegistration(r.index_no, r.course_code, viewYear, viewSemester);
+      success('Registration deleted securely!');
+      fetchViewRegs();
+    } catch (e: any) { toastError(e.message || 'Failed to delete registration'); }
+  };
+
   const renderViewRegistration = () => (
     <div className="space-y-6">
       <div className="card p-6">
@@ -513,7 +526,7 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
             </select>
           </div>
           <div className="flex items-end">
-            <button className="btn btn-primary w-full" onClick={() => window.print()}>🖨️ Print</button>
+            <button className="btn btn-primary w-full" onClick={() => printElement('print-registrations', 'Course Registrations')}>🖨️ Print</button>
           </div>
         </div>
       </div>
@@ -528,6 +541,7 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               <th className="px-6 py-3">Course</th>
               <th className="px-6 py-3 hidden sm:table-cell">Status</th>
               <th className="px-6 py-3 hidden md:table-cell">Date</th>
+              <th className="px-6 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
               {viewRegs.length > 0 ? viewRegs.map((r, i) => (
@@ -535,16 +549,21 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
                   <td className="px-6 py-3 text-sm text-slate-400">{i + 1}</td>
                   <td className="px-6 py-3">
                     <div className="text-sm font-bold">{r.full_name || `${r.surname || ''}, ${r.other_names || ''}`}</div>
-                    <div className="text-xs text-slate-500 font-mono">{r.iid}</div>
+                    <div className="text-xs text-slate-500 font-mono">{r.index_no}</div>
                   </td>
                   <td className="px-6 py-3">
-                    <div className="text-sm font-medium">{r.course_title || r.cid}</div>
-                    <div className="text-xs text-slate-400">{r.credits} credits</div>
+                    <div className="text-sm font-medium">{r.course_name || r.course_code}</div>
+                    <div className="text-xs text-slate-400">{r.credit_hours} credits</div>
                   </td>
                   <td className="px-6 py-3 hidden sm:table-cell">
                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : r.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{r.status}</span>
                   </td>
                   <td className="px-6 py-3 text-sm text-slate-500 hidden md:table-cell">{r.registration_date ? new Date(r.registration_date).toLocaleDateString() : 'N/A'}</td>
+                  <td className="px-6 py-3 text-right">
+                    <button onClick={() => handleDeleteRegistration(r)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
                 </tr>
               )) : <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No registrations found.</td></tr>}
             </tbody>

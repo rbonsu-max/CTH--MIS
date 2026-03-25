@@ -2,100 +2,135 @@ import db from '../../../db';
 
 export interface Assessment {
   id: number;
-  iid: string;
-  cid: string;
+  index_no: string;
+  course_code: string;
   academic_year: string;
-  semester_sid: string;
-  class_score: number;
+  level: string;
+  semester_id: string;
+  a1: number;
+  a2: number;
+  a3: number;
+  a4: number;
+  total_ca: number;
   exam_score: number;
   total_score: number;
   grade: string;
-  gp: number;
-  credits: number;
+  grade_point: number;
+  weighted_gp: number;
   entered_by: string;
   updated_at: string;
+  index_number?: string;
+  surname?: string;
+  other_names?: string;
+  progid?: string;
+  course_name?: string;
+  credit_hours?: number;
 }
 
 export interface BoardsheetCache {
   id: number;
-  iid: string;
+  index_no: string;
   academic_year: string;
-  semester_sid: string;
-  tcr: number;
-  tcp: number;
-  gpa: number;
-  ctcr: number;
-  ctcp: number;
-  cgpa: number;
-  remarks: string;
+  level: string;
+  semester_id: string;
+  progid: string;
+  sCH: number;
+  sGP: number;
+  sGPA: number;
+  cCH: number;
+  cGP: number;
+  cGPA: number;
+  class: string;
   calculated_at: string;
 }
 
 export class AssessmentRepository {
-  static getAssessments(iid: string, academic_year: string, semester_sid: string): Assessment[] {
+  static getAssessments(index_no: string, academic_year: string, semester_id: string): Assessment[] {
     return db.prepare(`
       SELECT * FROM view_student_results 
-      WHERE iid = ? AND academic_year = ? AND semester_sid = ?
-    `).all(iid, academic_year, semester_sid) as Assessment[];
+      WHERE index_no = ? AND academic_year = ? AND semester_id = ?
+    `).all(index_no, academic_year, semester_id) as Assessment[];
   }
 
-  static getCourseAssessments(cid: string, academic_year: string, semester_sid: string): Assessment[] {
+  static getCourseAssessments(course_code: string, academic_year: string, semester_id: string): Assessment[] {
     return db.prepare(`
       SELECT * FROM view_student_results 
-      WHERE cid = ? AND academic_year = ? AND semester_sid = ?
-    `).all(cid, academic_year, semester_sid) as Assessment[];
+      WHERE course_code = ? AND academic_year = ? AND semester_id = ?
+    `).all(course_code, academic_year, semester_id) as Assessment[];
+  }
+
+  static getSpecificResult(index_no: string, course_code: string, academic_year: string, semester_id: string): Assessment | undefined {
+    return db.prepare(`
+      SELECT * FROM student_assessments 
+      WHERE index_no = ? AND course_code = ? AND academic_year = ? AND semester_id = ?
+    `).get(index_no, course_code, academic_year, semester_id) as Assessment;
+  }
+
+  static getPeriodAssessments(academic_year: string, semester_id: string): Assessment[] {
+    return db.prepare(`
+      SELECT * FROM view_student_results 
+      WHERE academic_year = ? AND semester_id = ?
+    `).all(academic_year, semester_id) as Assessment[];
   }
 
   static saveAssessment(assessment: Partial<Assessment>): void {
     db.prepare(`
-      INSERT INTO student_assessments (iid, cid, academic_year, semester_sid, class_score, exam_score, grade, gp, entered_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(iid, cid, academic_year, semester_sid) DO UPDATE SET
-        class_score = excluded.class_score,
+      INSERT INTO student_assessments (index_no, course_code, academic_year, level, semester_id, a1, a2, a3, a4, total_ca, exam_score, total_score, grade, grade_point, weighted_gp, entered_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(index_no, course_code, academic_year, semester_id) DO UPDATE SET
+        a1 = excluded.a1,
+        a2 = excluded.a2,
+        a3 = excluded.a3,
+        a4 = excluded.a4,
+        total_ca = excluded.total_ca,
         exam_score = excluded.exam_score,
+        total_score = excluded.total_score,
         grade = excluded.grade,
-        gp = excluded.gp,
+        grade_point = excluded.grade_point,
+        weighted_gp = excluded.weighted_gp,
         entered_by = excluded.entered_by,
         updated_at = CURRENT_TIMESTAMP
-    `).run(assessment.iid, assessment.cid, assessment.academic_year, assessment.semester_sid, assessment.class_score, assessment.exam_score, assessment.grade, assessment.gp, assessment.entered_by);
+    `).run(assessment.index_no, assessment.course_code, assessment.academic_year, assessment.level || '100', assessment.semester_id, assessment.a1 || 0, assessment.a2 || 0, assessment.a3 || 0, assessment.a4 || 0, assessment.total_ca, assessment.exam_score, assessment.total_score, assessment.grade, assessment.grade_point, assessment.weighted_gp, assessment.entered_by);
   }
 
-  static getBoardsheetCache(iid: string, academic_year: string, semester_sid: string): BoardsheetCache | undefined {
+  static getBoardsheetCache(index_no: string, academic_year: string, semester_id: string): BoardsheetCache | undefined {
     return db.prepare(`
-      SELECT * FROM boardsheet_cache 
-      WHERE iid = ? AND academic_year = ? AND semester_sid = ?
-    `).get(iid, academic_year, semester_sid) as BoardsheetCache;
+      SELECT * FROM broadsheet_cache 
+      WHERE index_no = ? AND academic_year = ? AND semester_id = ?
+    `).get(index_no, academic_year, semester_id) as BoardsheetCache;
   }
 
   static saveBoardsheetCache(cache: Partial<BoardsheetCache>): void {
     db.prepare(`
-      INSERT INTO boardsheet_cache (iid, academic_year, semester_sid, tcr, tcp, gpa, ctcr, ctcp, cgpa, remarks)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(iid, academic_year, semester_sid) DO UPDATE SET
-        tcr = excluded.tcr,
-        tcp = excluded.tcp,
-        gpa = excluded.gpa,
-        ctcr = excluded.ctcr,
-        ctcp = excluded.ctcp,
-        cgpa = excluded.cgpa,
-        remarks = excluded.remarks,
+      INSERT INTO broadsheet_cache (index_no, academic_year, level, semester_id, progid, sCH, sGP, sGPA, cCH, cGP, cGPA, class)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(index_no, academic_year, semester_id) DO UPDATE SET
+        level = excluded.level,
+        progid = excluded.progid,
+        sCH = excluded.sCH,
+        sGP = excluded.sGP,
+        sGPA = excluded.sGPA,
+        cCH = excluded.cCH,
+        cGP = excluded.cGP,
+        cGPA = excluded.cGPA,
+        class = excluded.class,
         calculated_at = CURRENT_TIMESTAMP
-    `).run(cache.iid, cache.academic_year, cache.semester_sid, cache.tcr, cache.tcp, cache.gpa, cache.ctcr, cache.ctcp, cache.cgpa, cache.remarks);
+    `).run(cache.index_no, cache.academic_year, cache.level || '100', cache.semester_id, cache.progid, cache.sCH, cache.sGP, cache.sGPA, cache.cCH, cache.cGP, cache.cGPA, cache.class);
   }
 
-  static getStudentFullHistory(iid: string): Assessment[] {
+  static getStudentFullHistory(index_no: string): Assessment[] {
     return db.prepare(`
       SELECT * FROM view_student_results 
-      WHERE iid = ?
-      ORDER BY academic_year ASC, semester_sid ASC
-    `).all(iid) as Assessment[];
+      WHERE index_no = ?
+      ORDER BY academic_year ASC, semester_id ASC
+    `).all(index_no) as Assessment[];
   }
 
-  static getStudentAllCaches(iid: string): BoardsheetCache[] {
+  static getStudentAllCaches(index_no: string): BoardsheetCache[] {
     return db.prepare(`
-      SELECT * FROM boardsheet_cache 
-      WHERE iid = ?
-      ORDER BY academic_year ASC, semester_sid ASC
-    `).all(iid) as BoardsheetCache[];
+      SELECT * FROM broadsheet_cache 
+      WHERE index_no = ?
+      ORDER BY academic_year ASC, semester_id ASC
+    `).all(index_no) as BoardsheetCache[];
   }
 }

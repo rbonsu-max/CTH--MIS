@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'sims-secret-key';
+import { JWT_SECRET } from '../config';
 
 export const authenticate = (req: any, res: any, next: any) => {
   const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;

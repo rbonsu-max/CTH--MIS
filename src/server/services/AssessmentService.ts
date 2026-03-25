@@ -2,78 +2,83 @@ import { AssessmentRepository, Assessment, BoardsheetCache } from '../repositori
 import db from '../../../db';
 
 export class AssessmentService {
-  static calculateGrade(totalScore: number): { grade: string; gp: number } {
-    if (totalScore >= 80) return { grade: 'A', gp: 4.0 };
-    if (totalScore >= 75) return { grade: 'B+', gp: 3.5 };
-    if (totalScore >= 70) return { grade: 'B', gp: 3.0 };
-    if (totalScore >= 65) return { grade: 'C+', gp: 2.5 };
-    if (totalScore >= 60) return { grade: 'C', gp: 2.0 };
-    if (totalScore >= 55) return { grade: 'D+', gp: 1.5 };
-    if (totalScore >= 50) return { grade: 'D', gp: 1.0 };
-    return { grade: 'F', gp: 0.0 };
+  static calculateGrade(totalScore: number): { grade: string; grade_point: number } {
+    const points = db.prepare('SELECT * FROM grading_points ORDER BY min_score DESC').all() as any[];
+    
+    for (const p of points) {
+      if (totalScore >= p.min_score) {
+        return { grade: p.grade, grade_point: p.gp }; // 'gp' in grading_points table
+      }
+    }
+    return { grade: 'F', grade_point: 0.0 };
   }
 
-  static async computeGPA(iid: string, academicYear: string, semesterSid: string): Promise<BoardsheetCache> {
-    // 1. Get all assessments for this student in this period
-    const assessments = AssessmentRepository.getAssessments(iid, academicYear, semesterSid);
+  static async computeGPA(index_no: string, academicYear: string, semesterId: string): Promise<BoardsheetCache> {
+    const assessments = AssessmentRepository.getAssessments(index_no, academicYear, semesterId);
     
-    let tcr = 0; // Total Credit Registered
-    let tcp = 0; // Total Credit Points (credits * gp)
+    let sCH = 0; // Semester Credit Hours
+    let sGP = 0; // Semester Grade Points
     
     for (const ass of assessments) {
-      tcr += ass.credits;
-      tcp += (ass.credits * ass.gp);
+      // credit_hours comes from the view_student_results join
+      const credits = (ass as any).credit_hours || 0;
+      sCH += credits;
+      sGP += (credits * ass.grade_point);
     }
     
-    const gpa = tcr > 0 ? parseFloat((tcp / tcr).toFixed(2)) : 0;
+    const sGPA = sCH > 0 ? parseFloat((sGP / sCH).toFixed(2)) : 0;
     
-    // 2. Get cumulative data (previous semesters)
+    // Get cumulative data (previous semesters)
     const previousCaches = db.prepare(`
-      SELECT * FROM boardsheet_cache 
-      WHERE iid = ? 
-      AND (academic_year < ? OR (academic_year = ? AND semester_sid < ?))
-      ORDER BY academic_year DESC, semester_sid DESC
+      SELECT * FROM broadsheet_cache 
+      WHERE index_no = ? 
+      AND (academic_year < ? OR (academic_year = ? AND semester_id < ?))
+      ORDER BY academic_year DESC, semester_id DESC
       LIMIT 1
-    `).get(iid, academicYear, academicYear, semesterSid) as BoardsheetCache;
+    `).get(index_no, academicYear, academicYear, semesterId) as BoardsheetCache;
     
-    const ctcr = (previousCaches?.ctcr || 0) + tcr;
-    const ctcp = (previousCaches?.ctcp || 0) + tcp;
-    const cgpa = ctcr > 0 ? parseFloat((ctcp / ctcr).toFixed(2)) : 0;
+    const cCH = (previousCaches?.cCH || 0) + sCH;
+    const cGP = (previousCaches?.cGP || 0) + sGP;
+    const cGPA = cCH > 0 ? parseFloat((cGP / cCH).toFixed(2)) : 0;
     
-    // 3. Determine class award if it's the final semester (this logic can be more complex)
-    let remarks = '';
-    if (cgpa >= 3.6) remarks = 'First Class';
-    else if (cgpa >= 3.0) remarks = 'Second Class Upper';
-    else if (cgpa >= 2.5) remarks = 'Second Class Lower';
-    else if (cgpa >= 2.0) remarks = 'Third Class';
-    else if (cgpa >= 1.0) remarks = 'Pass';
-    else remarks = 'Fail';
+    let classification = '';
+    if (cGPA >= 3.6) classification = 'First Class';
+    else if (cGPA >= 3.0) classification = 'Second Class Upper';
+    else if (cGPA >= 2.5) classification = 'Second Class Lower';
+    else if (cGPA >= 2.0) classification = 'Third Class';
+    else if (cGPA >= 1.0) classification = 'Pass';
+    else classification = 'Fail';
+
+    // Retrieve student info for level and progid
+    const student = db.prepare('SELECT current_level, progid FROM students WHERE iid = ?').get(index_no) as any;
 
     const cache: Partial<BoardsheetCache> = {
-      iid,
+      index_no,
       academic_year: academicYear,
-      semester_sid: semesterSid,
-      tcr,
-      tcp,
-      gpa,
-      ctcr,
-      ctcp,
-      cgpa,
-      remarks
+      level: student?.current_level?.toString() || '100',
+      semester_id: semesterId,
+      progid: student?.progid || '',
+      sCH,
+      sGP,
+      sGPA,
+      cCH,
+      cGP,
+      cGPA,
+      class: classification
     };
     
     AssessmentRepository.saveBoardsheetCache(cache);
     return cache as BoardsheetCache;
   }
 
-  static async bulkComputeGPA(academicYear: string, semesterSid: string): Promise<void> {
+  static async bulkComputeGPA(academicYear: string, semesterId: string): Promise<void> {
     const students = db.prepare(`
-      SELECT DISTINCT iid FROM student_assessments 
-      WHERE academic_year = ? AND semester_sid = ?
-    `).all(academicYear, semesterSid) as { iid: string }[];
+      SELECT DISTINCT index_no FROM student_assessments 
+      WHERE academic_year = ? AND semester_id = ?
+    `).all(academicYear, semesterId) as { index_no: string }[];
     
     for (const student of students) {
-      await this.computeGPA(student.iid, academicYear, semesterSid);
+      await this.computeGPA(student.index_no, academicYear, semesterId);
     }
   }
 }

@@ -27,12 +27,12 @@ router.post('/students', (req, res) => {
 router.post('/programs', (req, res) => {
   const programs = req.body;
   const insert = db.prepare(`
-    INSERT OR REPLACE INTO programs (progid, name, department, duration_years, created_by)
+    INSERT OR REPLACE INTO programs (progid, name, department, duration, created_by)
     VALUES (?, ?, ?, ?, ?)
   `);
   const insertMany = db.transaction((data) => {
     for (const p of data) {
-      insert.run(p.progid, p.name, p.department, p.duration_years, (req as any).user.uid);
+      insert.run(p.progid, p.name, p.department, p.duration, (req as any).user.uid);
     }
   });
   try {
@@ -46,12 +46,12 @@ router.post('/programs', (req, res) => {
 router.post('/courses', (req, res) => {
   const courses = req.body;
   const insert = db.prepare(`
-    INSERT OR REPLACE INTO courses (cid, title, credits, department, created_by)
+    INSERT OR REPLACE INTO courses (code, name, credit_hours, department, created_by)
     VALUES (?, ?, ?, ?, ?)
   `);
   const insertMany = db.transaction((data) => {
     for (const c of data) {
-      insert.run(c.cid, c.title, c.credits, c.department, (req as any).user.uid);
+      insert.run(c.code, c.name, c.credit_hours, c.department, (req as any).user.uid);
     }
   });
   try {
@@ -105,29 +105,69 @@ router.post('/assessments', async (req, res) => {
   const assessments = req.body;
   const { AssessmentRepository } = await import('../repositories/AssessmentRepository');
   const { AssessmentService } = await import('../services/AssessmentService');
+  const { AssessmentControlRepository } = await import('../repositories/AssessmentControlRepository');
   
+  const user = (req as any).user;
+  const isSuperAdmin = user.role === 'SuperAdmin';
+  const academicYear = assessments[0]?.academic_year;
+  const semesterId = assessments[0]?.semester_id;
+
+  if (!isSuperAdmin) {
+    if (!academicYear || !semesterId) {
+      return res.status(400).json({ error: 'Academic year and semester are required for validation.' });
+    }
+
+    const activeWindow = AssessmentControlRepository.getActiveWindow(academicYear, semesterId);
+    
+    let lecturerLid = null;
+    if (user.role === 'Lecturer') {
+      const lecturer = db.prepare('SELECT lid FROM lecturers WHERE user_uid = ?').get(user.uid) as any;
+      lecturerLid = lecturer?.lid;
+    }
+
+    // Check if window is open OR lecturer has granted access for the course
+    // Note: Bulk upload check is simplified to course-level access since it's multiple students
+    const courseCode = assessments[0]?.course_code;
+    const hasAccess = activeWindow || (lecturerLid && AssessmentControlRepository.hasGrantedAccess(lecturerLid, courseCode));
+
+    if (!hasAccess) {
+      return res.status(403).json({ error: 'Assessment upload window is closed. Please request access from SuperAdmin.' });
+    }
+
+    // Check for edits in the bulk data
+    for (const a of assessments) {
+      const existing = AssessmentRepository.getSpecificResult(a.index_no, a.course_code, a.academic_year, a.semester_id);
+      if (existing) {
+        if (!lecturerLid || !AssessmentControlRepository.hasGrantedAccess(lecturerLid, a.course_code, a.index_no)) {
+          return res.status(403).json({ error: `Editing existing result for ${a.index_no} requires specific SuperAdmin approval.` });
+        }
+      }
+    }
+  }
+
   const insert = db.prepare(`
-    INSERT INTO student_assessments (iid, cid, academic_year, semester_sid, class_score, exam_score, grade, gp, entered_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(iid, cid, academic_year, semester_sid) DO UPDATE SET
-      class_score = excluded.class_score,
+    INSERT INTO student_assessments (index_no, course_code, academic_year, level, semester_id, total_ca, exam_score, total_score, grade, grade_point, entered_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(index_no, course_code, academic_year, semester_id) DO UPDATE SET
+      level = excluded.level,
+      total_ca = excluded.total_ca,
       exam_score = excluded.exam_score,
+      total_score = excluded.total_score,
       grade = excluded.grade,
-      gp = excluded.gp,
+      grade_point = excluded.grade_point,
       entered_by = excluded.entered_by,
       updated_at = CURRENT_TIMESTAMP
   `);
 
   const uniqueIids = new Set<string>();
-  const academicYear = assessments[0]?.academic_year;
   const semesterSid = assessments[0]?.semester_sid;
 
   const insertMany = db.transaction((data) => {
     for (const a of data) {
-      const total_score = (Number(a.class_score) || 0) + (Number(a.exam_score) || 0);
-      const { grade, gp } = AssessmentService.calculateGrade(total_score);
-      insert.run(a.iid, a.cid, a.academic_year, a.semester_sid, a.class_score, a.exam_score, grade, gp, (req as any).user.uid);
-      uniqueIids.add(a.iid);
+      const total_score = (Number(a.total_ca) || 0) + (Number(a.exam_score) || 0);
+      const { grade, grade_point } = AssessmentService.calculateGrade(total_score);
+      insert.run(a.index_no, a.course_code, a.academic_year, a.level || '100', a.semester_id, a.total_ca, a.exam_score, total_score, grade, grade_point, (req as any).user.uid);
+      uniqueIids.add(a.index_no);
     }
   });
 

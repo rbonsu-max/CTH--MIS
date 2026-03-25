@@ -37,21 +37,22 @@ export interface Program {
   progid: string;
   name: string;
   department: string;
-  duration_years: number;
+  duration: number;
+  required_ch?: number;
 }
 
 export interface Course {
   id: number;
-  cid: string;
-  title: string;
-  credits: number;
+  code: string;
+  name: string;
+  credit_hours: number;
   department: string;
 }
 
 export interface Registration {
   id: number;
-  iid: string;
-  cid: string;
+  index_no: string;
+  course_code: string;
   academic_year: string;
   semester_sid: string;
   registration_date: string;
@@ -59,50 +60,61 @@ export interface Registration {
   surname?: string;
   other_names?: string;
   full_name?: string;
-  course_title?: string;
-  credits?: number;
+  course_name?: string;
+  credit_hours?: number;
   createdAt?: string;
 }
 
 export interface Assessment {
   id: number;
-  iid: string;
-  cid: string;
+  index_no: string;
+  course_code: string;
   academic_year: string;
-  semester_sid: string;
-  class_score: number;
+  semester_id: string;
+  level: string;
+  a1: number;
+  a2: number;
+  a3: number;
+  a4: number;
+  total_ca: number;
   exam_score: number;
   total_score: number;
   grade: string;
-  gp: number;
+  grade_point: number;
+  weighted_gp: number;
   updated_at?: string;
   surname?: string;
   other_names?: string;
-  course_title?: string;
-  credits: number;
+  course_name?: string;
+  credit_hours: number;
+  index_number?: string;
+  progid?: string;
 }
 
 export interface BoardsheetCache {
   id: number;
-  iid: string;
+  index_no: string;
   academic_year: string;
-  semester_sid: string;
-  tcr: number;
-  tcp: number;
-  gpa: number;
-  ctcr: number;
-  ctcp: number;
-  cgpa: number;
-  remarks: string;
+  semester_id: string;
+  level: string;
+  progid: string;
+  sCH: number;
+  sGP: number;
+  sGPA: number;
+  cCH: number;
+  cGP: number;
+  cGPA: number;
+  class: string;
   calculated_at: string;
 }
 
 export interface Lecturer {
   id: number;
   lid: string;
-  fullname: string;
+  title?: string;
+  name: string;
   email: string;
-  phone: string;
+  tel: string;
   department: string;
   designation: string;
   user_uid?: string;
@@ -111,8 +123,8 @@ export interface Lecturer {
 export interface AcademicYear {
   id: number;
   code: string;
-  start_date?: string;
-  end_date?: string;
+  date_from?: string;
+  date_to?: string;
   is_current: boolean;
 }
 
@@ -141,12 +153,42 @@ export interface Department {
 export interface LecturerAssignment {
   id: number;
   lid: string;
-  cid: string;
+  course_code: string;
   academic_year: string;
   semester_sid: string;
   lecturer_name?: string;
-  course_title?: string;
-  credits?: number;
+  course_name?: string;
+  credit_hours?: number;
+}
+
+export interface AssessmentWindow {
+  id: number;
+  academic_year: string;
+  semester_id: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_by?: string;
+  created_at?: string;
+}
+
+export interface AssessmentRequest {
+  id: number;
+  lid: string;
+  lecturer_name?: string;
+  course_code: string;
+  course_name?: string;
+  academic_year: string;
+  semester_id: string;
+  index_no?: string;
+  student_name?: string;
+  request_type: 'upload' | 'edit';
+  reason: string;
+  status: 'pending' | 'granted' | 'denied';
+  created_at: string;
+  granted_at?: string;
+  expires_at?: string;
+  processed_by?: string;
 }
 
 export type ModuleType = 
@@ -159,4 +201,5 @@ export type ModuleType =
   | 'academic_records'
   | 'statistics'
   | 'lecturers'
-  | 'settings';
+  | 'settings'
+  | 'student_portal';

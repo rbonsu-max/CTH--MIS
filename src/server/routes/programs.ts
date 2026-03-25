@@ -1,5 +1,6 @@
 import express from 'express';
 import { ProgramRepository } from '../repositories/ProgramRepository';
+import { checkRole } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -10,31 +11,31 @@ router.get('/', (req, res) => {
   res.json(programs);
 });
 
-router.post('/', (req, res) => {
-  const { progid, name, department, duration_years } = req.body;
+router.post('/', checkRole(['SuperAdmin', 'Administrator']), (req, res) => {
+  const { progid, name, department, duration, required_ch } = req.body;
   if (!progid || !name) {
     return res.status(400).json({ error: 'progid and name are required' });
   }
   try {
-    ProgramRepository.createProgram({ progid, name, department, duration_years, created_by: (req as any).user.uid });
-    res.status(201).json({ progid, name, department, duration_years });
+    ProgramRepository.createProgram({ progid, name, department, duration, required_ch, created_by: (req as any).user.uid });
+    res.status(201).json({ progid, name, department, duration, required_ch });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.put('/:progid', (req, res) => {
+router.put('/:progid', checkRole(['SuperAdmin', 'Administrator']), (req, res) => {
   const { progid } = req.params;
-  const { name, department, duration_years } = req.body;
+  const { name, department, duration, required_ch } = req.body;
   try {
-    ProgramRepository.updateProgram(progid, { name, department, duration_years });
+    ProgramRepository.updateProgram(progid, { name, department, duration, required_ch });
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.delete('/:progid', (req, res) => {
+router.delete('/:progid', checkRole(['SuperAdmin', 'Administrator']), (req, res) => {
   const { progid } = req.params;
   try {
     ProgramRepository.deleteProgram(progid);
@@ -53,22 +54,22 @@ router.get('/:progid/curriculum', (req, res) => {
   res.json(curriculum);
 });
 
-router.post('/:progid/curriculum', (req, res) => {
+router.post('/:progid/curriculum', checkRole(['SuperAdmin', 'Administrator']), (req, res) => {
   const { progid } = req.params;
-  const { cid, level, semester_sid, is_elective } = req.body;
+  const { course_code, level, semester_sid, is_elective } = req.body;
   try {
-    ProgramRepository.mountCurriculum({ progid, cid, level, semester_sid, is_elective, created_by: (req as any).user.uid });
-    res.status(201).json({ progid, cid, level, semester_sid, is_elective });
+    ProgramRepository.mountCurriculum({ progid, course_code, level, semester_sid, is_elective, created_by: (req as any).user.uid });
+    res.status(201).json({ progid, course_code, level, semester_sid, is_elective });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.delete('/:progid/curriculum', (req, res) => {
+router.delete('/:progid/curriculum', checkRole(['SuperAdmin', 'Administrator']), (req, res) => {
   const { progid } = req.params;
-  const { cid, level, semester_sid } = req.query;
+  const { course_code, level, semester_sid } = req.query;
   try {
-    ProgramRepository.unmountCurriculum(progid, cid as string, Number(level), semester_sid as string);
+    ProgramRepository.unmountCurriculum(progid, course_code as string, Number(level), semester_sid as string);
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

@@ -120,20 +120,30 @@ router.post('/:iid/level', (req, res) => {
 // POST create/update student portal login
 router.post('/:iid/login', async (req, res) => {
   const { iid } = req.params;
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: 'username and password are required' });
+  const { password } = req.body;
+  if (!password) {
+    return res.status(400).json({ error: 'password is required' });
   }
   try {
+    const student = db.prepare('SELECT index_number FROM students WHERE iid = ?').get(iid) as any;
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    const username = student.index_number;
+
     const password_hash = await bcrypt.hash(password, 10);
-    // Use UPSERT based on iid (primary key for student login)
-    db.prepare(`
-      INSERT INTO student_logins (iid, username, password_hash)
-      VALUES (?, ?, ?)
-      ON CONFLICT(iid) DO UPDATE SET
-        username = excluded.username,
-        password_hash = excluded.password_hash
-    `).run(iid, username, password_hash);
+    
+    const existing = db.prepare('SELECT id FROM student_logins WHERE iid = ?').get(iid);
+    if (existing) {
+      db.prepare(`
+        UPDATE student_logins 
+        SET username = ?, password_hash = ?, requires_reset = 1 
+        WHERE iid = ?
+      `).run(username, password_hash, iid);
+    } else {
+      db.prepare(`
+        INSERT INTO student_logins (iid, username, password_hash, requires_reset)
+        VALUES (?, ?, ?, 1)
+      `).run(iid, username, password_hash);
+    }
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -149,7 +159,7 @@ router.post('/:iid/reset-password', async (req, res) => {
   }
   try {
     const password_hash = await bcrypt.hash(password, 10);
-    const result = db.prepare('UPDATE student_logins SET password_hash = ? WHERE iid = ?').run(password_hash, iid);
+    const result = db.prepare('UPDATE student_logins SET password_hash = ?, requires_reset = 1 WHERE iid = ?').run(password_hash, iid);
     if (result.changes === 0) {
       return res.status(404).json({ error: 'No login found for this student' });
     }

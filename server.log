@@ -1,0 +1,2935 @@
+[SIMS] Server running on http://0.0.0.0:3009 (development)
+[WARN] JWT_SECRET not set — using insecure default. Set it in .env before deploying!
+[0mGET / [36m304[0m 31.779 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 5.231 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.703 ms - -[0m
+[0mGET / [36m304[0m 3.258 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 37.006 ms - -[0m
+[0mGET /@vite/client [32m200[0m 25.020 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.289 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 1.268 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.199 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 154.480 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 153.011 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.128 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.346 ms - -[0m
+[0mGET /src/index.css [36m304[0m 293.657 ms - -[0m
+[0mGET /@vite/client [32m200[0m 6.911 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.091 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 420.330 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 439.006 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 447.808 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 25.671 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 45.408 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 472.372 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 347.275 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 8.018 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.184 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.193 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.120 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.085 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.119 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.181 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.089 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.196 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.130 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.100 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.089 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.087 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.079 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.881 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.525 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 45.213 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 45.753 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 47.050 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 26.409 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 26.999 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.182 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.153 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.092 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.140 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.158 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.111 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.427 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.599 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.129 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.117 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 19.702 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.040 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.127 ms - -[0m
+[0mGET /api/students [36m304[0m 2.089 ms - -[0m
+[0mGET /api/programs [32m200[0m 1.540 ms - 2[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [32m200[0m 1.919 ms - 2[0m
+[0mGET /api/registrations [36m304[0m 1.157 ms - -[0m
+[0mGET /api/academic/years [32m200[0m 0.946 ms - 133[0m
+[0mGET /api/calendar-events [36m304[0m 4.651 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.922 ms - -[0m
+[0mGET /api/academic/semesters [32m200[0m 0.901 ms - 245[0m
+[0mGET /api/registrations [36m304[0m 0.975 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.003 ms - -[0m
+[0mGET /api/students [36m304[0m 0.959 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.928 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 2.431 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.057 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.296 ms - -[0m
+[0mGET /api/students [36m304[0m 0.776 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.430 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 1.709 ms - -[0m
+[0mGET /api/registrations [36m304[0m 1.128 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.749 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.033 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.619 ms - -[0m
+[0mGET /api/students [36m304[0m 0.681 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.570 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 0.848 ms - -[0m
+[0mGET /api/registrations [36m304[0m 2.182 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.216 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.538 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.492 ms - -[0m
+[0mPOST /api/auth/login [32m200[0m 89.025 ms - 211[0m
+[0mPOST /api/academic/years [32m201[0m 1.182 ms - 41[0m
+[0mPOST /api/academic/years [32m201[0m 0.728 ms - 41[0m
+[0mPOST /api/academic/years/EX2023%2F2024/set-current [32m200[0m 1.043 ms - 16[0m
+[0mPOST /api/academic/semesters [32m201[0m 0.717 ms - 78[0m
+[0mPOST /api/academic/semesters/EXSEM1/set-current [32m200[0m 0.772 ms - 16[0m
+[0mPOST /api/departments [32m201[0m 0.746 ms - 45[0m
+[0mPOST /api/programs [32m201[0m 1.051 ms - 91[0m
+[0mPOST /api/courses [32m201[0m 0.852 ms - 88[0m
+[0mPOST /api/courses [32m201[0m 0.701 ms - 89[0m
+[0mPOST /api/programs/EXPROG/curriculum [32m201[0m 0.865 ms - 78[0m
+[0mPOST /api/programs/EXPROG/curriculum [32m201[0m 0.644 ms - 78[0m
+[0mPOST /api/lecturers [32m201[0m 0.768 ms - 190[0m
+[0mPOST /api/lecturers/assignments [32m201[0m 0.806 ms - 93[0m
+[0mPOST /api/auth/login [32m200[0m 64.926 ms - 167[0m
+[DEBUG] GET /api/courses user: {
+  id: 'EX-U-01',
+  uid: 'EX-LEC-UID-01',
+  role: 'Lecturer',
+  name: 'Dr. Example Lecturer',
+  username: 'lecturer@ex.com',
+  iat: 1774382499,
+  exp: 1774468899
+}
+[DEBUG] GET /api/courses lecturer courses: [
+  {
+    id: 15,
+    code: 'EXC101',
+    name: 'Foundations of Example',
+    credit_hours: 3,
+    department: 'EXDEPT',
+    created_by: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+    created_at: '2026-03-24 20:01:39'
+  }
+]
+[0mGET /api/courses [32m200[0m 0.659 ms - 185[0m
+[0mGET /api/registrations?course_code=EXC102 [32m200[0m 0.750 ms - 2[0m
+[0mPOST /api/students [32m201[0m 3.694 ms - 234[0m
+[0mPOST /api/students [32m201[0m 1.099 ms - 238[0m
+[0mPOST /api/students [32m201[0m 0.653 ms - 233[0m
+[0mPOST /api/registrations [32m201[0m 1.184 ms - 119[0m
+[0mPOST /api/registrations [32m201[0m 0.630 ms - 119[0m
+[0mPOST /api/registrations [32m201[0m 0.609 ms - 119[0m
+[0mPOST /api/registrations [32m201[0m 0.656 ms - 119[0m
+[0mPOST /api/registrations [32m201[0m 0.637 ms - 119[0m
+[0mPOST /api/registrations [32m201[0m 0.620 ms - 119[0m
+[0mPOST /api/assessments [32m201[0m 2.437 ms - 218[0m
+[0mPOST /api/assessments [32m201[0m 0.988 ms - 218[0m
+[0mPOST /api/assessments [32m201[0m 0.916 ms - 218[0m
+[0mPOST /api/assessments [32m201[0m 1.054 ms - 218[0m
+[0mPOST /api/assessments [32m201[0m 1.052 ms - 217[0m
+[0mPOST /api/assessments [32m201[0m 1.033 ms - 217[0m
+[0mPOST /api/assessments/compute-gpa [32m200[0m 1.656 ms - 16[0m
+[0mGET /api/assessments/broadsheet?index_no=GYHLWIV&academic_year=EX2023/2024&semester_id=EXSEM1 [32m200[0m 0.558 ms - 227[0m
+[0mGET /api/assessments/broadsheet?index_no=UAODVN5&academic_year=EX2023/2024&semester_id=EXSEM1 [32m200[0m 0.487 ms - 227[0m
+[0mGET /api/assessments/broadsheet?index_no=886VGTS&academic_year=EX2023/2024&semester_id=EXSEM1 [32m200[0m 0.491 ms - 234[0m
+[0mPOST /api/academic/years/EX2026%2F2027/set-current [32m200[0m 0.548 ms - 16[0m
+[0mGET /api/assessments/graduation-list?progid=EXPROG&admission_year=EX2023%2F2024 [32m200[0m 0.765 ms - 406[0m
+[0mGET /api/students/GYHLWIV/transcript [32m200[0m 1.088 ms - -[0m
+[0mPOST /api/academic/years/EX2023%2F2024/set-current [32m200[0m 0.692 ms - 16[0m
+[0mGET / [36m304[0m 4.661 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.546 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 0.816 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.145 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.072 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.068 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.158 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.059 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.456 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.442 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.100 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.111 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.220 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.079 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.059 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.050 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.094 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.125 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.799 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 2.860 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.147 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.195 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.067 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.148 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.166 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.113 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.569 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 4.685 ms - -[0m
+[0mGET /api/programs [32m200[0m 0.967 ms - 241[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [32m200[0m 0.790 ms - 370[0m
+[0mGET /api/academic/years [32m200[0m 0.487 ms - 470[0m
+[0mGET /api/calendar-events [36m304[0m 0.939 ms - -[0m
+[0mGET /api/academic/semesters [32m200[0m 0.612 ms - 410[0m
+[0mGET /api/registrations [32m200[0m 0.851 ms - -[0m
+[0mGET /api/students [32m200[0m 1.941 ms - -[0m
+[0mGET /api/programs [36m304[0m 3.824 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 1.504 ms - -[0m
+[0mGET /api/students [36m304[0m 1.741 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.618 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.170 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.119 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.722 ms - -[0m
+[0mGET / [36m304[0m 11.946 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.214 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 0.074 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.289 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.182 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.127 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.144 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.163 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.095 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.135 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.073 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.222 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.105 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.115 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.054 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.110 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.077 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.129 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.094 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.079 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.072 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.061 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.795 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.605 ms - -[0m
+[0mGET /api/students [36m304[0m 1.899 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.869 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 0.847 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.781 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.807 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.744 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.066 ms - -[0m
+[0mGET /api/students [36m304[0m 1.406 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.443 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 0.978 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.733 ms - -[0m
+[0mGET /api/registrations [36m304[0m 2.945 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 2.153 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.257 ms - -[0m
+[0mGET /api/programs [36m304[0m 6.093 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.380 ms - -[0m
+[0mGET /api/departments [32m200[0m 1.250 ms - 832[0m
+[0mGET /api/departments [36m304[0m 4.510 ms - -[0m
+[0mGET /api/programs [36m304[0m 11.800 ms - -[0m
+[0mGET /api/departments [36m304[0m 7.768 ms - -[0m
+[0mGET /api/programs [36m304[0m 6.684 ms - -[0m
+[0mGET /api/departments [36m304[0m 12.405 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 6.436 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774381275,
+  exp: 1774467675
+}
+[0mGET /api/courses [36m304[0m 3.382 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.822 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.803 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 7.419 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.150 ms - -[0m
+[0mGET /api/registrations [36m304[0m 3.860 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [32m200[0m 1.926 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.895 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.848 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.660 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.666 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.363 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 3.750 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 1.059 ms - 24[0m
+[0mGET /api/courses [33m401[0m 1.863 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.313 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.296 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.841 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.223 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.800 ms - 24[0m
+[0mGET /api/students [33m401[0m 4.530 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.800 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.647 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.367 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.765 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.467 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.581 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.639 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.508 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.722 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 24.756 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 1.259 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.552 ms - 24[0m
+[0mGET /api/courses [33m401[0m 1.338 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.598 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.712 ms - 24[0m
+[0mGET /api/courses [33m401[0m 1.186 ms - 24[0m
+[0mGET /api/programs [33m401[0m 1.366 ms - 24[0m
+[0mGET /api/students [33m401[0m 1.146 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.638 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.463 ms - 24[0m
+[0mGET /api/courses [33m401[0m 2.506 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.629 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.637 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.485 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.987 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.567 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 0.918 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 1.284 ms - 24[0m
+[0mGET /api/courses [33m401[0m 2.582 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.695 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 3.436 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.487 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.515 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 5.767 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.427 ms - 24[0m
+[0mGET /api/academic/years [33m401[0m 3.539 ms - 24[0m
+[0mGET /api/courses [33m401[0m 5.354 ms - 24[0m
+[0mGET /api/courses [33m401[0m 1.889 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 1.106 ms - 24[0m
+[0mGET /api/students [33m401[0m 1.057 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.364 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.405 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.881 ms - 24[0m
+[0mPOST /api/auth/logout [32m200[0m 0.422 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.303 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.193 ms - 24[0m
+[0mGET / [36m304[0m 18.661 ms - -[0m
+[0mGET /@vite/client [36m304[0m 2.979 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.093 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 0.086 ms - -[0m
+[0mGET / [36m304[0m 16.756 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.298 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 0.266 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.087 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.133 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.283 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.091 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.046 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.106 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.098 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.151 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.198 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.120 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 3.507 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.458 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 1.436 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.099 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.108 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.139 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 1.078 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.484 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.684 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.455 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.307 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.096 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.097 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.096 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.099 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.127 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.094 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.112 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.072 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.114 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 1.013 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.296 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.193 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.147 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.647 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.146 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.500 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.093 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.050 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 2.934 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.143 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 2.451 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.848 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.065 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.055 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.135 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 1.363 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.081 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.048 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.249 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.159 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.258 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.270 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.195 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.258 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.347 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.171 ms - 24[0m
+[0mGET / [36m304[0m 4.767 ms - -[0m
+[0mGET / [36m304[0m 6.295 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.216 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 2.917 ms - -[0m
+[0mGET /src/main.tsx [36m304[0m 0.152 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.239 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.093 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.632 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.478 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.403 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.525 ms - -[0m
+[0mGET /src/index.css [36m304[0m 3.241 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 1.256 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.219 ms - -[0m
+[0mGET /src/App.tsx [36m304[0m 0.533 ms - -[0m
+[0mGET /src/index.css [36m304[0m 0.198 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.081 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.270 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.527 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.292 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 1.131 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.306 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.750 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 2.441 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.243 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.392 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.097 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.055 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.133 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.469 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 1.927 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.279 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.116 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.051 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 2.185 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 1.808 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.390 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 1.077 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx [36m304[0m 0.230 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.333 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.083 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.075 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.126 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 3.406 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.957 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.804 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.918 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 1.222 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.067 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.074 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 6.795 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 2.442 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 3.917 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.781 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.225 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.220 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 3.070 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 4.042 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.992 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.187 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 123.959 ms - 211[0m
+[0mGET /api/programs [36m304[0m 2.651 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 2.724 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.865 ms - -[0m
+[0mGET /api/students [36m304[0m 1.625 ms - -[0m
+[0mGET /api/registrations [36m304[0m 1.304 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.422 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.895 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.049 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.932 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 0.965 ms - -[0m
+[0mGET /api/students [36m304[0m 2.182 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.081 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.709 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 0.660 ms - -[0m
+[0mGET /api/students [36m304[0m 3.659 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.014 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.935 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [32m200[0m 4.356 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.680 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.902 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 0.960 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.277 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.983 ms - -[0m
+[0mGET /api/students [36m304[0m 1.005 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 1.077 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.022 ms - -[0m
+[0mGET /api/students [36m304[0m 0.802 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.768 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2026%2F2027&semester_id=EXSEM1 [32m200[0m 0.815 ms - 2[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2026%2F2027&semester_id=EXSEM1 [32m200[0m 0.694 ms - 2[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.980 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.883 ms - -[0m
+10:12:14 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+10:12:14 AM [vite] Internal server error: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx: Unexpected token (248:5)
+
+  246 |     );
+  247 |   };
+> 248 |     </div>
+      |      ^
+  249 |   );
+  250 |
+  251 |   // ─── BROADSHEET ─────────────────────────────────────────────
+  Plugin: vite:react-babel
+  File: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx:248:5
+  246|      );
+  247|    };
+  248|      </div>
+     |       ^
+  249|    );
+  250|  
+      at toParseError (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+      at TypeScriptParserMixin.unexpected (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1544:16)
+      at TypeScriptParserMixin.jsxParseIdentifier (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:278:14)
+      at TypeScriptParserMixin.jsxParseNamespacedName (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:288:25)
+      at TypeScriptParserMixin.jsxParseElementName (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:306:14)
+      at TypeScriptParserMixin.jsxParseOpeningElementAt (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:429:24)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:470:35)
+      at TypeScriptParserMixin.jsxParseElement (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:559:19)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:573:21)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at fn (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3745:23)
+      at TypeScriptParserMixin.tryParse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3744:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at callback (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at TypeScriptParserMixin.allowInAnd (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:3192:16)
+      at TypeScriptParserMixin.parseExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3220:20)
+      at TypeScriptParserMixin.parseStatementLike (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at TypeScriptParserMixin.parseBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at TypeScriptParserMixin.parseBlock (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:2621:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:2562:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:1850:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3764:22)
+      at callback (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at TypeScriptParserMixin.allowInAnd (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:3192:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at TypeScriptParserMixin.parseVar (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433534249 [33m404[0m 131.741 ms - 179[0m
+10:12:14 AM [vite] Internal server error: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx: Unexpected token (248:5)
+
+  246 |     );
+  247 |   };
+> 248 |     </div>
+      |      ^
+  249 |   );
+  250 |
+  251 |   // ─── BROADSHEET ─────────────────────────────────────────────
+  Plugin: vite:react-babel
+  File: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx:248:5
+  246|      );
+  247|    };
+  248|      </div>
+     |       ^
+  249|    );
+  250|  
+      at toParseError (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+      at TypeScriptParserMixin.unexpected (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1544:16)
+      at TypeScriptParserMixin.jsxParseIdentifier (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:278:14)
+      at TypeScriptParserMixin.jsxParseNamespacedName (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:288:25)
+      at TypeScriptParserMixin.jsxParseElementName (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:306:14)
+      at TypeScriptParserMixin.jsxParseOpeningElementAt (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:429:24)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:470:35)
+      at TypeScriptParserMixin.jsxParseElement (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:559:19)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:573:21)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at fn (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3745:23)
+      at TypeScriptParserMixin.tryParse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/util.ts:174:20)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3744:20)
+      at TypeScriptParserMixin.parseExpressionBase (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:226:23)
+      at callback (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:217:39)
+      at TypeScriptParserMixin.allowInAnd (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:3192:16)
+      at TypeScriptParserMixin.parseExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:217:17)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:688:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3220:20)
+      at TypeScriptParserMixin.parseStatementLike (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:431:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1444:16)
+      at TypeScriptParserMixin.parseBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at TypeScriptParserMixin.parseBlock (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1385:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:2621:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:2562:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:1850:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:1170:21)
+      at TypeScriptParserMixin.parseExprAtom (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/jsx/index.ts:583:22)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:742:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:721:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:683:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3893:20)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:417:14)
+      at TypeScriptParserMixin.parseExprOps (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:429:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:384:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:301:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3764:22)
+      at callback (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:257:12)
+      at TypeScriptParserMixin.allowInAnd (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:3192:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/expression.ts:256:17)
+      at TypeScriptParserMixin.parseVar (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1587:18)
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433534249 [33m404[0m 98.869 ms - 179[0m
+[0mGET /src/index.css?t=1774433534249 [32m200[0m 214.766 ms - -[0m
+[0mGET /src/index.css?t=1774433534249 [36m304[0m 0.278 ms - -[0m
+10:12:38 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774433558151 [32m200[0m 92.403 ms - -[0m
+[0mGET /src/index.css?t=1774433558151 [36m304[0m 0.152 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [32m200[0m 105.533 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.143 ms - -[0m
+[0mGET / [32m200[0m 13.818 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.197 ms - -[0m
+[0mGET /src/main.tsx?t=1774433558151 [32m200[0m 0.359 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.099 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.662 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.360 ms - -[0m
+[0mGET /src/index.css?t=1774433558151 [36m304[0m 0.184 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.119 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [32m200[0m 0.584 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.093 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.104 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.147 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.138 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.058 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.065 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.334 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.279 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.159 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.069 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.061 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.071 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.163 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.069 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.081 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.078 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.116 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.118 ms - -[0m
+[0mGET /api/auth/me [32m200[0m 1.352 ms - 200[0m
+[0mGET /api/auth/me [36m304[0m 0.511 ms - -[0m
+[0mGET /api/students [36m304[0m 0.911 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.474 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 1.103 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.943 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.679 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.876 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.697 ms - -[0m
+[0mGET /api/students [36m304[0m 3.261 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.521 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.694 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 0.836 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.735 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.046 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.092 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.360 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 9.894 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.558 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 4.573 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433222,
+  exp: 1774519622
+}
+[0mGET /api/courses [36m304[0m 1.372 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.499 ms - -[0m
+[0mGET /api/students [36m304[0m 6.086 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.210 ms - -[0m
+[0mGET /api/students [36m304[0m 7.899 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.043 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 2.003 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 7.835 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.857 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.348 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.348 ms - 24[0m
+10:16:54 AM [vite] (client) page reload package.json
+[0mGET / [32m200[0m 4.940 ms - -[0m
+[0mGET / [36m304[0m 4.376 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.119 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.092 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.598 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.144 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.166 ms - -[0m
+[0mGET / [36m304[0m 12.163 ms - -[0m
+[0mGET /src/main.tsx?t=1774433814211 [32m200[0m 0.310 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 1.951 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.089 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.168 ms - -[0m
+[0mGET /src/main.tsx?t=1774433814211 [36m304[0m 0.263 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.169 ms - -[0m
+[0mGET /src/main.tsx?t=1774433814211 [36m304[0m 0.328 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.123 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.077 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.202 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.157 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.082 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 5.284 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.730 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.128 ms - -[0m
+[0mGET /src/index.css?t=1774433814211 [32m200[0m 0.240 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.107 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.056 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.045 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 3.971 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.125 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.260 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.123 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.138 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 3.352 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.077 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.181 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.145 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.634 ms - -[0m
+[0mGET /src/index.css?t=1774433814211 [36m304[0m 0.209 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.086 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.109 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.093 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.091 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.045 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.040 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 1.831 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.306 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.169 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.065 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.106 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.067 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.164 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.080 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.398 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.491 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.075 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.191 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 1.540 ms - -[0m
+[0mGET /src/index.css?t=1774433814211 [36m304[0m 0.365 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.109 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.050 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.380 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.748 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.069 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.114 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.216 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.233 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 1.515 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.066 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 4.262 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.410 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.065 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.086 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.124 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.097 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 1.976 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 3.884 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.079 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.117 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.281 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.195 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.078 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.064 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 3.880 ms - 24[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.097 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.353 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.199 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 2.632 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.800 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.201 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.200 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.210 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 1.377 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.827 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.328 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.219 ms - 24[0m
+10:16:56 AM [vite] (client) page reload package.json
+[0mGET / [32m200[0m 5.508 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.148 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.045 ms - -[0m
+[0mGET /manifest.json [36m304[0m 2.768 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.070 ms - -[0m
+[0mGET / [36m304[0m 106.548 ms - -[0m
+[0mGET /src/main.tsx?t=1774433816692 [32m200[0m 0.310 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.570 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.289 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.277 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.124 ms - -[0m
+[0mGET /src/main.tsx?t=1774433816692 [36m304[0m 0.147 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.559 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.127 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.072 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.203 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 2.135 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.074 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.700 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.073 ms - -[0m
+[0mGET /src/index.css?t=1774433816692 [32m200[0m 0.349 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.221 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.336 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.068 ms - -[0m
+[0mGET / [36m304[0m 34.423 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.631 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.051 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.054 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.041 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.102 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.199 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.135 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.865 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.124 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.093 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.116 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.062 ms - -[0m
+[0mGET /src/index.css?t=1774433816692 [36m304[0m 0.092 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.041 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.073 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.351 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.363 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 0.486 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.062 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.051 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.078 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.046 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.290 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.126 ms - -[0m
+[0mGET /src/main.tsx?t=1774433816692 [36m304[0m 0.241 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.077 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.121 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.072 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.080 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.051 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.142 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.146 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.847 ms - -[0m
+[0mGET /src/App.tsx?t=1774433558151 [36m304[0m 0.121 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 3.169 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.058 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 3.351 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.276 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.112 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.115 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.305 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.068 ms - -[0m
+[0mGET /src/index.css?t=1774433816692 [36m304[0m 0.093 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.105 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.087 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 2.209 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433558151 [36m304[0m 1.121 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.187 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.061 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.149 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.069 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 1.128 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.232 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.259 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.200 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.449 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.304 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.154 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.258 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.261 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.210 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.418 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.351 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 75.766 ms - 211[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 0.768 ms - -[0m
+[0mGET /api/students [36m304[0m 0.986 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.726 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.735 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.678 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.670 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.700 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 2.974 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.039 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 0.972 ms - -[0m
+[0mGET /api/students [36m304[0m 1.615 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.980 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.241 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 1.418 ms - -[0m
+[0mGET /api/students [36m304[0m 1.058 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.244 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.929 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.047 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.922 ms - -[0m
+10:18:11 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+10:18:11 AM [vite] Internal server error: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx: Missing semicolon. (86:138)
+
+  84 |             </select>
+  85 |           </div>
+> 86 |           <div className="flex items-end"><button className="btn btn-primary w-full" onClick={() => printElement('print-course-results', `Course Results - ${crCourse}`)}>🖨️ Print</button></div>
+     |                                                                                                                                           ^
+  87 |         </div>
+  88 |       </div>
+  89 |       <div className="card overflow-hidden" id="print-course-results">
+  Plugin: vite:react-babel
+  File: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx:86:138
+  84 |              </select>
+  85 |            </div>
+  86 |            <div className="flex items-end"><button className="btn btn-primary w-full" onClick={() => printElement('print-course-results', `Course Results - ${crCourse}`)}>🖨️ Print</button></div>
+     |                                                                                                                                            ^
+  87 |          </div>
+  88 |        </div>
+      at toParseError (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+      at TypeScriptParserMixin.semicolon (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/util.ts:149:10)
+      at TypeScriptParserMixin.parseExpressionStatement (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1363:10)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:702:19)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3220:20)
+      at TypeScriptParserMixin.parseStatementLike (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at TypeScriptParserMixin.parseBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at TypeScriptParserMixin.parseProgram (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at TypeScriptParserMixin.parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/index.ts:83:25)
+      at TypeScriptParserMixin.parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:4354:20)
+      at parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/parser/index.ts:29:19)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transformation/index.ts:41:36)
+      at run.next (<anonymous>)
+      at transform (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transform.ts:29:20)
+      at transform.next (<anonymous>)
+      at step (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:261:32)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:223:11)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:189:28
+      at <anonymous> (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/gensync-utils/async.ts:90:7)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:113:33
+      at step (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:287:14)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:223:11)
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433891401 [33m404[0m 9.928 ms - 179[0m
+10:18:11 AM [vite] Internal server error: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx: Missing semicolon. (86:138)
+
+  84 |             </select>
+  85 |           </div>
+> 86 |           <div className="flex items-end"><button className="btn btn-primary w-full" onClick={() => printElement('print-course-results', `Course Results - ${crCourse}`)}>🖨️ Print</button></div>
+     |                                                                                                                                           ^
+  87 |         </div>
+  88 |       </div>
+  89 |       <div className="card overflow-hidden" id="print-course-results">
+  Plugin: vite:react-babel
+  File: /Users/user/Desktop/snsportal/sns/src/components/AcademicRecordsModule.tsx:86:138
+  84 |              </select>
+  85 |            </div>
+  86 |            <div className="flex items-end"><button className="btn btn-primary w-full" onClick={() => printElement('print-course-results', `Course Results - ${crCourse}`)}>🖨️ Print</button></div>
+     |                                                                                                                                            ^
+  87 |          </div>
+  88 |        </div>
+      at toParseError (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at TypeScriptParserMixin.raise (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/tokenizer/index.ts:1504:19)
+      at TypeScriptParserMixin.semicolon (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/util.ts:149:10)
+      at TypeScriptParserMixin.parseExpressionStatement (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1363:10)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:702:19)
+      at TypeScriptParserMixin.parseStatementContent (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:3220:20)
+      at TypeScriptParserMixin.parseStatementLike (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:482:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:419:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1443:16)
+      at TypeScriptParserMixin.parseBlockBody (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:1417:10)
+      at TypeScriptParserMixin.parseProgram (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at TypeScriptParserMixin.parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/parser/index.ts:83:25)
+      at TypeScriptParserMixin.parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/plugins/typescript/index.ts:4354:20)
+      at parse (/Users/user/Desktop/snsportal/sns/node_modules/@babel/parser/src/index.ts:86:38)
+      at parser (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/parser/index.ts:29:19)
+      at parser.next (<anonymous>)
+      at normalizeFile (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transformation/normalize-file.ts:50:24)
+      at normalizeFile.next (<anonymous>)
+      at run (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transformation/index.ts:41:36)
+      at run.next (<anonymous>)
+      at transform (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/transform.ts:29:20)
+      at transform.next (<anonymous>)
+      at step (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:261:32)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:223:11)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:189:28
+      at <anonymous> (/Users/user/Desktop/snsportal/sns/node_modules/@babel/core/src/gensync-utils/async.ts:90:7)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:113:33
+      at step (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:287:14)
+      at /Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/Users/user/Desktop/snsportal/sns/node_modules/gensync/index.js:223:11)
+[0mGET /src/index.css?t=1774433891401 [32m200[0m 28.944 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433891401 [33m404[0m 5.929 ms - 179[0m
+[0mGET /src/index.css?t=1774433891401 [36m304[0m 0.141 ms - -[0m
+10:18:51 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774433931615 [32m200[0m 85.918 ms - -[0m
+[0mGET /src/index.css?t=1774433931615 [36m304[0m 0.148 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433931615 [36m304[0m 0.191 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433931615 [32m200[0m 131.363 ms - -[0m
+10:18:52 AM [vite] (client) ✨ new dependencies optimized: xlsx, file-saver
+10:18:52 AM [vite] (client) ✨ optimized dependencies changed. reloading
+[0mGET /node_modules/.vite/deps/file-saver.js?v=d4aee0b6 [32m200[0m 678.277 ms - -[0m
+[0mGET /node_modules/.vite/deps/chunk-PR4QN5HX.js?v=3ef28c70 [32m200[0m 1.427 ms - -[0m
+[0mGET /node_modules/.vite/deps/xlsx.js?v=b2248e5c [32m200[0m 699.755 ms - -[0m
+[0mGET / [32m200[0m 3.387 ms - -[0m
+[0mGET / [36m304[0m 7.460 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 2.354 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.091 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.180 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.227 ms - -[0m
+[0mGET /src/main.tsx?t=1774433931615 [32m200[0m 0.258 ms - -[0m
+[0mGET /src/main.tsx?t=1774433931615 [36m304[0m 0.993 ms - -[0m
+[0mGET /src/index.css?t=1774433931615 [36m304[0m 0.136 ms - -[0m
+[0mGET /@vite/client [36m304[0m 58.240 ms - -[0m
+[0mGET /src/index.css?t=1774433931615 [36m304[0m 0.090 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.170 ms - -[0m
+[0mGET /node_modules/.vite/deps/react_jsx-dev-runtime.js?v=3ef28c70 [32m200[0m 1.283 ms - -[0m
+[0mGET /node_modules/.vite/deps/react.js?v=3ef28c70 [32m200[0m 0.420 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [32m200[0m 0.219 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.099 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 78.575 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.923 ms - -[0m
+[0mGET /src/App.tsx?t=1774433931615 [32m200[0m 0.692 ms - -[0m
+[0mGET /node_modules/.vite/deps/chunk-NKU67ILE.js?v=3ef28c70 [32m200[0m 0.950 ms - -[0m
+[0mGET /src/App.tsx?t=1774433931615 [36m304[0m 0.730 ms - -[0m
+[0mGET /src/constants.tsx [32m200[0m 0.459 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [32m200[0m 0.525 ms - -[0m
+[0mGET /node_modules/.vite/deps/motion_react.js?v=3ef28c70 [32m200[0m 0.672 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [32m200[0m 1.699 ms - -[0m
+[0mGET /node_modules/.vite/deps/react-dom_client.js?v=3ef28c70 [32m200[0m 2.155 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [32m200[0m 0.853 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [32m200[0m 4.982 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [32m200[0m 0.792 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [32m200[0m 1.227 ms - -[0m
+[0mGET /node_modules/.vite/deps/lucide-react.js?v=3ef28c70 [32m200[0m 1.360 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.083 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.087 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [32m200[0m 1.595 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [32m200[0m 0.453 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [32m200[0m 1.271 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.209 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.167 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433931615 [32m200[0m 2.989 ms - -[0m
+[0mGET /src/components/Login.tsx [32m200[0m 0.375 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.060 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.084 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.447 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.110 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.135 ms - -[0m
+[0mGET /node_modules/.vite/deps/chunk-6QO6Q4YR.js?v=3ef28c70 [32m200[0m 0.466 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [32m200[0m 0.694 ms - -[0m
+[0mGET /node_modules/.vite/deps/chunk-77XXEOXN.js?v=3ef28c70 [32m200[0m 0.843 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [32m200[0m 0.710 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.212 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.625 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.206 ms - -[0m
+[0mGET /node_modules/.vite/deps/papaparse.js?v=3ef28c70 [32m200[0m 1.001 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.181 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [32m200[0m 0.636 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [32m200[0m 0.558 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433931615 [32m200[0m 1.865 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [32m200[0m 0.995 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.113 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.326 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.507 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.167 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.204 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.147 ms - -[0m
+[0mGET /node_modules/.vite/deps/file-saver.js?v=3ef28c70 [32m200[0m 0.204 ms - -[0m
+[0mGET /node_modules/.vite/deps/xlsx.js?v=3ef28c70 [32m200[0m 3.386 ms - -[0m
+[0mGET /api/auth/me [32m200[0m 1.541 ms - 200[0m
+[0mGET /api/auth/me [36m304[0m 2.447 ms - -[0m
+[0mGET /api/students [36m304[0m 1.416 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.711 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 1.313 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.599 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.103 ms - -[0m
+[0mGET /api/students [36m304[0m 1.439 ms - -[0m
+[0mGET /api/registrations [36m304[0m 1.394 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.540 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.521 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.500 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 1.419 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.211 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.311 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.786 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.724 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.537 ms - -[0m
+[0mGET /api/students [36m304[0m 2.763 ms - -[0m
+[0mGET /api/programs [36m304[0m 5.864 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 6.240 ms - -[0m
+[0mGET /api/registrations [36m304[0m 2.260 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.881 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.100 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 4.466 ms - -[0m
+[0mGET /api/students [36m304[0m 1.440 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.643 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 2.495 ms - -[0m
+[0mGET /api/registrations [36m304[0m 3.367 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.094 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.594 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 7.351 ms - -[0m
+[0mGET / [36m304[0m 3.116 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.341 ms - -[0m
+[0mGET /src/main.tsx?t=1774433931615 [36m304[0m 4.601 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.199 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.256 ms - -[0m
+[0mGET /src/App.tsx?t=1774433931615 [36m304[0m 0.171 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.410 ms - -[0m
+[0mGET /src/index.css?t=1774433931615 [36m304[0m 0.153 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.161 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.092 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.087 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.129 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.203 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.128 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.424 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.578 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774433931615 [36m304[0m 0.187 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.155 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.104 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 2.443 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.153 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.064 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.066 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.223 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.321 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.596 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 2.459 ms - -[0m
+[0mGET /api/students [36m304[0m 0.965 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.753 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 0.914 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.932 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.856 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.182 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.169 ms - -[0m
+[0mGET /api/students [36m304[0m 1.241 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.262 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774433839,
+  exp: 1774520239
+}
+[0mGET /api/courses [36m304[0m 1.656 ms - -[0m
+[0mGET /api/registrations [36m304[0m 1.304 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.060 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.139 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.926 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.541 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.443 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.820 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 174.230 ms - 211[0m
+[0mGET /api/students [36m304[0m 4.769 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.056 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.672 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434026,
+  exp: 1774520426
+}
+[0mGET /api/courses [36m304[0m 1.340 ms - -[0m
+[0mGET /api/registrations [36m304[0m 2.649 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.968 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.039 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 2.149 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.989 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.521 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434026,
+  exp: 1774520426
+}
+[0mGET /api/courses [36m304[0m 1.664 ms - -[0m
+[0mGET /api/students [36m304[0m 7.657 ms - -[0m
+[0mGET /api/students [36m304[0m 2.558 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.382 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434026,
+  exp: 1774520426
+}
+[0mGET /api/courses [36m304[0m 1.016 ms - -[0m
+[0mGET /api/programs [36m304[0m 12.058 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.463 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.412 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 4.374 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.709 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.411 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.892 ms - 24[0m
+10:28:15 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774434495040 [32m200[0m 131.423 ms - -[0m
+[0mGET /src/index.css?t=1774434495040 [36m304[0m 0.267 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434495040 [36m304[0m 0.966 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434495040 [32m200[0m 151.005 ms - -[0m
+[0mGET /api/academic/years [33m401[0m 1.187 ms - 24[0m
+[0mGET /api/courses [33m401[0m 0.346 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 0.213 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.247 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.279 ms - 24[0m
+10:28:30 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774434510968 [32m200[0m 227.500 ms - -[0m
+[0mGET /src/index.css?t=1774434510968 [36m304[0m 0.518 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434510968 [32m200[0m 235.360 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434510968 [36m304[0m 0.934 ms - -[0m
+10:33:39 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774434819764 [32m200[0m 77.780 ms - -[0m
+[0mGET /src/index.css?t=1774434819764 [36m304[0m 0.922 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [32m200[0m 86.170 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [36m304[0m 2.148 ms - -[0m
+[0mGET /api/academic/years [33m401[0m 0.646 ms - 24[0m
+[0mGET /api/academic/semesters [33m401[0m 1.550 ms - 24[0m
+[0mGET /api/courses [33m401[0m 1.181 ms - 24[0m
+[0mGET /api/students [33m401[0m 0.375 ms - 24[0m
+[0mGET /api/programs [33m401[0m 0.826 ms - 24[0m
+10:33:53 AM [vite] (client) page reload src/server/repositories/AssessmentRepository.ts
+[0mGET / [32m200[0m 7.409 ms - -[0m
+[0mGET / [36m304[0m 3.022 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.204 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.184 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.390 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.759 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.163 ms - -[0m
+[0mGET /src/main.tsx?t=1774434833063 [32m200[0m 0.541 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.070 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.132 ms - -[0m
+[0mGET /src/main.tsx?t=1774434833063 [36m304[0m 1.162 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.177 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.107 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/index.css?t=1774434833063 [32m200[0m 0.282 ms - -[0m
+[0mGET /src/index.css?t=1774434833063 [36m304[0m 0.166 ms - -[0m
+[0mGET /src/App.tsx?t=1774434819764 [32m200[0m 1.175 ms - -[0m
+[0mGET /src/App.tsx?t=1774434819764 [36m304[0m 0.273 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.096 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.077 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.307 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [36m304[0m 0.168 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.955 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.077 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.079 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.069 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.163 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.068 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.069 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.078 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.107 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.476 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.105 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.061 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.052 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.053 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.047 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.203 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.144 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [36m304[0m 0.256 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.082 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.067 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.095 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 7.395 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.059 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.047 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.064 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.048 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.045 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.083 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.889 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.128 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.373 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.238 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.256 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.517 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.200 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.461 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.192 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.388 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 4.363 ms - 24[0m
+[0mGET /api/settings [33m401[0m 1.284 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.519 ms - 24[0m
+10:34:05 AM [vite] (client) page reload src/server/routes/assessments.ts
+[0mGET / [32m200[0m 3.747 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.098 ms - -[0m
+[0mGET /src/main.tsx?t=1774434845881 [32m200[0m 0.172 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.069 ms - -[0m
+[0mGET / [36m304[0m 7.665 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.260 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.057 ms - -[0m
+[0mGET /src/App.tsx?t=1774434819764 [36m304[0m 0.139 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.095 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.839 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.129 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.102 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 0.114 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.056 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.184 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 0.076 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.156 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [36m304[0m 0.823 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.057 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.121 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.046 ms - -[0m
+[0mGET /src/index.css?t=1774434845881 [32m200[0m 0.497 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.071 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.052 ms - -[0m
+[0mGET /src/main.tsx?t=1774434845881 [36m304[0m 0.143 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.070 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.143 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.136 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 1.246 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.258 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.112 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.186 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.180 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.106 ms - -[0m
+[0mGET /src/App.tsx?t=1774434819764 [36m304[0m 0.112 ms - -[0m
+[0mGET /src/index.css?t=1774434845881 [36m304[0m 0.322 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.061 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.317 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx [36m304[0m 0.067 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx [36m304[0m 1.615 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx [36m304[0m 1.123 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx [36m304[0m 0.094 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx [36m304[0m 0.138 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434819764 [36m304[0m 1.401 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx [36m304[0m 0.072 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx [36m304[0m 0.070 ms - -[0m
+[0mGET /src/services/api.ts [36m304[0m 0.057 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.068 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx [36m304[0m 0.098 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx [36m304[0m 0.054 ms - -[0m
+[0mGET /src/components/Login.tsx [36m304[0m 0.110 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx [36m304[0m 0.161 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx [36m304[0m 0.829 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.323 ms - 24[0m
+[0mGET /src/components/SettingsDepartments.tsx [36m304[0m 0.063 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.705 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.290 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.182 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.677 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.264 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.311 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.261 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 86.530 ms - 211[0m
+[0mGET /api/students [36m304[0m 2.927 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 2.740 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.132 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.549 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.624 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.574 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 3.366 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 8.138 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.091 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.955 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 3.049 ms - -[0m
+[0mGET /api/students [36m304[0m 2.828 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.728 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.423 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 2.605 ms - -[0m
+[0mGET /api/students [36m304[0m 6.038 ms - -[0m
+[0mGET /api/programs [36m304[0m 4.387 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.158 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.120 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 2.908 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 3.137 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.128 ms - -[0m
+[0mGET /api/assessments?course_code=EXC101&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.545 ms - -[0m
+10:35:48 AM [vite] (client) hmr update /src/App.tsx, /src/index.css, /src/components/StudentPortalModule.tsx, /src/components/ProgramsModule.tsx, /src/components/CoursesModule.tsx, /src/components/Login.tsx, /src/components/StatisticsModule.tsx, /src/components/LecturersModule.tsx, /src/components/AssessmentModule.tsx, /src/components/AcademicRecordsModule.tsx, /src/components/StudentsModule.tsx, /src/components/RegistrationModule.tsx, /src/components/SettingsModule.tsx, /src/components/TranscriptModal.tsx, /src/components/BulkUploadModule.tsx, /src/components/SettingsGrading.tsx, /src/components/SettingsDepartments.tsx, /src/components/SettingsSystem.tsx
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [32m200[0m 0.429 ms - -[0m
+[0mGET /src/App.tsx?t=1774434948578 [32m200[0m 17.356 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [32m200[0m 0.613 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [32m200[0m 0.402 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [32m200[0m 0.773 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [32m200[0m 0.550 ms - -[0m
+[0mGET /src/index.css?t=1774434948578 [32m200[0m 71.017 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [32m200[0m 0.791 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434948578 [32m200[0m 0.948 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [32m200[0m 2.055 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [32m200[0m 1.252 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [32m200[0m 0.888 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [32m200[0m 0.646 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [32m200[0m 5.186 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [32m200[0m 1.274 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [32m200[0m 0.645 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 0.560 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [32m200[0m 0.406 ms - -[0m
+[0mGET /src/App.tsx?t=1774434948578 [36m304[0m 0.139 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 2.736 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 0.930 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.293 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.575 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [32m200[0m 0.377 ms - -[0m
+[0mGET /src/index.css?t=1774434948578 [36m304[0m 0.172 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434948578 [36m304[0m 0.368 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 0.991 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.298 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.169 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [32m200[0m 0.933 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 0.170 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 1.971 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.201 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.211 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 1.142 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 0.116 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.158 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 0.102 ms - -[0m
+10:36:02 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774434962087 [32m200[0m 74.130 ms - -[0m
+[0mGET /src/index.css?t=1774434962087 [36m304[0m 0.280 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434962087 [32m200[0m 82.508 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434962087 [36m304[0m 0.149 ms - -[0m
+10:36:18 AM [vite] (client) hmr update /src/components/AcademicRecordsModule.tsx, /src/index.css
+[0mGET /src/index.css?t=1774434978247 [32m200[0m 106.174 ms - -[0m
+[0mGET /src/index.css?t=1774434978247 [36m304[0m 0.149 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [32m200[0m 115.129 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.160 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [32m200[0m 30.802 ms - 2[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.056 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.972 ms - -[0m
+[0mGET /api/auth/me [32m200[0m 4.496 ms - 200[0m
+[0mGET /api/auth/me [36m304[0m 1.215 ms - -[0m
+[0mGET /api/students [36m304[0m 1.590 ms - -[0m
+[0mGET /api/students [36m304[0m 3.873 ms - -[0m
+[0mGET /api/students [36m304[0m 0.889 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.466 ms - -[0m
+[0mGET /api/students [36m304[0m 2.143 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.269 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.702 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.468 ms - -[0m
+[0mGET /api/students [36m304[0m 1.006 ms - -[0m
+[0mGET /api/students [36m304[0m 0.692 ms - -[0m
+[0mGET /api/students [36m304[0m 0.777 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.981 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [32m200[0m 1.354 ms - 584[0m
+[0mGET /api/assessments?index_no=GYHLWIV [32m200[0m 1.729 ms - 852[0m
+[0mGET /api/auth/me [36m304[0m 1.110 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.122 ms - -[0m
+[0mGET /api/students [36m304[0m 1.238 ms - -[0m
+[0mGET /api/students [36m304[0m 0.681 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.695 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.779 ms - -[0m
+[0mGET /api/students [36m304[0m 2.124 ms - -[0m
+[0mGET /api/students [36m304[0m 0.626 ms - -[0m
+[0mGET /api/students [36m304[0m 1.146 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.926 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [36m304[0m 1.120 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 0.864 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.723 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 3.872 ms - -[0m
+[0mGET /api/students [36m304[0m 1.628 ms - -[0m
+[0mGET /api/students [36m304[0m 0.589 ms - -[0m
+[0mGET /api/students [36m304[0m 0.970 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.277 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [36m304[0m 1.084 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 1.035 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.581 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.777 ms - -[0m
+[0mGET /api/students [36m304[0m 1.069 ms - -[0m
+[0mGET /api/students [36m304[0m 0.721 ms - -[0m
+[0mGET /api/students [36m304[0m 0.773 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.169 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [36m304[0m 1.038 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 1.114 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.841 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.943 ms - -[0m
+[0mGET /api/students [36m304[0m 0.868 ms - -[0m
+[0mGET /api/students [36m304[0m 0.575 ms - -[0m
+[0mGET /api/students [36m304[0m 0.917 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.924 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [36m304[0m 0.689 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 0.751 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.661 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 3.481 ms - -[0m
+[0mGET /api/students [36m304[0m 1.599 ms - -[0m
+[0mGET /api/students [36m304[0m 0.598 ms - -[0m
+[0mGET /api/students [36m304[0m 1.568 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.739 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV [36m304[0m 0.793 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 0.760 ms - -[0m
+[0mGET /api/students [36m304[0m 0.698 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.912 ms - -[0m
+[0mGET /api/students [36m304[0m 1.124 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.988 ms - -[0m
+[0mGET /api/students [36m304[0m 1.932 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.990 ms - -[0m
+[0mGET /api/students [36m304[0m 1.084 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.092 ms - -[0m
+[0mGET /api/students [36m304[0m 5.072 ms - -[0m
+[0mGET /api/students [36m304[0m 1.014 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.091 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.181 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.642 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.995 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.345 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.023 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.288 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.749 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.101 ms - -[0m
+[0mGET /api/students [36m304[0m 1.315 ms - -[0m
+[0mGET /api/students [36m304[0m 0.722 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.976 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.645 ms - -[0m
+[0mGET /api/departments [36m304[0m 3.983 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.157 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.069 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.415 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.086 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.160 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.769 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.095 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 1.696 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.084 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.332 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 1.101 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.742 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 11.920 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 2.917 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.127 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.310 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.828 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.129 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.109 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.621 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 1.960 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.993 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.795 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.172 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.082 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.678 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.946 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.609 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.149 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.978 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.761 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.851 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 1.631 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.026 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 1.348 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.282 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.815 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.783 ms - -[0m
+[0mGET /api/students [36m304[0m 0.802 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.805 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 3.749 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.800 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.204 ms - -[0m
+[0mGET /api/students [36m304[0m 1.069 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.263 ms - -[0m
+[0mGET /api/students [36m304[0m 1.151 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV [36m304[0m 0.790 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.251 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.017 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.229 ms - -[0m
+[0mGET /api/students [36m304[0m 1.073 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.005 ms - -[0m
+[0mGET /api/students [36m304[0m 1.054 ms - -[0m
+[0mGET /api/registrations?academic_year=EX2023%2F2024&semester_sid=EXSEM1 [32m200[0m 1.583 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 0.965 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.129 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.442 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774434865,
+  exp: 1774521265
+}
+[0mGET /api/courses [36m304[0m 1.196 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.948 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.797 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.904 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 1.453 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 1.316 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.316 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.269 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 85.208 ms - 211[0m
+[0mGET /api/students [36m304[0m 0.670 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.942 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.091 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.947 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.755 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.857 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.702 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.244 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.728 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.245 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.486 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.409 ms - -[0m
+[0mGET /api/students [36m304[0m 1.194 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.064 ms - -[0m
+[0mGET /api/students [36m304[0m 1.161 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV&academic_year=EX2023%2F2024&semester_sid=EXSEM1 [32m200[0m 1.306 ms - 584[0m
+[0mGET /api/assessments?index_no=GYHLWIV&academic_year=EX2023%2F2024&semester_id=EXSEM1 [32m200[0m 0.741 ms - 852[0m
+[0mGET /api/academic/years [36m304[0m 0.918 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.533 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.862 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.970 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.595 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.655 ms - -[0m
+[0mGET /api/students [36m304[0m 1.195 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.611 ms - -[0m
+[0mGET /api/students [36m304[0m 1.565 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.084 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 3.121 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.701 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.447 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.757 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.279 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.150 ms - -[0m
+[0mGET /api/students [36m304[0m 1.215 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.026 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.212 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.934 ms - -[0m
+[0mGET /api/students [36m304[0m 0.899 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.702 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.813 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.563 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.820 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.800 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.856 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.019 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.187 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.213 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.215 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.309 ms - -[0m
+[0mGET /api/students [36m304[0m 0.573 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.047 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.931 ms - -[0m
+[0mGET /api/students [36m304[0m 0.985 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.077 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 3.493 ms - -[0m
+[0mGET /api/students [36m304[0m 1.883 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.752 ms - -[0m
+[0mGET /api/students [36m304[0m 1.498 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.265 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.594 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.889 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.690 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.354 ms - -[0m
+[0mGET /api/students/GYHLWIV/transcript [32m200[0m 1.646 ms - -[0m
+[0mGET /api/settings [36m304[0m 2.184 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.090 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.695 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.116 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.983 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.402 ms - -[0m
+[0mGET /api/students [36m304[0m 1.609 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.377 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.221 ms - -[0m
+[0mGET /api/students [36m304[0m 1.092 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.562 ms - -[0m
+[0mGET /api/students/GYHLWIV/transcript [36m304[0m 1.279 ms - -[0m
+[0mGET /api/settings [36m304[0m 0.713 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.761 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.430 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.195 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.049 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.920 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.400 ms - -[0m
+[0mGET /api/students [36m304[0m 1.342 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.969 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.956 ms - -[0m
+[0mGET /api/students [36m304[0m 0.887 ms - -[0m
+[0mGET /api/assessments/graduation-list?progid=EXPROG&admission_year=EX2023%2F2024 [33m400[0m 1.469 ms - 99[0m
+[0mGET /api/students [36m304[0m 1.111 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.875 ms - -[0m
+[0mGET /api/students [36m304[0m 0.957 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.104 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.247 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.296 ms - -[0m
+[0mGET /api/students [36m304[0m 3.823 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.161 ms - -[0m
+[0mGET /api/students [36m304[0m 1.278 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.360 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.808 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 1.208 ms - -[0m
+[0mGET /api/lecturers [32m200[0m 1.434 ms - 279[0m
+[0mGET /api/departments [36m304[0m 1.544 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 0.930 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.604 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 1.707 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.363 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 0.914 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.895 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.623 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.535 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774436812,
+  exp: 1774523212
+}
+[0mGET /api/courses [36m304[0m 0.972 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.077 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.243 ms - -[0m
+[0mGET /api/lecturers/assignments? [32m200[0m 2.057 ms - 281[0m
+[0mGET /api/academic/semesters [36m304[0m 2.022 ms - -[0m
+[0mGET /api/lecturers/assignments? [36m304[0m 1.470 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 1.374 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 1.064 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.170 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.536 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 1.276 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.707 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 0.604 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.711 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 4.989 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.435 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.611 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.262 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.031 ms - -[0m
+[0mGET /api/users [32m200[0m 1.036 ms - 518[0m
+[0mGET /api/calendar-events [36m304[0m 1.144 ms - -[0m
+[0mGET /api/users [36m304[0m 0.940 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 4.198 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.123 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.857 ms - -[0m
+[0mGET /api/users [36m304[0m 0.953 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.357 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.522 ms - -[0m
+[0mGET /api/users [36m304[0m 1.027 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.536 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.031 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.304 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.748 ms - -[0m
+[0mGET /api/users [36m304[0m 1.129 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.236 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.909 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.164 ms - -[0m
+[0mGET /api/users [36m304[0m 1.056 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.033 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.823 ms - -[0m
+[0mGET /api/settings/grading [36m304[0m 1.436 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.268 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.288 ms - -[0m
+[0mGET /api/settings/grading [36m304[0m 0.993 ms - -[0m
+[0mGET /api/users [36m304[0m 0.875 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.039 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.916 ms - -[0m
+[0mGET /api/users [36m304[0m 0.563 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.406 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.532 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.588 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.146 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.874 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.995 ms - -[0m
+[0mGET /api/users [36m304[0m 1.593 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.112 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.943 ms - -[0m
+[0mGET /api/users [36m304[0m 0.642 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 4.544 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.694 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.545 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.101 ms - -[0m
+[0mGET /api/users [36m304[0m 1.146 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.278 ms - -[0m
+[0mGET /api/users [36m304[0m 0.959 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.467 ms - -[0m
+[0mGET /api/settings [36m304[0m 1.883 ms - -[0m
+[0mGET /api/settings [36m304[0m 0.898 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.600 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.473 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.618 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.837 ms - -[0m
+[0mGET /api/users [36m304[0m 0.821 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.418 ms - -[0m
+[0mGET /api/users [36m304[0m 1.061 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.877 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 0.677 ms - -[0m
+[0mGET /api/lecturers [36m304[0m 0.906 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.553 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.504 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.397 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.316 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.255 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 83.540 ms - 218[0m
+[0mGET /api/students [36m304[0m 1.504 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.672 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.615 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: 'f340aecc-9188-42bd-91d2-57b12719ef85',
+  uid: '46019604-3234-43b2-bd87-3ab9150c1113',
+  role: 'Lecturer',
+  name: 'Fiifi Abiah Quayson',
+  username: 'babssq@gmail.com',
+  iat: 1774437851,
+  exp: 1774524251
+}
+[DEBUG] GET /api/courses lecturer courses: []
+[0mGET /api/courses [32m200[0m 0.954 ms - 2[0m
+[0mGET /api/registrations [32m200[0m 1.204 ms - 2[0m
+[0mGET /api/academic/years [36m304[0m 0.723 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.771 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.396 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.334 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.288 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 86.191 ms - 218[0m
+[0mGET /api/students [36m304[0m 1.077 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.330 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.599 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: 'f340aecc-9188-42bd-91d2-57b12719ef85',
+  uid: '46019604-3234-43b2-bd87-3ab9150c1113',
+  role: 'Lecturer',
+  name: 'Fiifi Abiah Quayson',
+  username: 'babssq@gmail.com',
+  iat: 1774438475,
+  exp: 1774524875
+}
+[DEBUG] GET /api/courses lecturer courses: []
+[0mGET /api/courses [36m304[0m 1.172 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.991 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.969 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.592 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: 'f340aecc-9188-42bd-91d2-57b12719ef85',
+  uid: '46019604-3234-43b2-bd87-3ab9150c1113',
+  role: 'Lecturer',
+  name: 'Fiifi Abiah Quayson',
+  username: 'babssq@gmail.com',
+  iat: 1774438475,
+  exp: 1774524875
+}
+[DEBUG] GET /api/courses lecturer courses: []
+[0mGET /api/courses [36m304[0m 0.908 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.141 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: 'f340aecc-9188-42bd-91d2-57b12719ef85',
+  uid: '46019604-3234-43b2-bd87-3ab9150c1113',
+  role: 'Lecturer',
+  name: 'Fiifi Abiah Quayson',
+  username: 'babssq@gmail.com',
+  iat: 1774438475,
+  exp: 1774524875
+}
+[DEBUG] GET /api/courses lecturer courses: []
+[0mGET /api/courses [36m304[0m 1.194 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.106 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.313 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.458 ms - -[0m
+[0mPOST /api/auth/logout [32m200[0m 0.412 ms - 16[0m
+[0mGET /api/settings [33m401[0m 0.247 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.211 ms - 24[0m
+[0mGET / [32m200[0m 61.549 ms - -[0m
+[0mGET / [36m304[0m 41.187 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.252 ms - -[0m
+[0mGET /src/main.tsx?t=1774434978247 [32m200[0m 9.357 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.118 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.147 ms - -[0m
+[0mGET /src/main.tsx?t=1774434978247 [36m304[0m 0.124 ms - -[0m
+[0mGET /manifest.json [36m304[0m 0.447 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.068 ms - -[0m
+[0mGET /manifest.json [36m304[0m 2.067 ms - -[0m
+[0mGET /src/index.css?t=1774434978247 [36m304[0m 0.183 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.058 ms - -[0m
+[0mGET /src/index.css?t=1774434978247 [36m304[0m 8.103 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.581 ms - -[0m
+[0mGET /src/App.tsx?t=1774434978247 [32m200[0m 1.670 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.106 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 1.631 ms - -[0m
+[0mGET /src/App.tsx?t=1774434978247 [36m304[0m 3.680 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.065 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.957 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 1.498 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 1.807 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 7.140 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.998 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.439 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.257 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 0.762 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 0.434 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 0.182 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.135 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.112 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 0.100 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.177 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 0.173 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 0.116 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 0.110 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.075 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 0.063 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 2.828 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.189 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.101 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.042 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 0.154 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 5.783 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 0.126 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 0.388 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 0.450 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.129 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.053 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 1.019 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.117 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.131 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 0.172 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.097 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.175 ms - -[0m
+[0mGET /api/auth/me [33m401[0m 0.228 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.506 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.632 ms - 24[0m
+[0mGET /api/settings [33m401[0m 1.423 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.405 ms - 24[0m
+[0mGET /api/auth/me [33m401[0m 0.227 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.233 ms - 24[0m
+[0mGET /api/settings [33m401[0m 0.170 ms - 24[0m
+[0mPOST /api/auth/login [32m200[0m 76.342 ms - 211[0m
+[0mGET /api/students [36m304[0m 0.672 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.834 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [32m200[0m 0.851 ms - 370[0m
+[0mGET /api/academic/years [36m304[0m 0.581 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.214 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 1.293 ms - -[0m
+[0mGET /api/registrations [32m200[0m 1.024 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.804 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 0.584 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.565 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.796 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 0.687 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.740 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.651 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.676 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.705 ms - -[0m
+[0mGET /api/students [36m304[0m 0.525 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.923 ms - -[0m
+[0mGET /api/students [36m304[0m 0.771 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.623 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.516 ms - -[0m
+[0mGET /api/students [36m304[0m 1.127 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.333 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.127 ms - -[0m
+[0mGET /api/students [36m304[0m 2.735 ms - -[0m
+[0mGET /api/registrations?academic_year=EX2023%2F2024&semester_sid=EXSEM1 [36m304[0m 1.098 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 0.535 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.686 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.653 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.724 ms - -[0m
+[0mGET /api/registrations/windows [36m304[0m 0.405 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.580 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.713 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.881 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.082 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.616 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.593 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.806 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.120 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.316 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.717 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.594 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.708 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.812 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.917 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.741 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.790 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.648 ms - -[0m
+[0mGET /api/departments [36m304[0m 0.595 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.729 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 3.287 ms - -[0m
+[0mGET /api/departments [36m304[0m 1.091 ms - -[0m
+[0mGET /api/students [36m304[0m 0.771 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.613 ms - -[0m
+[0mGET /api/students [36m304[0m 1.407 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.234 ms - -[0m
+[0mGET /api/students [36m304[0m 0.971 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.722 ms - -[0m
+[0mGET /api/students [36m304[0m 1.060 ms - -[0m
+[0mGET /api/programs [36m304[0m 2.072 ms - -[0m
+[0mGET /api/students [36m304[0m 0.789 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.186 ms - -[0m
+[0mGET /api/students [36m304[0m 1.257 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.558 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.191 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.641 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 3.317 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.087 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 2.294 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.471 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.980 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.829 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.766 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.842 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.044 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.641 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.928 ms - -[0m
+[0mGET /api/students [36m304[0m 0.861 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.992 ms - -[0m
+[0mGET /api/students [36m304[0m 1.244 ms - -[0m
+[0mGET /api/registrations?index_no=GYHLWIV&academic_year=EX2023%2F2024&semester_sid=EXSEM1 [36m304[0m 0.740 ms - -[0m
+[0mGET /api/assessments?index_no=GYHLWIV&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.986 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.840 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.627 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.508 ms - -[0m
+[0mGET /api/students [36m304[0m 1.529 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.429 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.973 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.708 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.677 ms - -[0m
+[0mGET /api/students [36m304[0m 0.720 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.708 ms - -[0m
+[0mGET /api/assessments?course_code=EXC102&academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.775 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.772 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 4.113 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.711 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.769 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.860 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.142 ms - -[0m
+[0mGET /api/students [36m304[0m 1.972 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.250 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.850 ms - -[0m
+[0mGET /api/students [36m304[0m 0.709 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.517 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.881 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.895 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.770 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.877 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.872 ms - -[0m
+[0mGET /api/assessments?academic_year=EX2023%2F2024&semester_id=EXSEM1 [36m304[0m 0.763 ms - -[0m
+1:22:00 PM [vite] (client) page reload db.ts
+[0mGET / [32m200[0m 4.987 ms - -[0m
+[0mGET / [36m304[0m 63.325 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.487 ms - -[0m
+[0mGET /src/main.tsx?t=1774444920778 [32m200[0m 1.247 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.149 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.542 ms - -[0m
+[0mGET /src/main.tsx?t=1774444920778 [36m304[0m 0.174 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.164 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.782 ms - -[0m
+[0mGET /src/App.tsx?t=1774434978247 [36m304[0m 0.694 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.115 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.149 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.054 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.259 ms - -[0m
+[0mGET /src/App.tsx?t=1774434978247 [36m304[0m 0.273 ms - -[0m
+[0mGET /src/index.css?t=1774444920778 [32m200[0m 0.642 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.857 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.091 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.318 ms - -[0m
+[0mGET /src/index.css?t=1774444920778 [36m304[0m 1.650 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.387 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 0.149 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.196 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.650 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 0.153 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 1.310 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.161 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 0.581 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.249 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 0.175 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 0.139 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.437 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.104 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 0.117 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.248 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 0.140 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.504 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 0.937 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 0.395 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.320 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 0.159 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 1.146 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 0.295 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 0.590 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 0.827 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 0.130 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.704 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 1.345 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.072 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 0.133 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.374 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.136 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.695 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 0.226 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.183 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.172 ms - -[0m
+[0mGET /api/auth/me [32m200[0m 0.976 ms - 200[0m
+[0mGET /api/auth/me [36m304[0m 1.621 ms - -[0m
+[0mGET /api/students [36m304[0m 1.803 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.003 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.696 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.580 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.593 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.444 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.676 ms - -[0m
+[0mGET /api/registrations [36m304[0m 3.895 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.796 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 1.011 ms - -[0m
+[0mGET /api/students [36m304[0m 0.865 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.787 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.940 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.774 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.654 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.576 ms - -[0m
+[0mGET /api/students [36m304[0m 2.385 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.648 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.003 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.893 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.718 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.718 ms - -[0m
+[0mGET /api/students [36m304[0m 1.834 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.781 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.501 ms - -[0m
+[0mGET /api/registrations [36m304[0m 2.990 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 2.446 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 2.001 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.484 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.501 ms - -[0m
+[0mGET / [36m304[0m 5.574 ms - -[0m
+[0mGET /@vite/client [36m304[0m 0.485 ms - -[0m
+[0mGET /src/main.tsx?t=1774444920778 [36m304[0m 0.803 ms - -[0m
+[0mGET /@react-refresh [36m304[0m 0.121 ms - -[0m
+[0mGET /node_modules/vite/dist/client/env.mjs [36m304[0m 0.097 ms - -[0m
+[0mGET /src/App.tsx?t=1774434978247 [36m304[0m 0.229 ms - -[0m
+[0mGET /src/index.css?t=1774444920778 [36m304[0m 0.273 ms - -[0m
+[0mGET /src/context/ToastContext.tsx [36m304[0m 0.056 ms - -[0m
+[0mGET /manifest.json [36m304[0m 1.114 ms - -[0m
+[0mGET /src/constants.tsx [36m304[0m 0.251 ms - -[0m
+[0mGET /src/components/StudentsModule.tsx?t=1774434948578 [36m304[0m 0.171 ms - -[0m
+[0mGET /src/components/ProgramsModule.tsx?t=1774434948578 [36m304[0m 0.131 ms - -[0m
+[0mGET /src/components/CoursesModule.tsx?t=1774434948578 [36m304[0m 0.088 ms - -[0m
+[0mGET /src/components/RegistrationModule.tsx?t=1774434948578 [36m304[0m 0.157 ms - -[0m
+[0mGET /src/components/AssessmentModule.tsx?t=1774434948578 [36m304[0m 0.094 ms - -[0m
+[0mGET /src/components/LecturersModule.tsx?t=1774434948578 [36m304[0m 0.316 ms - -[0m
+[0mGET /src/components/SettingsModule.tsx?t=1774434948578 [36m304[0m 0.153 ms - -[0m
+[0mGET /src/components/AcademicRecordsModule.tsx?t=1774434978247 [36m304[0m 0.190 ms - -[0m
+[0mGET /src/components/StatisticsModule.tsx?t=1774434948578 [36m304[0m 0.137 ms - -[0m
+[0mGET /src/components/StudentPortalModule.tsx?t=1774434948578 [36m304[0m 0.389 ms - -[0m
+[0mGET /src/components/Login.tsx?t=1774434948578 [36m304[0m 1.014 ms - -[0m
+[0mGET /src/services/api.ts?t=1774434948578 [36m304[0m 0.898 ms - -[0m
+[0mGET /src/utils/print.ts [36m304[0m 0.187 ms - -[0m
+[0mGET /src/components/BulkUploadModule.tsx?t=1774434948578 [36m304[0m 0.444 ms - -[0m
+[0mGET /src/components/TranscriptModal.tsx?t=1774434948578 [36m304[0m 0.272 ms - -[0m
+[0mGET /src/components/SettingsDepartments.tsx?t=1774434948578 [36m304[0m 0.103 ms - -[0m
+[0mGET /src/components/SettingsGrading.tsx?t=1774434948578 [36m304[0m 0.168 ms - -[0m
+[0mGET /src/components/SettingsSystem.tsx?t=1774434948578 [36m304[0m 0.076 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.428 ms - -[0m
+[0mGET /api/auth/me [36m304[0m 0.341 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.927 ms - -[0m
+[0mGET /api/students [36m304[0m 1.502 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 1.130 ms - -[0m
+[0mGET /api/registrations [36m304[0m 0.606 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.635 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.635 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.653 ms - -[0m
+[0mGET /api/students [36m304[0m 1.035 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.778 ms - -[0m
+[0mGET /api/registrations [36m304[0m 1.000 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 3.264 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 1.328 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 1.057 ms - -[0m
+[0mGET /api/calendar-events [36m304[0m 0.633 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.755 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.922 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.911 ms - -[0m
+[0mGET /api/students [36m304[0m 0.655 ms - -[0m
+[0mGET /api/programs [36m304[0m 0.635 ms - -[0m
+[0mGET /api/academic/semesters [36m304[0m 0.785 ms - -[0m
+[DEBUG] GET /api/courses user: {
+  id: '28225227-2cf0-4a0f-9bee-ad2d5c72ce8e',
+  uid: 'b07ff10c-ae10-4ab4-a09c-c5423acde703',
+  role: 'SuperAdmin',
+  name: 'Richard Bonsu',
+  username: 'youroger1@gmail.com',
+  iat: 1774444299,
+  exp: 1774530699
+}
+[0mGET /api/courses [36m304[0m 0.773 ms - -[0m
+[0mGET /api/students [36m304[0m 0.927 ms - -[0m
+[0mGET /api/academic/years [36m304[0m 0.767 ms - -[0m
+[0mGET /api/programs [36m304[0m 1.072 ms - -[0m

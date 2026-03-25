@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X, Printer, Download, GraduationCap } from 'lucide-react';
 import { Student, Assessment, BoardsheetCache } from '../types';
+import { api } from '../services/api';
 
 interface TranscriptModalProps {
   isOpen: boolean;
@@ -15,6 +16,17 @@ interface TranscriptModalProps {
 
 export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClose, data, title }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const [logoBase64, setLogoBase64] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      api.getSettings()
+        .then(settings => {
+          if (settings.institution_logo) setLogoBase64(settings.institution_logo);
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   if (!isOpen || !data) return null;
 
@@ -26,10 +38,10 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
     if (!groupedResults[ass.academic_year]) {
       groupedResults[ass.academic_year] = {};
     }
-    if (!groupedResults[ass.academic_year][ass.semester_sid]) {
-      groupedResults[ass.academic_year][ass.semester_sid] = [];
+    if (!groupedResults[ass.academic_year][ass.semester_id]) {
+      groupedResults[ass.academic_year][ass.semester_id] = [];
     }
-    groupedResults[ass.academic_year][ass.semester_sid].push(ass);
+    groupedResults[ass.academic_year][ass.semester_id].push(ass);
   });
 
   const handlePrint = () => {
@@ -95,11 +107,15 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
           <div ref={printRef} className="bg-white p-4 md:p-12 shadow-sm mx-auto w-full max-w-[210mm] min-h-[297mm] text-slate-900">
             {/* Header */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 border-b-4 border-slate-900 pb-6 mb-8 text-center md:text-left">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-100 border-2 border-slate-200 rounded-xl flex items-center justify-center text-slate-400 font-bold text-[10px] md:text-xs text-center p-4 shadow-inner">
-                <div className="flex flex-col items-center">
-                  <GraduationCap size={40} className="text-slate-300 mb-1" />
-                  <span>OFFICIAL SEAL</span>
-                </div>
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-100 border-2 border-slate-200 rounded-xl flex items-center justify-center text-slate-400 font-bold text-[10px] md:text-xs text-center p-2 shadow-inner">
+                {logoBase64 ? (
+                  <img src={logoBase64} alt="Official Seal" className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <GraduationCap size={40} className="text-slate-300 mb-1" />
+                    <span>OFFICIAL SEAL</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 space-y-1">
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight uppercase text-slate-900">ST NICHOLAS SEMINARY</h1>
@@ -124,13 +140,13 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                 </div>
                 <div className="flex justify-between border-b border-slate-200 pb-1">
                   <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Gender</span>
-                  <span className="font-bold">{student.gender === 'M' ? 'MALE' : 'FEMALE'}</span>
+                  <span className="font-bold">{student.gender?.toUpperCase() || 'N/A'}</span>
                 </div>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between border-b border-slate-200 pb-1">
                   <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Programme</span>
-                  <span className="font-bold uppercase text-right">{student.progid}</span>
+                  <span className="font-bold uppercase text-right">{student.program_name || student.progid}</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-200 pb-1">
                   <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Admission Year</span>
@@ -138,7 +154,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                 </div>
                 <div className="flex justify-between border-b border-slate-200 pb-1">
                   <span className="font-bold text-slate-500 uppercase text-[10px] tracking-wider">Date of Issue</span>
-                  <span className="font-bold">{new Date().toLocaleDateString('en-GB')}</span>
+                  <span className="font-bold">{new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                 </div>
               </div>
             </div>
@@ -148,70 +164,67 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
               {Object.entries(groupedResults).map(([year, semesters]) => (
                 <div key={year} className="space-y-8">
                   {Object.entries(semesters).map(([sem, results]) => {
-                    const cache = caches.find(c => c.academic_year === year && c.semester_sid === sem);
+                    const cache = caches.find(c => c.academic_year === year && c.semester_id === sem);
                     return (
-                      <div key={sem} className="space-y-4">
-                        <div className="flex items-center gap-4">
-                          <h2 className="text-base font-black uppercase text-slate-900 whitespace-nowrap">
-                            {year} - {sem === 'SEM1' ? 'First Semester' : 'Second Semester'}
-                          </h2>
-                          <div className="h-px bg-slate-200 flex-1"></div>
+                      <div key={`${year}-${sem}`} className="border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="bg-slate-100 px-6 py-3 border-b border-slate-200">
+                          <h5 className="text-sm font-bold text-slate-700">{year} - Semester {sem}</h5>
                         </div>
-                        <div className="overflow-hidden border border-slate-200 rounded-lg">
-                          <table className="w-full text-[11px]">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs">
                             <thead>
-                              <tr className="bg-slate-900 text-white text-left">
-                                <th className="px-3 py-2 w-20">CODE</th>
-                                <th className="px-3 py-2">TITLE</th>
-                                <th className="px-3 py-2 w-14 text-center">CA</th>
-                                <th className="px-3 py-2 w-14 text-center">EXAM</th>
-                                <th className="px-3 py-2 w-10 text-center">CR</th>
-                                <th className="px-3 py-2 w-10 text-center">GD</th>
-                                <th className="px-3 py-2 w-12 text-center">GP</th>
+                              <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider">
+                                <th className="px-3 py-2 font-bold">Course Code</th>
+                                <th className="px-3 py-2 font-bold">Course Title</th>
+                                <th className="px-3 py-2 text-center font-bold">CA</th>
+                                <th className="px-3 py-2 text-center font-bold">Exam</th>
+                                <th className="px-3 py-2 text-center font-bold">CH</th>
+                                <th className="px-3 py-2 text-center font-bold">Grade</th>
+                                <th className="px-3 py-2 text-center font-bold">GP</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                               {results.map(res => (
-                                <tr key={res.id} className="hover:bg-slate-50">
-                                  <td className="px-3 py-1.5 font-bold text-slate-700 text-[11px]">{res.cid}</td>
-                                  <td className="px-3 py-1.5 uppercase font-medium text-[11px]">{res.course_title || 'N/A'}</td>
-                                  <td className="px-3 py-1.5 text-center text-[11px]">{(res as any).class_score?.toFixed(2) || '-'}</td>
-                                  <td className="px-3 py-1.5 text-center text-[11px]">{(res as any).exam_score?.toFixed(2) || '-'}</td>
-                                  <td className="px-3 py-1.5 text-center font-bold text-[11px]">{res.credits}</td>
-                                  <td className="px-3 py-1.5 text-center font-black text-blue-700 text-[11px]">{res.grade}</td>
-                                  <td className="px-3 py-1.5 text-center font-mono text-[11px]">{res.gp?.toFixed ? res.gp.toFixed(1) : res.gp}</td>
-                                </tr>
-                              ))}
+                                  <tr key={res.id} className="hover:bg-slate-50">
+                                    <td className="px-3 py-1.5 font-bold text-slate-700 text-[11px]">{res.course_code}</td>
+                                    <td className="px-3 py-1.5 uppercase font-medium text-[11px]">{res.course_name || 'N/A'}</td>
+                                    <td className="px-3 py-1.5 text-center text-[11px]">{res.total_ca?.toFixed(2) || '-'}</td>
+                                    <td className="px-3 py-1.5 text-center text-[11px]">{res.exam_score?.toFixed(2) || '-'}</td>
+                                    <td className="px-3 py-1.5 text-center font-bold text-[11px]">{res.credit_hours}</td>
+                                    <td className="px-3 py-1.5 text-center font-black text-blue-700 text-[11px]">{res.grade}</td>
+                                    <td className="px-3 py-1.5 text-center font-mono text-[11px]">{res.grade_point?.toFixed ? res.grade_point.toFixed(1) : (res.grade_point || '0.0')}</td>
+                                  </tr>
+                                ))}
                             </tbody>
                             {cache && (
-                              <tfoot className="bg-slate-50">
-                                <tr className="font-bold border-t-2 border-slate-900">
-                                  <td colSpan={2} className="px-4 py-3">
-                                    <div className="flex gap-8">
-                                      <div className="flex flex-col">
-                                        <span className="text-[9px] uppercase text-slate-500">Semester GPA</span>
-                                        <span className="text-sm font-black text-blue-700">{cache.gpa.toFixed(4)}</span>
+                              <tfoot>
+                                  <tr className="font-bold border-t-2 border-slate-900">
+                                    <td colSpan={2} className="px-4 py-3">
+                                      <div className="flex gap-8">
+                                        <div className="flex flex-col">
+                                          <span className="text-[9px] uppercase text-slate-500">Semester GPA</span>
+                                          <span className="text-sm font-black text-blue-700">{cache.sGPA?.toFixed(4) || '0.0000'}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                          <span className="text-[9px] uppercase text-slate-500">Cumulative GPA</span>
+                                          <span className="text-sm font-black text-slate-900">{cache.cGPA?.toFixed(4) || '0.0000'}</span>
+                                        </div>
                                       </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
                                       <div className="flex flex-col">
-                                        <span className="text-[9px] uppercase text-slate-500">Cumulative GPA</span>
-                                        <span className="text-sm font-black text-slate-900">{cache.cgpa.toFixed(4)}</span>
+                                        <span className="text-[9px] uppercase text-slate-500">TCR</span>
+                                        <span>{cache.sCH}</span>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <div className="flex flex-col">
-                                      <span className="text-[9px] uppercase text-slate-500">TCR</span>
-                                      <span>{cache.tcr}</span>
-                                    </div>
-                                  </td>
-                                  <td></td>
-                                  <td className="px-4 py-3 text-center">
-                                    <div className="flex flex-col">
-                                      <span className="text-[9px] uppercase text-slate-500">TCP</span>
-                                      <span>{cache.tcp.toFixed(1)}</span>
-                                    </div>
-                                  </td>
-                                </tr>
+                                    </td>
+                                    <td></td>
+                                    <td className="px-4 py-3 text-center">
+                                      <div className="flex flex-col">
+                                        <span className="text-[9px] uppercase text-slate-500">TCP</span>
+                                        <span>{cache.sGP?.toFixed(1) || '0.0'}</span>
+                                      </div>
+                                    </td>
+                                  </tr>
                               </tfoot>
                             )}
                           </table>
