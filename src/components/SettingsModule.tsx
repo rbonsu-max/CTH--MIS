@@ -38,7 +38,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
-  const [newUser, setNewUser] = useState({ fullname: '', username: '', password: '', role: 'Administrator' });
+  const [newUser, setNewUser] = useState({ fullname: '', username: '', email: '', password: '', role: 'Administrator' });
   const [newEvent, setNewEvent] = useState({ date: '', event: '' });
   const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -67,29 +67,25 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const fetchData = async (options?: { searchTerm?: string; page?: number }) => {
     setLoading(true);
     try {
-      const effectiveSearch = options?.searchTerm ?? userSearch;
-      const effectivePage = options?.page ?? userPage;
       const [years, sems, userResponse, events] = await Promise.all([
         api.getAcademicYears(),
         api.getSemesters(),
-        api.getUsers({ q: effectiveSearch, page: effectivePage, pageSize: userPageSize }),
+        api.getUsers({ q: options?.searchTerm ?? userSearch, page: options?.page ?? userPage, pageSize: userPageSize }),
         api.getCalendarEvents()
       ]);
-      const normalizedUsers = Array.isArray(userResponse) ? userResponse : userResponse.data;
-      const normalizedTotal = Array.isArray(userResponse) ? userResponse.length : userResponse.total;
-      const normalizedTotalPages = Array.isArray(userResponse)
-        ? Math.max(1, Math.ceil(userResponse.length / userPageSize))
-        : userResponse.totalPages;
+      const normalizedUsers = userResponse.data || [];
+      const normalizedTotal = userResponse.total || 0;
+      const normalizedTotalPages = userResponse.totalPages || 1;
       setAcademicYears(years);
       setSemesters(sems);
-      setUsers(normalizedUsers || []);
-      setUserTotal(normalizedTotal || 0);
-      setUserTotalPages(normalizedTotalPages || 1);
+      setUsers(normalizedUsers);
+      setUserTotal(normalizedTotal);
+      setUserTotalPages(normalizedTotalPages);
       setCalendarEvents(events);
       return {
-        users: normalizedUsers || [],
-        total: normalizedTotal || 0,
-        totalPages: normalizedTotalPages || 1,
+        users: normalizedUsers,
+        total: normalizedTotal,
+        totalPages: normalizedTotalPages,
       };
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -201,9 +197,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     try {
       await api.createUser(newUser);
       success('User created successfully!');
-      setNewUser({ fullname: '', username: '', password: '', role: 'Administrator' });
+      setNewUser({ fullname: '', username: '', email: '', password: '', role: 'Administrator' });
       setShowAddUserModal(false);
-      setUserPage(1);
       fetchData();
     } catch (error) {
       console.error('Failed to create user:', error);
@@ -235,9 +230,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     try {
       await api.deleteUser(uid);
       success('User deleted!');
-      if (users.length === 1 && userPage > 1) {
-        setUserPage(prev => prev - 1);
-      }
       fetchData();
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -458,7 +450,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                 <input
                   type="text"
                   className="input pl-10"
-                  placeholder="Search by full name, username, or role"
+                  placeholder="Search by full name, email, or username"
                   value={userSearchInput}
                   onChange={e => setUserSearchInput(e.target.value)}
                 />
@@ -488,7 +480,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
               <span>user{userTotal === 1 ? '' : 's'} found</span>
             </div>
           </div>
-
           <div className="overflow-x-auto" id="print-users">
             <table className="w-full text-left">
               <thead>
@@ -511,6 +502,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                         <div className="min-w-0">
                           <div className="text-sm font-bold text-slate-900 truncate">{u.fullname}</div>
                           <div className="text-xs text-slate-400 truncate">{u.username}</div>
+                          {u.email && <div className="text-xs text-slate-400 truncate">{u.email}</div>}
                           <div className="md:hidden mt-1">
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
                               u.role === 'SuperAdmin' ? 'bg-purple-100 text-purple-700' :
@@ -560,7 +552,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
               </tbody>
             </table>
           </div>
-
           <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="text-sm text-slate-500">
               Page <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userPage}</span> of <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userTotalPages}</span>
@@ -606,13 +597,22 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                 />
               </div>
               <div className="space-y-2">
-                <label className="label">Username / Email</label>
+                <label className="label">Username</label>
                 <input 
                   type="text" 
                   className="input" 
                   required
                   value={newUser.username}
                   onChange={e => setNewUser({ ...newUser, username: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="label">Email</label>
+                <input 
+                  type="email" 
+                  className="input"
+                  value={newUser.email}
+                  onChange={e => setNewUser({ ...newUser, email: e.target.value })}
                 />
               </div>
               <div className="space-y-2">

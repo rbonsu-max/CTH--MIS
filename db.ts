@@ -24,6 +24,7 @@ export function initDb() {
       uid TEXT NOT NULL UNIQUE,
       fullname TEXT NOT NULL,
       username TEXT NOT NULL UNIQUE,
+      email TEXT UNIQUE,
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL CHECK (role IN ('Administrator','User','Lecturer','Student','Finance','Registry','SuperAdmin')),
       status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','locked')),
@@ -375,6 +376,14 @@ export function initDb() {
 
   ensureColumn('assessment_requests', 'academic_year', 'TEXT REFERENCES academic_years(code)');
   ensureColumn('assessment_requests', 'semester_id', 'TEXT REFERENCES semesters(sid)');
+  ensureColumn('users', 'email', 'TEXT');
+  db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users(email) WHERE email IS NOT NULL').run();
+  db.prepare(`
+    UPDATE users
+    SET email = username
+    WHERE email IS NULL
+      AND username LIKE '%@%'
+  `).run();
 
   // Seed default academic year and semester if empty
   const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };
