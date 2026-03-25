@@ -146,10 +146,14 @@ router.post('/assessments', async (req, res) => {
   }
 
   const insert = db.prepare(`
-    INSERT INTO student_assessments (index_no, course_code, academic_year, level, semester_id, total_ca, exam_score, total_score, grade, grade_point, entered_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO student_assessments (index_no, course_code, academic_year, level, semester_id, a1, a2, a3, a4, total_ca, exam_score, total_score, grade, grade_point, entered_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(index_no, course_code, academic_year, semester_id) DO UPDATE SET
       level = excluded.level,
+      a1 = excluded.a1,
+      a2 = excluded.a2,
+      a3 = excluded.a3,
+      a4 = excluded.a4,
       total_ca = excluded.total_ca,
       exam_score = excluded.exam_score,
       total_score = excluded.total_score,
@@ -160,13 +164,33 @@ router.post('/assessments', async (req, res) => {
   `);
 
   const uniqueIids = new Set<string>();
-  const semesterSid = assessments[0]?.semester_sid;
+  const semesterSid = assessments[0]?.semester_id;
 
   const insertMany = db.transaction((data) => {
     for (const a of data) {
-      const total_score = (Number(a.total_ca) || 0) + (Number(a.exam_score) || 0);
+      const a1 = Number(a.a1) || 0;
+      const a2 = Number(a.a2) || 0;
+      const a3 = Number(a.a3) || 0;
+      const a4 = Number(a.a4) || 0;
+      const total_ca = a.total_ca !== undefined ? Number(a.total_ca) : (a1 + a2 + a3 + a4);
+      const exam_score = Number(a.exam_score) || 0;
+      const total_score = total_ca + exam_score;
       const { grade, grade_point } = AssessmentService.calculateGrade(total_score);
-      insert.run(a.index_no, a.course_code, a.academic_year, a.level || '100', a.semester_id, a.total_ca, a.exam_score, total_score, grade, grade_point, (req as any).user.uid);
+      
+      insert.run(
+        a.index_no, 
+        a.course_code, 
+        a.academic_year, 
+        a.level || '100', 
+        a.semester_id, 
+        a1, a2, a3, a4, 
+        total_ca, 
+        exam_score, 
+        total_score, 
+        grade, 
+        grade_point, 
+        (req as any).user.uid
+      );
       uniqueIids.add(a.index_no);
     }
   });

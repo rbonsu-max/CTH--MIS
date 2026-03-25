@@ -189,8 +189,7 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
       data.courses.forEach((code: string) => {
         const ass = grp.assessments.find((a: any) => a.course_code === code);
         if (ass) {
-          const ca = (ass.a1 || 0) + (ass.a2 || 0) + (ass.a3 || 0) + (ass.a4 || 0);
-          row.push(Number(ca.toFixed(1)), Number(ass.exam_score?.toFixed(1) || 0), Number(ass.total_score?.toFixed(1) || 0));
+          row.push(Number(ass.total_ca?.toFixed(1) || 0), Number(ass.exam_score?.toFixed(1) || 0), Number(ass.total_score?.toFixed(1) || 0));
         } else {
           row.push('-', '-', '-');
         }
@@ -293,13 +292,12 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
                   <td className="px-4 py-3 border-r font-mono text-slate-500">{grp.student.readable_index}</td>
                   {activeCourses.map(code => {
                     const ass = grp.assessments.find((a: any) => a.course_code === code);
-                    const ca = ass ? (ass.a1 || 0) + (ass.a2 || 0) + (ass.a3 || 0) + (ass.a4 || 0) : null;
                     return (
                       <React.Fragment key={code}>
-                        <td className="px-2 py-3 text-center border-r bg-slate-50/20">{ass ? ca?.toFixed(1) : '-'}</td>
-                        <td className="px-2 py-3 text-center border-r">{ass ? ass.exam_score?.toFixed(1) : '-'}</td>
+                        <td className="px-2 py-3 text-center border-r bg-slate-50/20">{ass ? (ass.total_ca || 0).toFixed(1) : '-'}</td>
+                        <td className="px-2 py-3 text-center border-r">{ass ? (ass.exam_score || 0).toFixed(1) : '-'}</td>
                         <td className="px-2 py-3 text-center border-r font-bold text-blue-700 bg-blue-50/10">
-                          {ass ? ass.total_score?.toFixed(1) : '-'}
+                          {ass ? (ass.total_score || 0).toFixed(1) : '-'}
                         </td>
                       </React.Fragment>
                     );

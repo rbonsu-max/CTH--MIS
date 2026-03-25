@@ -13,7 +13,10 @@ import {
   Menu,
   FileSpreadsheet,
   Plus,
-  Loader2
+  Loader2,
+  Clock,
+  Settings,
+  User as UserIcon
 } from 'lucide-react';
 import { NAV_ITEMS } from './constants';
 import { ModuleType, User, Student, Program, Course, Registration, CalendarEvent } from './types';
@@ -37,6 +40,8 @@ export default function App() {
   const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['dashboard']));
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfilePopover, setShowProfilePopover] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -628,26 +633,119 @@ export default function App() {
               />
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4">
-              <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
-                <Bell size={20} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-              </button>
+            <div className="flex items-center gap-2 md:gap-4 relative">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className={`relative p-2 rounded-lg transition-colors ${showNotifications ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  <Bell size={20} />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                </button>
+
+                {showNotifications && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                    <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                      <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <h3 className="font-bold text-slate-900">Notifications</h3>
+                        <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase">3 New</span>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto p-2 space-y-1">
+                        {[
+                          { title: 'System Update', description: 'Version 2.0 is now live with Excel support.', time: '2 mins ago', type: 'info' },
+                          { title: 'New Access Request', description: 'Lecturer John Doe requested access for Course CS101.', time: '1 hour ago', type: 'warning' },
+                          { title: 'Backup Successful', description: 'Nightly database backup completed successfully.', time: '5 hours ago', type: 'success' },
+                        ].map((notif, i) => (
+                          <div key={i} className="p-3 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer group">
+                            <div className="flex gap-3">
+                              <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                                notif.type === 'success' ? 'bg-emerald-500' : 
+                                notif.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
+                              }`} />
+                              <div className="flex-1">
+                                <div className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{notif.title}</div>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.description}</p>
+                                <div className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
+                                  <Clock size={10} />
+                                  {notif.time}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="p-3 border-t border-slate-100 text-center">
+                        <button className="text-xs font-bold text-blue-600 hover:text-blue-700">View All Notifications</button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
               
               <div className="h-8 w-px bg-slate-200 mx-1 md:mx-2" />
 
-              <div className="flex items-center gap-2 md:gap-3">
-                <div className="text-right hidden sm:block">
-                  <div className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{user.name}</div>
-                  <div className="text-[10px] font-bold uppercase text-blue-600 tracking-wider">
-                    {user.role.replace('_', ' ')}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowProfilePopover(!showProfilePopover)}
+                  className={`flex items-center gap-2 md:gap-3 p-1 rounded-xl transition-all ${showProfilePopover ? 'bg-slate-100' : 'hover:bg-slate-50'}`}
+                >
+                  <div className="text-right hidden sm:block px-1">
+                    <div className="text-sm font-bold text-slate-900 truncate max-w-[120px]">{user.name}</div>
+                    <div className="text-[10px] font-bold uppercase text-blue-600 tracking-wider">
+                      {user.role.replace('_', ' ')}
+                    </div>
                   </div>
-                </div>
-                <img 
-                  src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} 
-                  alt="Profile" 
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-xl border-2 border-white shadow-sm"
-                />
+                  <img 
+                    src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} 
+                    alt="Profile" 
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-xl border-2 border-white shadow-sm"
+                  />
+                </button>
+
+                {showProfilePopover && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowProfilePopover(false)} />
+                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                      <div className="p-6 text-center border-b border-slate-100 bg-slate-50/50">
+                        <div className="relative inline-block">
+                          <img 
+                            src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} 
+                            alt="Profile" 
+                            className="w-20 h-20 rounded-2xl border-4 border-white shadow-lg mx-auto"
+                          />
+                          <div className="absolute -bottom-2 -right-2 bg-emerald-500 w-6 h-6 rounded-lg border-4 border-white shadow-sm flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          </div>
+                        </div>
+                        <h3 className="mt-4 font-bold text-slate-900 text-lg">{user.name}</h3>
+                        <p className="text-xs font-medium text-slate-500 mt-1">{user.email || 'No email set'}</p>
+                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                          <UserIcon size={12} />
+                          {user.role.replace('_', ' ')}
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
+                          <UserIcon className="text-slate-400" size={18} />
+                          My Profile
+                        </button>
+                        <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
+                          <Settings className="text-slate-400" size={18} />
+                          Account Settings
+                        </button>
+                        <div className="my-2 border-t border-slate-50 mx-2" />
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all font-medium"
+                        >
+                          <LogOut className="text-red-400" size={18} />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

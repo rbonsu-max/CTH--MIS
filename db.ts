@@ -391,7 +391,7 @@ export function initDb() {
     db.prepare(`
       INSERT INTO users (id, uid, fullname, username, password_hash, role, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(uuidv4(), uid, 'Richard Bonsu', 'youroger1@gmail.com', passwordHash, 'SuperAdmin', 'active');
+    `).run(uuidv4(), uid, 'Isaac Roger Kweku Bonsu', 'youroger1@gmail.com', passwordHash, 'SuperAdmin', 'active');
   }
 
   // Seed departments if empty
