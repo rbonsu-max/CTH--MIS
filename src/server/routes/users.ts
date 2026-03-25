@@ -10,8 +10,8 @@ router.get('/', (req, res) => {
   const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '10'), 10) || 10));
   const offset = (page - 1) * pageSize;
-  const where = q ? 'WHERE fullname LIKE ? OR username LIKE ? OR role LIKE ?' : '';
-  const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`] : [];
+  const where = q ? 'WHERE fullname LIKE ? OR username LIKE ?' : '';
+  const params = q ? [`%${q}%`, `%${q}%`] : [];
 
   const count = db.prepare(`
     SELECT COUNT(*) as total

@@ -30,6 +30,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const [users, setUsers] = useState<User[]>([]);
   const [userSearchInput, setUserSearchInput] = useState('');
   const [userSearch, setUserSearch] = useState('');
+  const [userSearchVersion, setUserSearchVersion] = useState(0);
   const [userPage, setUserPage] = useState(1);
   const [userTotal, setUserTotal] = useState(0);
   const [userTotalPages, setUserTotalPages] = useState(1);
@@ -61,27 +62,62 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     if (shouldLoadAdminData) {
       fetchData();
     }
-  }, [shouldLoadAdminData, userSearch, userPage]);
+  }, [shouldLoadAdminData, userSearch, userPage, userSearchVersion]);
 
-  const fetchData = async () => {
+  const fetchData = async (options?: { searchTerm?: string; page?: number }) => {
     setLoading(true);
     try {
+      const effectiveSearch = options?.searchTerm ?? userSearch;
+      const effectivePage = options?.page ?? userPage;
       const [years, sems, userResponse, events] = await Promise.all([
         api.getAcademicYears(),
         api.getSemesters(),
-        api.getUsers({ q: userSearch, page: userPage, pageSize: userPageSize }),
+        api.getUsers({ q: effectiveSearch, page: effectivePage, pageSize: userPageSize }),
         api.getCalendarEvents()
       ]);
+      const normalizedUsers = Array.isArray(userResponse) ? userResponse : userResponse.data;
+      const normalizedTotal = Array.isArray(userResponse) ? userResponse.length : userResponse.total;
+      const normalizedTotalPages = Array.isArray(userResponse)
+        ? Math.max(1, Math.ceil(userResponse.length / userPageSize))
+        : userResponse.totalPages;
       setAcademicYears(years);
       setSemesters(sems);
-      setUsers(userResponse.data);
-      setUserTotal(userResponse.total);
-      setUserTotalPages(userResponse.totalPages);
+      setUsers(normalizedUsers || []);
+      setUserTotal(normalizedTotal || 0);
+      setUserTotalPages(normalizedTotalPages || 1);
       setCalendarEvents(events);
+      return {
+        users: normalizedUsers || [],
+        total: normalizedTotal || 0,
+        totalPages: normalizedTotalPages || 1,
+      };
     } catch (error) {
       console.error('Failed to fetch settings:', error);
+      return null;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUserSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedSearch = userSearchInput.trim();
+    const nextPage = 1;
+
+    if (!trimmedSearch) {
+      setUserPage(nextPage);
+      setUserSearch('');
+      setUserSearchVersion(prev => prev + 1);
+      return;
+    }
+
+    const result = await fetchData({ searchTerm: trimmedSearch, page: nextPage });
+    setUserPage(nextPage);
+    setUserSearch(trimmedSearch);
+    setUserSearchVersion(prev => prev + 1);
+
+    if (result && result.total === 0) {
+      toastError('User not found.');
     }
   };
 
@@ -415,11 +451,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <form
               className="flex flex-col sm:flex-row gap-3 w-full lg:max-w-2xl"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setUserPage(1);
-                setUserSearch(userSearchInput.trim());
-              }}
+              onSubmit={handleUserSearch}
             >
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -443,6 +475,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                     setUserSearchInput('');
                     setUserSearch('');
                     setUserPage(1);
+                    setUserSearchVersion(prev => prev + 1);
                   }}
                 >
                   Clear
@@ -530,19 +563,19 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
 
           <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="text-sm text-slate-500">
-              Page <span className="font-semibold text-slate-700">{userPage}</span> of <span className="font-semibold text-slate-700">{userTotalPages}</span>
+              Page <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userPage}</span> of <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userTotalPages}</span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 className="btn btn-secondary"
-                disabled={userPage <= 1}
+                disabled={userPage <= 1 || userTotal === 0}
                 onClick={() => setUserPage(prev => Math.max(1, prev - 1))}
               >
                 Previous
               </button>
               <button
                 className="btn btn-secondary"
-                disabled={userPage >= userTotalPages}
+                disabled={userPage >= userTotalPages || userTotal === 0}
                 onClick={() => setUserPage(prev => Math.min(userTotalPages, prev + 1))}
               >
                 Next
