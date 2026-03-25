@@ -2,6 +2,7 @@ import express from 'express';
 import { AssessmentRepository } from '../repositories/AssessmentRepository';
 import { AssessmentService } from '../services/AssessmentService';
 import { AssessmentControlRepository } from '../repositories/AssessmentControlRepository';
+import { NotificationService } from '../services/NotificationService';
 import db from '../../../db';
 
 const router = express.Router();
@@ -90,6 +91,13 @@ router.post('/', async (req, res) => {
     
     // Auto-compute GPA for this student
     await AssessmentService.computeGPA(index_no, academic_year, semester_id);
+
+    NotificationService.notifySuperAdmins(
+      'assessment_uploaded',
+      'Assessment uploaded',
+      `${user.name} uploaded or updated results for ${course_code} (${academic_year} ${semester_id}) for student ${index_no}.`,
+      { index_no, course_code, academic_year, semester_id, actor_uid: user.uid }
+    );
     
     res.status(201).json({ index_no, course_code, ...req.body, total_ca, total_score, grade, grade_point, weighted_gp });
   } catch (error: any) {

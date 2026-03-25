@@ -19,7 +19,7 @@ import {
   User as UserIcon
 } from 'lucide-react';
 import { NAV_ITEMS } from './constants';
-import { ModuleType, User, Student, Program, Course, Registration, CalendarEvent } from './types';
+import { ModuleType, User, Registration, CalendarEvent, NotificationItem } from './types';
 import { StudentsModule } from './components/StudentsModule';
 import { ProgramsModule } from './components/ProgramsModule';
 import { CoursesModule } from './components/CoursesModule';
@@ -42,6 +42,7 @@ export default function App() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['dashboard']));
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfilePopover, setShowProfilePopover] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,6 +72,24 @@ export default function App() {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadNotifications();
+    } else {
+      setNotifications([]);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const timer = window.setInterval(() => {
+      loadNotifications();
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, [user]);
 
   // Idle Timer logic
   useEffect(() => {
@@ -162,6 +181,15 @@ export default function App() {
     }
   };
 
+  const loadNotifications = async () => {
+    try {
+      const data = await api.getNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await api.logout();
@@ -169,6 +197,46 @@ export default function App() {
       setActiveModule('dashboard');
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  };
+
+  const handleOpenAccountSettings = () => {
+    setShowProfilePopover(false);
+    setActiveModule('settings');
+    setActiveSubItem('account_settings');
+  };
+
+  const handleOpenProfile = () => {
+    setShowProfilePopover(false);
+    if (user?.role === 'Student') {
+      setActiveModule('student_portal');
+      setActiveSubItem('overview');
+      return;
+    }
+    setActiveModule('settings');
+    setActiveSubItem('account_settings');
+  };
+
+  const handleNotificationClick = async (notification: NotificationItem) => {
+    try {
+      if (!notification.is_read) {
+        await api.markNotificationRead(notification.id);
+        setNotifications((prev) => prev.map((item) => (
+          item.id === notification.id ? { ...item, is_read: true } : item
+        )));
+      }
+
+      if (notification.type === 'assessment_uploaded' || notification.type === 'assessment_bulk_upload') {
+        setActiveModule('assessment');
+        setActiveSubItem('by_course');
+      } else if (notification.type === 'access_request') {
+        setActiveModule('settings');
+        setActiveSubItem('access_requests');
+      }
+
+      setShowNotifications(false);
+    } catch (error) {
+      console.error('Failed to open notification:', error);
     }
   };
 
@@ -215,6 +283,7 @@ export default function App() {
         ? item.subItems.filter(sub => !sub.roles || sub.roles.includes(user.role))
         : undefined
     }));
+  const unreadNotifications = notifications.filter((item) => !item.is_read);
 
   const renderDashboard = () => (
     <div className="space-y-8">
@@ -459,7 +528,7 @@ export default function App() {
         content = <LecturersModule activeSubItem={activeSubItem} onSubItemChange={setActiveSubItem} />;
         break;
       case 'settings':
-        content = <SettingsModule activeSubItem={activeSubItem} />;
+        content = <SettingsModule activeSubItem={activeSubItem} user={user} />;
         break;
       case 'academic_records':
         content = <AcademicRecordsModule activeSubItem={activeSubItem} />;
@@ -636,11 +705,21 @@ export default function App() {
             <div className="flex items-center gap-2 md:gap-4 relative">
               <div className="relative">
                 <button 
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() => {
+                    const nextState = !showNotifications;
+                    setShowNotifications(nextState);
+                    if (nextState) {
+                      loadNotifications();
+                    }
+                  }}
                   className={`relative p-2 rounded-lg transition-colors ${showNotifications ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100'}`}
                 >
                   <Bell size={20} />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                  {unreadNotifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 rounded-full border-2 border-white text-[10px] font-bold text-white flex items-center justify-center">
+                      {Math.min(unreadNotifications.length, 9)}
+                    </span>
+                  )}
                 </button>
 
                 {showNotifications && (
@@ -649,34 +728,50 @@ export default function App() {
                     <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                       <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                         <h3 className="font-bold text-slate-900">Notifications</h3>
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase">3 New</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase">
+                            {unreadNotifications.length} New
+                          </span>
+                          {notifications.length > 0 && (
+                            <button
+                              onClick={async () => {
+                                await api.markAllNotificationsRead();
+                                setNotifications((prev) => prev.map((item) => ({ ...item, is_read: true })));
+                              }}
+                              className="text-[10px] font-bold text-slate-500 hover:text-blue-600"
+                            >
+                              Mark all read
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="max-h-[400px] overflow-y-auto p-2 space-y-1">
-                        {[
-                          { title: 'System Update', description: 'Version 2.0 is now live with Excel support.', time: '2 mins ago', type: 'info' },
-                          { title: 'New Access Request', description: 'Lecturer John Doe requested access for Course CS101.', time: '1 hour ago', type: 'warning' },
-                          { title: 'Backup Successful', description: 'Nightly database backup completed successfully.', time: '5 hours ago', type: 'success' },
-                        ].map((notif, i) => (
-                          <div key={i} className="p-3 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer group">
+                        {notifications.length > 0 ? notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            onClick={() => handleNotificationClick(notif)}
+                            className={`p-3 rounded-xl transition-colors cursor-pointer group ${
+                              notif.is_read ? 'hover:bg-slate-50' : 'bg-blue-50/60 hover:bg-blue-50'
+                            }`}
+                          >
                             <div className="flex gap-3">
                               <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                                notif.type === 'success' ? 'bg-emerald-500' : 
-                                notif.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
+                                notif.type.includes('bulk') ? 'bg-emerald-500' : 
+                                notif.type.includes('request') ? 'bg-orange-500' : 'bg-blue-500'
                               }`} />
                               <div className="flex-1">
                                 <div className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{notif.title}</div>
-                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.description}</p>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.message}</p>
                                 <div className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
                                   <Clock size={10} />
-                                  {notif.time}
+                                  {new Date(notif.created_at).toLocaleString()}
                                 </div>
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                      <div className="p-3 border-t border-slate-100 text-center">
-                        <button className="text-xs font-bold text-blue-600 hover:text-blue-700">View All Notifications</button>
+                        )) : (
+                          <div className="p-8 text-center text-sm text-slate-400">No notifications yet.</div>
+                        )}
                       </div>
                     </div>
                   </>
@@ -719,18 +814,18 @@ export default function App() {
                           </div>
                         </div>
                         <h3 className="mt-4 font-bold text-slate-900 text-lg">{user.name}</h3>
-                        <p className="text-xs font-medium text-slate-500 mt-1">{user.email || 'No email set'}</p>
+                        <p className="text-xs font-medium text-slate-500 mt-1">{user.email || user.username}</p>
                         <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
                           <UserIcon size={12} />
                           {user.role.replace('_', ' ')}
                         </div>
                       </div>
                       <div className="p-2">
-                        <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
+                        <button onClick={handleOpenProfile} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
                           <UserIcon className="text-slate-400" size={18} />
                           My Profile
                         </button>
-                        <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
+                        <button onClick={handleOpenAccountSettings} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-xl transition-all font-medium">
                           <Settings className="text-slate-400" size={18} />
                           Account Settings
                         </button>

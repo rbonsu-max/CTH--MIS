@@ -151,18 +151,20 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'settings', 
     label: 'Settings', 
     icon: <Settings size={20} />,
-    roles: ['SuperAdmin'],
+    roles: ['SuperAdmin', 'Administrator', 'Lecturer', 'Student', 'User', 'Finance', 'Registry'],
     subItems: [
-      { id: 'academic_year', label: 'Academic Year' },
-      { id: 'semesters', label: 'Semesters' },
-      { id: 'academic_calendar', label: 'Academic Calendar' },
-      { id: 'grading_points', label: 'Grading Points' },
-      { id: 'departments', label: 'Departments' },
-      { id: 'user_management', label: 'User Management' },
-      { id: 'assessment_control', label: 'Assessment Control' },
-      { id: 'access_requests', label: 'Access Requests' },
-      { id: 'system_settings', label: 'System Settings' },
-      { id: 'bulk_upload', label: 'Bulk Upload' }
+      { id: 'account_settings', label: 'Account Settings' },
+      { id: 'my_access_requests', label: 'My Access Requests', roles: ['Lecturer'] },
+      { id: 'academic_year', label: 'Academic Year', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'semesters', label: 'Semesters', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'academic_calendar', label: 'Academic Calendar', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'grading_points', label: 'Grading Points', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'departments', label: 'Departments', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'user_management', label: 'User Management', roles: ['SuperAdmin'] },
+      { id: 'assessment_control', label: 'Assessment Control', roles: ['SuperAdmin'] },
+      { id: 'access_requests', label: 'Access Requests', roles: ['SuperAdmin'] },
+      { id: 'system_settings', label: 'System Settings', roles: ['SuperAdmin', 'Administrator'] },
+      { id: 'bulk_upload', label: 'Bulk Upload', roles: ['SuperAdmin'] }
     ]
   }
 ];

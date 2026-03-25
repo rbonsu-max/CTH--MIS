@@ -8,9 +8,9 @@ async function runTests() {
   
   try {
     // 0. Cleanup any stale data from previous failed runs (topological order)
-    db.prepare(`DELETE FROM course_registrations WHERE iid IN ('TESTSTUDENT-001', 'TESTSTUDENT-002')`).run();
+    db.prepare(`DELETE FROM course_registrations WHERE index_no IN ('TESTSTUDENT-001', 'TESTSTUDENT-002')`).run();
     db.prepare(`DELETE FROM students WHERE iid IN ('TESTSTUDENT-001', 'TESTSTUDENT-002')`).run();
-    db.prepare(`DELETE FROM courses WHERE cid IN ('TC101', 'TC102')`).run();
+    db.prepare(`DELETE FROM courses WHERE code IN ('TC101', 'TC102')`).run();
     db.prepare('DELETE FROM programs WHERE progid = ?').run('TEST-PROG-1');
 
     // 1. Create a Test Program
@@ -25,8 +25,8 @@ async function runTests() {
     // 2. Create 2 Test Courses
     const course1 = 'TC101';
     const course2 = 'TC102';
-    ProgramRepository.createCourse({ cid: course1, title: 'Test Course 1', credits: 3, department: 'Test Dept' });
-    ProgramRepository.createCourse({ cid: course2, title: 'Test Course 2', credits: 4, department: 'Test Dept' });
+    ProgramRepository.createCourse({ code: course1, name: 'Test Course 1', credit_hours: 3, department: 'Test Dept' });
+    ProgramRepository.createCourse({ code: course2, name: 'Test Course 2', credit_hours: 4, department: 'Test Dept' });
     console.log('[+] Created Test Courses:', course1, course2);
 
     // 3. Create 2 Test Students
@@ -80,24 +80,24 @@ async function runTests() {
 
     // 5. Register Students for Courses (Test Registration)
     RegistrationRepository.registerCourse({
-      iid: student1, cid: course1, academic_year: '2023/2024', semester_sid: 'SEM1', status: 'approved'
+      index_no: student1, course_code: course1, academic_year: '2023/2024', semester_sid: 'SEM1', status: 'approved'
     });
     RegistrationRepository.registerCourse({
-      iid: student2, cid: course2, academic_year: '2023/2024', semester_sid: 'SEM1', status: 'approved'
+      index_no: student2, course_code: course2, academic_year: '2023/2024', semester_sid: 'SEM1', status: 'approved'
     });
     console.log('[+] Created Course Registrations');
 
     // 6. Test Cascading Delete: Delete Course 1 (Should wipe registration for student1)
     console.log('[*] Testing Course Deletion & Cascade (Course -> Registrations)');
     ProgramRepository.deleteCourse(course1);
-    const c1Check = db.prepare('SELECT * FROM course_registrations WHERE cid = ?').all(course1);
+    const c1Check = db.prepare('SELECT * FROM course_registrations WHERE course_code = ?').all(course1);
     if (c1Check.length === 0) console.log('[+] Course Cascade Delete Verified (Registrations clean)');
     else throw new Error('Course Cascade Delete Failed: Registrations still exist!');
 
     // 7. Test Cascading Delete: Delete Student 2 (Should wipe registration for course2)
     console.log('[*] Testing Student Deletion & Cascade (Student -> Registrations)');
     StudentRepository.deleteStudent(student2);
-    const s2Check = db.prepare('SELECT * FROM course_registrations WHERE iid = ?').all(student2);
+    const s2Check = db.prepare('SELECT * FROM course_registrations WHERE index_no = ?').all(student2);
     if (s2Check.length === 0) console.log('[+] Student Cascade Delete Verified (Registrations clean)');
     else throw new Error('Student Cascade Delete Failed: Registrations still exist!');
 

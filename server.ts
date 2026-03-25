@@ -42,6 +42,7 @@ import calendarRoutes from './src/server/routes/calendar';
 import departmentRoutes from './src/server/routes/departments';
 import settingsRoutes from './src/server/routes/settings';
 import assessmentControlRoutes from './src/server/routes/assessment-control';
+import notificationRoutes from './src/server/routes/notifications';
 
 // Middleware Imports
 import { authenticate, checkRole } from './src/server/middleware/auth';
@@ -123,6 +124,7 @@ async function startServer() {
   api.use('/calendar-events', authenticate, calendarRoutes);
   api.use('/settings', authenticate, checkRole(['SuperAdmin', 'Administrator']), settingsRoutes);
   api.use('/assessment-control', authenticate, assessmentControlRoutes);
+  api.use('/notifications', authenticate, notificationRoutes);
 
   app.use('/api', api);
 

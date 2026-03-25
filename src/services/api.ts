@@ -1,4 +1,4 @@
-import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest } from '../types';
+import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest, NotificationItem } from '../types';
 
 const API_URL = '/api';
 
@@ -40,6 +40,18 @@ export const api = {
   me: async (): Promise<User> => {
     const res = await fetchWithAuth(`${API_URL}/auth/me`);
     return res.json();
+  },
+  getPublicSettings: async (): Promise<Record<string, string>> => {
+    const res = await fetch(`${API_URL}/auth/public-settings`, { credentials: 'include' });
+    if (!res.ok) return {};
+    return res.json();
+  },
+  changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
   },
 
   // Students
@@ -163,13 +175,13 @@ export const api = {
     if (academicYear) params.append('academic_year', academicYear);
     if (semesterId) params.append('semester_id', semesterId);
     if (indexNo) params.append('index_no', indexNo);
-    const response = await fetch(`${API_URL}/assessments?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_URL}/assessments?${params.toString()}`);
     return response.json();
   },
 
   async getPeriodAssessments(academicYear: string, semesterId: string): Promise<Assessment[]> {
     const params = new URLSearchParams({ academic_year: academicYear, semester_id: semesterId });
-    const response = await fetch(`${API_URL}/assessments?${params.toString()}`);
+    const response = await fetchWithAuth(`${API_URL}/assessments?${params.toString()}`);
     return response.json();
   },
   createAssessment: async (assessment: Partial<Assessment>): Promise<Assessment> => {
@@ -581,5 +593,17 @@ export const api = {
     const sp = new URLSearchParams(params as any);
     const res = await fetchWithAuth(`${API_URL}/assessment-control/check-access?${sp.toString()}`);
     return res.json();
+  },
+
+  // Notifications
+  getNotifications: async (): Promise<NotificationItem[]> => {
+    const res = await fetchWithAuth(`${API_URL}/notifications`);
+    return res.json();
+  },
+  markNotificationRead: async (id: number): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/notifications/${id}/read`, { method: 'POST' });
+  },
+  markAllNotificationsRead: async (): Promise<void> => {
+    await fetchWithAuth(`${API_URL}/notifications/read-all`, { method: 'POST' });
   },
 };

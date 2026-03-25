@@ -187,14 +187,14 @@ export const StudentPortalModule: React.FC<StudentPortalProps> = ({ activeSubIte
           <tbody className="divide-y divide-slate-100">
             {registrations.length > 0 ? registrations.map((r, i) => (
               <tr key={i} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-medium">{r.cid}</td>
+                <td className="px-6 py-4 font-medium">{r.course_code}</td>
                 <td className="px-6 py-4">{r.course_name || 'Pending'}</td>
                 <td className="px-6 py-4">{r.credit_hours || '-'}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    r.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                    r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
                   }`}>
-                    {r.status || 'Registered'}
+                    {r.status || 'registered'}
                   </span>
                 </td>
               </tr>
@@ -231,14 +231,14 @@ export const StudentPortalModule: React.FC<StudentPortalProps> = ({ activeSubIte
             {assessments.length > 0 ? assessments.map((a, i) => (
               <tr key={i} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 font-medium">
-                  {a.cid} <br/> <span className="text-xs text-slate-400 font-normal">{a.course_name || 'Course'}</span>
+                  {a.course_code} <br/> <span className="text-xs text-slate-400 font-normal">{a.course_name || 'Course'}</span>
                 </td>
                 <td className="px-6 py-4">{a.credit_hours}</td>
-                <td className="px-6 py-4">{a.class_score}</td>
+                <td className="px-6 py-4">{a.total_ca}</td>
                 <td className="px-6 py-4">{a.exam_score}</td>
                 <td className="px-6 py-4 font-bold text-blue-700">{a.total_score}</td>
                 <td className="px-6 py-4 font-bold">{a.grade}</td>
-                <td className="px-6 py-4 font-bold">{a.gp}</td>
+                <td className="px-6 py-4 font-bold">{a.grade_point}</td>
               </tr>
             )) : <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400">No results published yet.</td></tr>}
           </tbody>

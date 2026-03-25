@@ -20,7 +20,7 @@ export function Login({ onLogin }: LoginProps) {
 
   useEffect(() => {
     // Fetch generic settings before login
-    api.getSettings()
+    api.getPublicSettings()
       .then(settings => {
         if (settings.institution_logo) setLogoBase64(settings.institution_logo);
       })

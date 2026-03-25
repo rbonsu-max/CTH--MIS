@@ -2,6 +2,7 @@ import express from 'express';
 import db from '../../../db';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
+import { NotificationService } from '../services/NotificationService';
 
 const router = express.Router();
 
@@ -65,12 +66,12 @@ router.post('/courses', (req, res) => {
 router.post('/lecturers', (req, res) => {
   const lecturers = req.body;
   const insert = db.prepare(`
-    INSERT OR REPLACE INTO lecturers (lid, fullname, email, phone, department, designation, created_by)
+    INSERT OR REPLACE INTO lecturers (lid, name, email, tel, department, designation, created_by)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   const insertMany = db.transaction((data) => {
     for (const l of data) {
-      insert.run(l.lid, l.fullname, l.email, l.phone, l.department, l.designation, (req as any).user.uid);
+      insert.run(l.lid, l.name || l.fullname, l.email, l.tel || l.phone, l.department, l.designation, (req as any).user.uid);
     }
   });
   try {
@@ -204,6 +205,19 @@ router.post('/assessments', async (req, res) => {
         await AssessmentService.computeGPA(iid, academicYear, semesterSid);
       }
     }
+
+    NotificationService.notifySuperAdmins(
+      'assessment_bulk_upload',
+      'Bulk results uploaded',
+      `${user.name} uploaded ${assessments.length} assessment records for ${assessments[0]?.course_code || 'multiple courses'} (${academicYear} ${semesterSid}).`,
+      {
+        course_code: assessments[0]?.course_code || null,
+        academic_year: academicYear,
+        semester_id: semesterSid,
+        count: assessments.length,
+        actor_uid: user.uid,
+      }
+    );
 
     res.json({ success: true, count: assessments.length });
   } catch (error: any) {

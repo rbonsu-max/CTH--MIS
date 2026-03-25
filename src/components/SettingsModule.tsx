@@ -9,13 +9,16 @@ import { SettingsGrading } from './SettingsGrading';
 import { SettingsSystem } from './SettingsSystem';
 import { SettingsAssessmentControl } from './SettingsAssessmentControl';
 import { SettingsAccessRequests } from './SettingsAccessRequests';
+import { AccountSettingsPanel } from './AccountSettingsPanel';
+import { MyAccessRequestsPanel } from './MyAccessRequestsPanel';
 import { printElement } from '../utils/print';
 
 interface SettingsModuleProps {
   activeSubItem: string | null;
+  user: User;
 }
 
-export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem }) => {
+export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, user }) => {
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,10 +36,26 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const { success, error: toastError } = useToast();
+  const adminSections = new Set([
+    'academic_year',
+    'semesters',
+    'academic_calendar',
+    'user_management',
+    'departments',
+    'grading_points',
+    'system_settings',
+    'assessment_control',
+    'access_requests',
+    'bulk_upload'
+  ]);
+  const shouldLoadAdminData = (user.role === 'SuperAdmin' || user.role === 'Administrator')
+    && (!activeSubItem || adminSections.has(activeSubItem));
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (shouldLoadAdminData) {
+      fetchData();
+    }
+  }, [shouldLoadAdminData]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -682,6 +701,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem })
   );
 
   switch (activeSubItem) {
+    case 'account_settings':
+      return <AccountSettingsPanel user={user} />;
+    case 'my_access_requests':
+      return <MyAccessRequestsPanel />;
     case 'academic_year':
       return renderAcademicYear();
     case 'semesters':

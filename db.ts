@@ -240,6 +240,8 @@ export function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       lid TEXT NOT NULL REFERENCES lecturers(lid),
       course_code TEXT NOT NULL REFERENCES courses(code),
+      academic_year TEXT REFERENCES academic_years(code),
+      semester_id TEXT REFERENCES semesters(sid),
       index_no TEXT REFERENCES students(iid), -- NULL if for whole course
       request_type TEXT CHECK (request_type IN ('upload','edit')),
       reason TEXT,
@@ -312,6 +314,18 @@ export function initDb() {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipient_uid TEXT NOT NULL REFERENCES users(uid),
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      payload TEXT,
+      is_read INTEGER NOT NULL DEFAULT 0 CHECK (is_read IN (0,1)),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      read_at TEXT
+    );
+
     -- 7. CALENDAR EVENTS
     CREATE TABLE IF NOT EXISTS calendar_events (
       id TEXT PRIMARY KEY,
@@ -342,7 +356,7 @@ export function initDb() {
     CREATE VIEW IF NOT EXISTS view_course_registrations AS
     SELECT cr.*, s.surname, s.other_names, c.name as course_name, c.credit_hours
     FROM course_registrations cr
-    JOIN students s ON cr.iid = s.iid
+    JOIN students s ON cr.index_no = s.iid
     JOIN courses c ON cr.course_code = c.code;
 
     CREATE VIEW IF NOT EXISTS view_student_results AS
@@ -351,6 +365,16 @@ export function initDb() {
     JOIN students s ON sa.index_no = s.iid
     JOIN courses c ON sa.course_code = c.code;
   `);
+
+  const ensureColumn = (table: string, column: string, definition: string) => {
+    const columns = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    if (!columns.some((item) => item.name === column)) {
+      db.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+    }
+  };
+
+  ensureColumn('assessment_requests', 'academic_year', 'TEXT REFERENCES academic_years(code)');
+  ensureColumn('assessment_requests', 'semester_id', 'TEXT REFERENCES semesters(sid)');
 
   // Seed default academic year and semester if empty
   const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };

@@ -6,6 +6,7 @@ export interface User {
   fullname: string;
   name: string;       // returned by JWT (same as fullname)
   username: string;
+  email?: string;
   role: UserRole;
   status: 'active' | 'inactive' | 'locked';
   avatar?: string;
@@ -89,6 +90,18 @@ export interface Assessment {
   credit_hours: number;
   index_number?: string;
   progid?: string;
+}
+
+export interface NotificationItem {
+  id: number;
+  recipient_uid: string;
+  type: string;
+  title: string;
+  message: string;
+  payload?: Record<string, unknown> | null;
+  is_read: boolean;
+  created_at: string;
+  read_at?: string | null;
 }
 
 export interface BoardsheetCache {

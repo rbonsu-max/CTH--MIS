@@ -94,6 +94,72 @@ router.get('/me', authenticate, (req: any, res) => {
   res.json(req.user);
 });
 
+router.get('/public-settings', (req, res) => {
+  const settings = db.prepare(`
+    SELECT key, value
+    FROM system_settings
+    WHERE key IN ('institution_logo', 'institution_name')
+  `).all() as Array<{ key: string; value: string }>;
+
+  res.json(settings.reduce<Record<string, string>>((acc, row) => {
+    acc[row.key] = row.value;
+    return acc;
+  }, {}));
+});
+
+router.post('/change-password', authenticate, async (req: any, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+  }
+
+  const user = req.user;
+
+  if (user.role === 'Student') {
+    const studentLogin = db.prepare(`
+      SELECT password_hash
+      FROM student_logins
+      WHERE iid = ?
+    `).get(user.uid) as { password_hash: string } | undefined;
+
+    if (!studentLogin || !bcrypt.compareSync(currentPassword, studentLogin.password_hash)) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    db.prepare(`
+      UPDATE student_logins
+      SET password_hash = ?, requires_reset = 0
+      WHERE iid = ?
+    `).run(passwordHash, user.uid);
+
+    return res.json({ success: true });
+  }
+
+  const existingUser = db.prepare(`
+    SELECT password_hash
+    FROM users
+    WHERE uid = ?
+  `).get(user.uid) as { password_hash: string } | undefined;
+
+  if (!existingUser || !bcrypt.compareSync(currentPassword, existingUser.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  db.prepare(`
+    UPDATE users
+    SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE uid = ?
+  `).run(passwordHash, user.uid);
+
+  res.json({ success: true });
+});
+
 router.post('/setup-password', async (req, res) => {
   const { username, currentPassword, newPassword } = req.body;
   if (!username || !currentPassword || !newPassword) {

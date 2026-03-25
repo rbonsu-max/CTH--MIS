@@ -37,9 +37,10 @@ export class AssessmentControlRepository {
       JOIN lecturers l ON ar.lid = l.lid
       JOIN courses c ON ar.course_code = c.code
       LEFT JOIN students s ON ar.index_no = s.iid
+      ORDER BY ar.created_at DESC
     `;
     if (status) {
-      sql += ' WHERE ar.status = ?';
+      sql = sql.replace('ORDER BY ar.created_at DESC', 'WHERE ar.status = ? ORDER BY ar.created_at DESC');
       return db.prepare(sql).all(status) as AssessmentRequest[];
     }
     return db.prepare(sql).all() as AssessmentRequest[];
@@ -58,10 +59,18 @@ export class AssessmentControlRepository {
 
   static createRequest(request: Partial<AssessmentRequest>) {
     const stmt = db.prepare(`
-      INSERT INTO assessment_requests (lid, course_code, index_no, request_type, reason, status)
-      VALUES (?, ?, ?, ?, ?, 'pending')
+      INSERT INTO assessment_requests (lid, course_code, academic_year, semester_id, index_no, request_type, reason, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
     `);
-    return stmt.run(request.lid, request.course_code, request.index_no, request.request_type, request.reason);
+    return stmt.run(
+      request.lid,
+      request.course_code,
+      request.academic_year || null,
+      request.semester_id || null,
+      request.index_no || null,
+      request.request_type,
+      request.reason
+    );
   }
 
   static updateRequestStatus(id: number, status: string, processedBy: string, processedAt: string, expiresAt?: string) {

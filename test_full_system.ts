@@ -43,8 +43,10 @@ db.prepare('DELETE FROM academic_years WHERE code = ?').run('2027/2028');
 db.prepare('DELETE FROM semesters WHERE name = ?').run('TEST-SEM1');
 db.prepare('DELETE FROM departments WHERE name = ?').run('TEST Department');
 db.prepare('DELETE FROM programs WHERE progid = ?').run('TEST-PROG');
-db.prepare('DELETE FROM courses WHERE cid = ?').run('TEST-101');
+db.prepare('DELETE FROM courses WHERE code = ?').run('TEST-101');
 db.prepare('DELETE FROM lecturers WHERE lid = ?').run('TEST-LEC-1');
+db.prepare('DELETE FROM assessment_windows WHERE academic_year = ?').run('2027/2028');
+db.prepare('DELETE FROM notifications WHERE recipient_uid = ?').run('TEST-ADMIN-01');
 const uniqueSuffix = Date.now();
 const testEmail = `stu${uniqueSuffix}@test.com`;
 const testIndex = `TEST-IDX-${uniqueSuffix}`;
@@ -73,15 +75,15 @@ async function runTest() {
       method: 'POST', body: JSON.stringify({ code: 'TDEPT', name: 'TEST Department' })
     });
     await fetchWithCookie(`${BASE_URL}/programs`, adminCookie, {
-      method: 'POST', body: JSON.stringify({ progid: 'TEST-PROG', name: 'Test Program', department: 'TEST Department', duration_years: 4 })
+      method: 'POST', body: JSON.stringify({ progid: 'TEST-PROG', name: 'Test Program', department: 'TEST Department', duration: 4 })
     });
     await fetchWithCookie(`${BASE_URL}/courses`, adminCookie, {
-      method: 'POST', body: JSON.stringify({ cid: 'TEST-101', title: 'Test Intro', credits: 3, department: 'TEST Department' })
+      method: 'POST', body: JSON.stringify({ code: 'TEST-101', name: 'Test Intro', credit_hours: 3, department: 'TEST Department' })
     });
 
     console.log('4. Setup Lecturer & Mount Curriculum');
     await fetchWithCookie(`${BASE_URL}/lecturers`, adminCookie, {
-      method: 'POST', body: JSON.stringify({ lid: 'TEST-LEC-1', fullname: 'Dr. Test', email: 'lec@test.com', department: 'TEST Department', designation: 'Professor' })
+      method: 'POST', body: JSON.stringify({ lid: 'TEST-LEC-1', name: 'Dr. Test', email: 'lec@test.com', department: 'TEST Department', designation: 'Professor', user_uid: 'TEST-LEC-USER-01' })
     });
     await fetchWithCookie(`${BASE_URL}/lecturers/assignments`, adminCookie, {
       method: 'POST', body: JSON.stringify({ lid: 'TEST-LEC-1', course_code: 'TEST-101', academic_year: '2027/2028', semester_sid })
@@ -103,6 +105,9 @@ async function runTest() {
     await fetchWithCookie(`${BASE_URL}/registrations/windows`, adminCookie, {
       method: 'POST', body: JSON.stringify({ academic_year: '2027/2028', semester_sid, start_date: '2020-01-01', end_date: '2030-12-31', is_active: 1 })
     });
+    await fetchWithCookie(`${BASE_URL}/assessment-control/windows`, adminCookie, {
+      method: 'POST', body: JSON.stringify({ academic_year: '2027/2028', semester_id: semester_sid, start_date: '2020-01-01', end_date: '2030-12-31', is_active: true })
+    });
 
     // --- STUDENT SESSION ---
     console.log('7. Student Portal Login (First Time Reset)');
@@ -117,7 +122,7 @@ async function runTest() {
     
     console.log('8. Student Registers for Course');
     await fetchWithCookie(`${BASE_URL}/registrations`, studentCookie, {
-      method: 'POST', body: JSON.stringify({ index_no: testIndex, course_code: 'TEST-101', academic_year: '2027/2028', semester_sid })
+      method: 'POST', body: JSON.stringify({ index_no: studentIID, course_code: 'TEST-101', academic_year: '2027/2028', semester_sid })
     });
 
     // --- LECTURER SESSION ---
@@ -125,18 +130,34 @@ async function runTest() {
     let { cookie: lecCookie } = await fetchWithCookie(`${BASE_URL}/auth/login`, null, {
       method: 'POST', body: JSON.stringify({ username: 'testlec', password: 'lecpass' })
     });
+
+    await fetchWithCookie(`${BASE_URL}/auth/change-password`, lecCookie, {
+      method: 'POST', body: JSON.stringify({ currentPassword: 'lecpass', newPassword: 'lecpass2' })
+    });
+    ({ cookie: lecCookie } = await fetchWithCookie(`${BASE_URL}/auth/login`, null, {
+      method: 'POST', body: JSON.stringify({ username: 'testlec', password: 'lecpass2' })
+    }));
     
     await fetchWithCookie(`${BASE_URL}/assessments`, lecCookie, {
-      method: 'POST', body: JSON.stringify({ index_no: testIndex, course_code: 'TEST-101', academic_year: '2027/2028', semester_id: semester_sid, a1: 25, exam_score: 60 })
+      method: 'POST', body: JSON.stringify({ index_no: studentIID, course_code: 'TEST-101', academic_year: '2027/2028', semester_id: semester_sid, a1: 10, a2: 8, a3: 7, a4: 5, exam_score: 60 })
     });
 
     // --- ADMIN SESSION ---
-    console.log('10. Admin Computes GPA and Fetches Boardsheet');
+    console.log('10. Admin Verifies Notifications, GPA and Boardsheet');
+    const notificationRes = await fetchWithCookie(`${BASE_URL}/notifications`, adminCookie);
+    const notifications = notificationRes.data as Array<{ type: string; title: string }>;
+    if (!notifications.some((item) => item.type === 'assessment_uploaded')) {
+      throw new Error('Expected superadmin notification after lecturer result upload');
+    }
+
     await fetchWithCookie(`${BASE_URL}/assessments/compute-gpa`, adminCookie, {
       method: 'POST', body: JSON.stringify({ academic_year: '2027/2028', semester_id: semester_sid })
     });
     
-    const bsRes = await fetchWithCookie(`${BASE_URL}/assessments/broadsheet?academic_year=2027/2028&semester_id=${semester_sid}&index_no=${testIndex}`, adminCookie);
+    const bsRes = await fetchWithCookie(`${BASE_URL}/assessments/broadsheet?academic_year=2027/2028&semester_id=${semester_sid}&index_no=${studentIID}`, adminCookie);
+    if (!bsRes.data || bsRes.data.sGPA === undefined) {
+      throw new Error('Boardsheet was not generated');
+    }
     
     console.log('Boardsheet Status generated correctly!');
     

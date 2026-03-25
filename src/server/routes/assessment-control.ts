@@ -71,10 +71,10 @@ router.post('/requests', (req, res) => {
   const lecturer = db.prepare('SELECT lid FROM lecturers WHERE user_uid = ?').get(user.uid) as any;
   if (!lecturer) return res.status(404).json({ error: 'Lecturer record not found' });
   
-  const { course_code, index_no, request_type, reason } = req.body;
+  const { course_code, academic_year, semester_id, index_no, request_type, reason } = req.body;
   try {
     AssessmentControlRepository.createRequest({
-      lid: lecturer.lid, course_code, index_no, request_type, reason
+      lid: lecturer.lid, course_code, academic_year, semester_id, index_no, request_type, reason
     });
     res.json({ success: true });
   } catch (error: any) {
