@@ -45,10 +45,18 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const fetchCourseResults = async () => {
     if (!crCourse || !currentYear || !currentSemester) return;
     setCrLoading(true);
+    setCrResults([]);
     try {
       const data = await api.getAssessments(crCourse, currentYear, currentSemester);
       setCrResults(data);
-    } catch (e) { console.error(e); }
+      if (data.length === 0) {
+        toastError('No records found for the selected filters.');
+      }
+    } catch (e) {
+      console.error(e);
+      setCrResults([]);
+      toastError('Failed to load records for the selected filters.');
+    }
     finally { setCrLoading(false); }
   };
 
@@ -132,6 +140,7 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
       return;
     }
     setCompLoading(true);
+    setCompResults({ students: [], courses: [] } as any);
     try {
       const studentGroups: Record<string, { student: any, assessments: any[] }> = {};
       const courseCodesSet = new Set<string>();
@@ -169,7 +178,14 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
       const activeCourses = Array.from(courseCodesSet).sort();
       
       setCompResults({ students: sortedStudents, courses: activeCourses } as any);
-    } catch (e) { console.error(e); }
+      if (sortedStudents.length === 0) {
+        toastError('No records found for the selected filters.');
+      }
+    } catch (e) {
+      console.error(e);
+      setCompResults({ students: [], courses: [] } as any);
+      toastError('Failed to load records for the selected filters.');
+    }
     finally { setCompLoading(false); }
   };
 
@@ -325,6 +341,8 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const fetchBroadsheet = async () => {
     if (!currentYear || !currentSemester) return;
     setBsLoading(true);
+    setBsCourses([]);
+    setBsResults([]);
     try {
       // Fetch all assessments for the period
       const allCourseIds = new Set<string>();
@@ -348,7 +366,15 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
       
       setBsCourses(Array.from(allCourseIds));
       setBsResults(Object.values(studentMap));
-    } catch (e) { console.error(e); }
+      if (Object.keys(studentMap).length === 0) {
+        toastError('No records found for the selected filters.');
+      }
+    } catch (e) {
+      console.error(e);
+      setBsCourses([]);
+      setBsResults([]);
+      toastError('Failed to load records for the selected filters.');
+    }
     finally { setBsLoading(false); }
   };
 
@@ -470,9 +496,13 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const fetchGraduationList = async () => {
     if (!gradProg || !gradYear) return toastError('Select both Program and Admission Year');
     setGradLoading(true);
+    setGradList([]);
     try {
       const data = await api.getGraduationList(gradProg, gradYear);
       setGradList(data);
+      if (data.length === 0) {
+        toastError('No records found for the selected filters.');
+      }
     } catch (e: any) {
       toastError(e.message || 'Failed to generate list');
       setGradList([]);

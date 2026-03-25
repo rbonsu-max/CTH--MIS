@@ -122,6 +122,12 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
       
       const courseRegs = regData.filter(r => r.course_code === selectedCourseId && r.academic_year === currentYear && r.semester_sid === currentSemester);
       setRegistrations(courseRegs);
+
+      if (courseRegs.length === 0) {
+        setAssessments({});
+        toastError('No records found for the selected course, year, and semester.');
+        return;
+      }
       
       // Initialize assessments state with existing data if available
       const initialAssessments: Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }> = {};
@@ -138,6 +144,9 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
       setAssessments(initialAssessments);
     } catch (error) {
       console.error('Failed to fetch students/assessments:', error);
+      setRegistrations([]);
+      setAssessments({});
+      toastError('Failed to load records for the selected filters.');
     } finally {
       setFetchingStudents(false);
     }
