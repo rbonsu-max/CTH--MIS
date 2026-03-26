@@ -1,6 +1,7 @@
 import express from 'express';
 import { StudentRepository } from '../repositories/StudentRepository';
 import { AssessmentRepository } from '../repositories/AssessmentRepository';
+import { AssessmentService } from '../services/AssessmentService';
 import bcrypt from 'bcryptjs';
 import db from '../../../db';
 
@@ -27,7 +28,11 @@ router.get('/:iid/transcript', (req, res) => {
   if (!student) return res.status(404).json({ error: 'Student not found' });
 
   const assessments = AssessmentRepository.getStudentFullHistory(iid);
-  const caches = AssessmentRepository.getStudentAllCaches(iid);
+  const caches = AssessmentService.buildStudentCaches(iid, assessments, {
+    level: student.current_level?.toString(),
+    progid: student.progid,
+    existingCaches: AssessmentRepository.getStudentAllCaches(iid),
+  });
 
   res.json({ student, assessments, caches });
 });
@@ -48,7 +53,7 @@ router.get('/:iid/login', (req, res) => {
 
 // POST create student
 router.post('/', (req, res) => {
-  const { index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, photo } = req.body;
+  const { index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, photo, status } = req.body;
   if (!index_number || !surname || !other_names) {
     return res.status(400).json({ error: 'index_number, surname, and other_names are required' });
   }
@@ -67,11 +72,11 @@ router.post('/', (req, res) => {
       progid,
       admission_year,
       current_level: current_level || 100,
-      status: 'active',
+      status: status || 'active',
       photo: photo || null,
       created_by: (req as any).user.uid,
     });
-    res.status(201).json({ iid, index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level });
+    res.status(201).json({ iid, index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, status: status || 'active' });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

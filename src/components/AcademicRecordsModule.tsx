@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, Loader2, Download, Search, CheckCircle, XCircle, AlertCircle, Trash2, Edit2, Plus, ChevronRight, BookOpen, User as UserIcon, Calendar, Settings as SettingsIcon, GraduationCap, ClipboardList, Filter } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import { Student, Assessment, AcademicYear, Semester, Course, BoardsheetCache, Program } from '../types';
+import { Student, Assessment, AcademicYear, Semester, Course, BoardsheetCache, Program, BroadsheetSummaryResponse, BroadsheetSummaryRow } from '../types';
 import { api } from '../services/api';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { TranscriptModal } from './TranscriptModal';
 import { printElement } from '../utils/print';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface AcademicRecordsModuleProps {
   activeSubItem: string | null;
@@ -41,6 +43,8 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const [crCourse, setCrCourse] = useState('');
   const [crResults, setCrResults] = useState<Assessment[]>([]);
   const [crLoading, setCrLoading] = useState(false);
+  const [crPage, setCrPage] = useState(1);
+  const [crPageSize, setCrPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchCourseResults = async () => {
     if (!crCourse || !currentYear || !currentSemester) return;
@@ -64,7 +68,14 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
     if (activeSubItem === 'course_results' && crCourse) fetchCourseResults();
   }, [crCourse, currentYear, currentSemester]);
 
+  useEffect(() => {
+    setCrPage(1);
+  }, [crCourse, currentYear, currentSemester, crPageSize]);
+
   const renderCourseResults = () => (
+    (() => {
+      const paginatedCourseResults = paginateItems<Assessment>(crResults, crPage, crPageSize);
+      return (
     <div className="space-y-6">
       <div className="card p-6">
         <h2 className="font-bold text-lg mb-1">Course Results</h2>
@@ -106,11 +117,11 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
               <th className="px-4 py-3">GP</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
-              {crResults.length > 0 ? crResults.map((r: any, i) => {
+              {paginatedCourseResults.items.length > 0 ? paginatedCourseResults.items.map((r: any, i) => {
                 const student = students.find(s => s.index_number === r.index_no || s.iid === r.index_no);
                 return (
                   <tr key={i} className="hover:bg-slate-50/50">
-                    <td className="px-6 py-3 text-sm text-slate-400">{i + 1}</td>
+                    <td className="px-6 py-3 text-sm text-slate-400">{paginatedCourseResults.startIndex + i + 1}</td>
                     <td className="px-6 py-3 text-sm font-mono text-slate-600">{r.index_no}</td>
                     <td className="px-6 py-3"><div className="text-sm font-bold">{student?.full_name || r.surname + ', ' + r.other_names || r.index_no}</div></td>
                     <td className="px-4 py-3 text-sm">{((r.a1 || 0) + (r.a2 || 0) + (r.a3 || 0) + (r.a4 || 0)).toFixed(2)}</td>
@@ -120,12 +131,27 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
                     <td className="px-4 py-3 text-sm font-mono text-blue-600 font-bold">{r.grade_point?.toFixed(1)}</td>
                   </tr>
                 );
-              }) : <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-500">Select a course to view results.</td></tr>}
+              }) : <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-500">Select a course to view results.</td></tr>}
             </tbody>
           </table>
         )}
+        <div className="px-6">
+          <PaginationControls
+            page={paginatedCourseResults.page}
+            pageSize={crPageSize}
+            totalItems={crResults.length}
+            onPageChange={setCrPage}
+            onPageSizeChange={(size) => {
+              setCrPageSize(size);
+              setCrPage(1);
+            }}
+            itemLabel="results"
+          />
+        </div>
       </div>
     </div>
+      );
+    })()
   );
 
   // ─── COMPOSITE RESULTS ──────────────────────────────────────
@@ -133,6 +159,8 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const [compLoading, setCompLoading] = useState(false);
   const [compLevel, setCompLevel] = useState('');
   const [compProgram, setCompProgram] = useState('');
+  const [compPage, setCompPage] = useState(1);
+  const [compPageSize, setCompPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchComposite = async () => {
     if (!currentYear || !currentSemester || !compLevel || !compProgram) {
@@ -226,6 +254,7 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
     const data = compResults as unknown as { students: any[], courses: string[] };
     const groupedStudents = data.students || [];
     const activeCourses = data.courses || [];
+    const paginatedComposite = paginateItems<any>(groupedStudents, compPage, compPageSize);
 
     return (
       <div className="space-y-6">
@@ -300,9 +329,9 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {groupedStudents.length > 0 ? groupedStudents.map((grp: any, i: number) => (
+              {paginatedComposite.items.length > 0 ? paginatedComposite.items.map((grp: any, i: number) => (
                 <tr key={i} className="hover:bg-slate-50/50">
-                  <td className="px-4 py-3 border-r text-slate-400">{i + 1}</td>
+                  <td className="px-4 py-3 border-r text-slate-400">{paginatedComposite.startIndex + i + 1}</td>
                   <td className="px-4 py-3 border-r font-bold text-slate-800 uppercase">{grp.student.surname}</td>
                   <td className="px-4 py-3 border-r text-slate-800">{grp.student.other_names}</td>
                   <td className="px-4 py-3 border-r font-mono text-slate-500">{grp.student.readable_index}</td>
@@ -329,61 +358,112 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
             </tbody>
           </table>
         </div>
+        <div className="px-6 pb-6">
+          <PaginationControls
+            page={paginatedComposite.page}
+            pageSize={compPageSize}
+            totalItems={groupedStudents.length}
+            onPageChange={setCompPage}
+            onPageSizeChange={(size) => {
+              setCompPageSize(size);
+              setCompPage(1);
+            }}
+            itemLabel="students"
+          />
+        </div>
       </div>
     );
   };
 
   // ─── BROADSHEET ─────────────────────────────────────────────
-  const [bsResults, setBsResults] = useState<any[]>([]);
-  const [bsCourses, setBsCourses] = useState<string[]>([]);
+  const [bsResults, setBsResults] = useState<BroadsheetSummaryRow[]>([]);
+  const [bsSemesters, setBsSemesters] = useState<BroadsheetSummaryResponse['semesters']>([]);
   const [bsLoading, setBsLoading] = useState(false);
+  const [bsProgram, setBsProgram] = useState('');
+  const [bsLevel, setBsLevel] = useState('');
+  const [bsPage, setBsPage] = useState(1);
+  const [bsPageSize, setBsPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchBroadsheet = async () => {
-    if (!currentYear || !currentSemester) return;
+    if (!currentYear) return;
     setBsLoading(true);
-    setBsCourses([]);
     setBsResults([]);
+    setBsSemesters([]);
     try {
-      // Fetch all assessments for the period
-      const allCourseIds = new Set<string>();
-      const studentMap: Record<string, any> = {};
-      
-      for (const c of courses) {
-        try {
-          const results = await api.getAssessments(c.code, currentYear, currentSemester);
-          if (results.length > 0) {
-            allCourseIds.add(c.code);
-            results.forEach((r: any) => {
-              if (!studentMap[r.index_no]) {
-                const st = students.find(s => s.iid === r.index_no || s.index_number === r.index_no);
-                studentMap[r.index_no] = { iid: r.index_no, full_name: st?.full_name || r.index_no, grades: {} };
-              }
-              studentMap[r.index_no].grades[c.code] = r.grade;
-            });
-          }
-        } catch (_) {}
-      }
-      
-      setBsCourses(Array.from(allCourseIds));
-      setBsResults(Object.values(studentMap));
-      if (Object.keys(studentMap).length === 0) {
+      const response = await api.getBroadsheetSummary(currentYear, bsProgram || undefined, bsLevel || undefined);
+      setBsSemesters(response.semesters);
+      setBsResults(response.data);
+      if (response.data.length === 0) {
         toastError('No records found for the selected filters.');
       }
     } catch (e) {
       console.error(e);
-      setBsCourses([]);
       setBsResults([]);
+      setBsSemesters([]);
       toastError('Failed to load records for the selected filters.');
     }
     finally { setBsLoading(false); }
   };
 
-  const renderBroadsheet = () => (
+  const exportBroadsheetToExcel = () => {
+    if (bsResults.length === 0) return;
+    const orderedSemesters = bsSemesters.slice(0, 2);
+    const headerTop = ['INDEX NO. / NAME', '', ''];
+    orderedSemesters.forEach((semester) => {
+      headerTop.push(semester.name.toUpperCase(), '', '', '', '', '');
+    });
+    if (orderedSemesters.length === 1) {
+      headerTop.push('', '', '', '', '', '');
+    }
+
+    const headerBottom = ['Index No.', 'Last Name', 'First Name'];
+    orderedSemesters.forEach(() => {
+      headerBottom.push('sCH', 'sGP', 'sGPA', 'cCH', 'cGP', 'cGPA');
+    });
+    if (orderedSemesters.length === 1) {
+      headerBottom.push('sCH', 'sGP', 'sGPA', 'cCH', 'cGP', 'cGPA');
+    }
+    headerBottom.push('Class');
+
+    const rows = bsResults.map((row) => {
+      const base = [row.index_number || row.index_no, row.surname, row.first_name];
+      orderedSemesters.forEach((semester) => {
+        const metrics = row.semesters[semester.sid];
+        base.push(
+          metrics?.sCH ?? '',
+          metrics?.sGP ?? '',
+          metrics?.sGPA ?? '',
+          metrics?.cCH ?? '',
+          metrics?.cGP ?? '',
+          metrics?.cGPA ?? '',
+        );
+      });
+      if (orderedSemesters.length === 1) {
+        base.push('', '', '', '', '', '');
+      }
+      base.push(row.class || '');
+      return base;
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headerTop, headerBottom, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Broadsheet');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    saveAs(
+      new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      `Broadsheet_${currentYear.replace(/\//g, '-')}${bsProgram ? `_${bsProgram}` : ''}${bsLevel ? `_L${bsLevel}` : ''}.xlsx`,
+    );
+  };
+
+  const renderBroadsheet = () => {
+    const orderedSemesters = bsSemesters.slice(0, 2);
+    const paginatedBroadsheet = paginateItems<BroadsheetSummaryRow>(bsResults, bsPage, bsPageSize);
+    return (
     <div className="space-y-6">
       <div className="card p-6">
         <h2 className="font-bold text-lg mb-1">Broadsheet</h2>
-        <p className="text-slate-500 text-sm mb-4">Full results grid — students × courses.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <p className="text-slate-500 text-sm mb-4">Year summary broadsheet with semester GPA and cumulative standing.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="space-y-2">
             <label className="label">Year</label>
             <select className="input" value={currentYear} onChange={e => setCurrentYear(e.target.value)}>
@@ -391,15 +471,29 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
             </select>
           </div>
           <div className="space-y-2">
-            <label className="label">Semester</label>
-            <select className="input" value={currentSemester} onChange={e => setCurrentSemester(e.target.value)}>
-              {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+            <label className="label">Program</label>
+            <select className="input" value={bsProgram} onChange={e => setBsProgram(e.target.value)}>
+              <option value="">All Programs</option>
+              {programs.map(p => <option key={p.progid} value={p.progid}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="label">Level</label>
+            <select className="input" value={bsLevel} onChange={e => setBsLevel(e.target.value)}>
+              <option value="">All Levels</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="300">300</option>
+              <option value="400">400</option>
             </select>
           </div>
           <div className="flex items-end gap-2">
             <button className="btn btn-primary flex-1" onClick={fetchBroadsheet} disabled={bsLoading}>
               {bsLoading ? <Loader2 size={18} className="animate-spin mr-2" /> : null}
               Load
+            </button>
+            <button className="btn btn-secondary flex items-center justify-center p-3" onClick={exportBroadsheetToExcel} title="Export to Excel">
+              <Download size={18} />
             </button>
             <button className="btn btn-secondary" onClick={() => printElement('print-broadsheet', 'Broadsheet')}>🖨️</button>
           </div>
@@ -408,33 +502,75 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
       <div className="card overflow-hidden" id="print-broadsheet">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead><tr className="bg-slate-50 text-slate-500 uppercase tracking-wider">
-              <th className="px-4 py-3 font-semibold sticky left-0 bg-slate-50">#</th>
-              <th className="px-4 py-3 font-semibold sticky left-8 bg-slate-50 min-w-[200px]">Student</th>
-              {bsCourses.map(c => <th key={c} className="px-3 py-3 font-semibold text-center min-w-[60px]">{c}</th>)}
-            </tr></thead>
+            <thead>
+              <tr className="bg-slate-50 text-slate-700 uppercase tracking-wider">
+                <th className="px-4 py-3 font-semibold text-center border-b border-r" colSpan={3}>Index No. / Name</th>
+                {orderedSemesters.map((semester) => (
+                  <th key={semester.sid} className="px-4 py-3 font-semibold text-center border-b border-r" colSpan={6}>
+                    {semester.name.toUpperCase()}
+                  </th>
+                ))}
+                <th className="px-4 py-3 font-semibold text-center border-b">Class</th>
+              </tr>
+              <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 font-semibold border-r">Index No.</th>
+                <th className="px-4 py-3 font-semibold border-r">Last Name</th>
+                <th className="px-4 py-3 font-semibold border-r">First Name</th>
+                {orderedSemesters.map((semester) => (
+                  <React.Fragment key={semester.sid}>
+                    <th className="px-3 py-3 font-semibold text-center border-r">sCH</th>
+                    <th className="px-3 py-3 font-semibold text-center border-r">sGP</th>
+                    <th className="px-3 py-3 font-semibold text-center border-r">sGPA</th>
+                    <th className="px-3 py-3 font-semibold text-center border-r">cCH</th>
+                    <th className="px-3 py-3 font-semibold text-center border-r">cGP</th>
+                    <th className="px-3 py-3 font-semibold text-center border-r">cGPA</th>
+                  </React.Fragment>
+                ))}
+                <th className="px-4 py-3 font-semibold text-center">Class</th>
+              </tr>
+            </thead>
             <tbody className="divide-y divide-slate-100">
-              {bsResults.length > 0 ? bsResults.map((r, i) => (
-                <tr key={r.iid} className="hover:bg-slate-50/50">
-                  <td className="px-4 py-2 text-slate-400 sticky left-0 bg-white">{i + 1}</td>
-                  <td className="px-4 py-2 font-bold sticky left-8 bg-white">{r.full_name}</td>
-                  {bsCourses.map(c => (
-                    <td key={c} className="px-3 py-2 text-center">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                        r.grades[c] === 'A' || r.grades[c] === 'B+' || r.grades[c] === 'B' ? 'bg-emerald-100 text-emerald-700' :
-                        r.grades[c] === 'F' || r.grades[c] === 'E' ? 'bg-red-100 text-red-700' :
-                        r.grades[c] ? 'bg-amber-100 text-amber-700' : ''
-                      }`}>{r.grades[c] || '-'}</span>
-                    </td>
-                  ))}
+              {paginatedBroadsheet.items.length > 0 ? paginatedBroadsheet.items.map((row) => (
+                <tr key={row.index_no} className="hover:bg-slate-50/50">
+                  <td className="px-4 py-2 font-mono border-r">{row.index_number || row.index_no}</td>
+                  <td className="px-4 py-2 font-bold border-r">{row.surname}</td>
+                  <td className="px-4 py-2 border-r">{row.first_name}</td>
+                  {orderedSemesters.map((semester) => {
+                    const metrics = row.semesters[semester.sid];
+                    return (
+                      <React.Fragment key={semester.sid}>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.sCH ?? '-'}</td>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.sGP?.toFixed?.(4) ?? '-'}</td>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.sGPA?.toFixed?.(4) ?? '-'}</td>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.cCH ?? '-'}</td>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.cGP?.toFixed?.(4) ?? '-'}</td>
+                        <td className="px-3 py-2 text-center border-r">{metrics?.cGPA?.toFixed?.(4) ?? '-'}</td>
+                      </React.Fragment>
+                    );
+                  })}
+                  <td className="px-4 py-2 text-center font-medium">{row.class || '-'}</td>
                 </tr>
-              )) : <tr><td colSpan={2 + bsCourses.length} className="px-6 py-12 text-center text-slate-500">Click "Load" to generate broadsheet.</td></tr>}
+              )) : <tr><td colSpan={4 + orderedSemesters.length * 6} className="px-6 py-12 text-center text-slate-500">Click "Load" to generate broadsheet.</td></tr>}
             </tbody>
           </table>
         </div>
+        <div className="px-6 pb-6">
+          <PaginationControls
+            page={paginatedBroadsheet.page}
+            pageSize={bsPageSize}
+            totalItems={bsResults.length}
+            onPageChange={setBsPage}
+            onPageSizeChange={(size) => {
+              setBsPageSize(size);
+              setBsPage(1);
+            }}
+            itemLabel="broadsheet rows"
+          />
+        </div>
       </div>
     </div>
-  );
+    );
+  };
 
   // ─── STATEMENT OF RESULT / TRANSCRIPT ───────────────────────
   const [srSearch, setSrSearch] = useState('');
@@ -492,6 +628,8 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   const [gradYear, setGradYear] = useState('');
   const [gradList, setGradList] = useState<any[]>([]);
   const [gradLoading, setGradLoading] = useState(false);
+  const [gradPage, setGradPage] = useState(1);
+  const [gradPageSize, setGradPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchGraduationList = async () => {
     if (!gradProg || !gradYear) return toastError('Select both Program and Admission Year');
@@ -512,6 +650,9 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
   };
 
   const renderGraduationList = () => (
+    (() => {
+      const paginatedGraduationList = paginateItems<any>(gradList, gradPage, gradPageSize);
+      return (
     <div className="space-y-6">
       <div className="card p-6">
         <h2 className="font-bold text-lg mb-1">Graduation List</h2>
@@ -555,13 +696,13 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {gradList.length > 0 ? gradList.map((r, i) => (
+            {paginatedGraduationList.items.length > 0 ? paginatedGraduationList.items.map((r, i) => (
               <tr key={i} className="hover:bg-slate-50/50">
-                <td className="px-6 py-4 text-sm text-slate-400">{i + 1}</td>
+                <td className="px-6 py-4 text-sm text-slate-400">{paginatedGraduationList.startIndex + i + 1}</td>
                 <td className="px-6 py-4"><div className="text-sm font-bold text-slate-900">{r.name}</div></td>
                 <td className="px-4 py-4 text-sm font-mono text-slate-500">{r.index_number}</td>
                 <td className="px-4 py-4 text-sm">{r.gender}</td>
-                <td className="px-4 py-4 text-sm font-bold text-blue-700 text-right">{r.final_cgpa?.toFixed(4) || 'Pending'}</td>
+                <td className="px-4 py-4 text-sm font-bold text-blue-700 text-right">{r.final_cgpa == null ? 'Pending' : r.final_cgpa.toFixed(4)}</td>
                 <td className="px-6 py-4"><span className="text-sm font-bold text-emerald-700">{r.class_award || '-'}</span></td>
               </tr>
             )) : (
@@ -569,8 +710,23 @@ export const AcademicRecordsModule: React.FC<AcademicRecordsModuleProps> = ({ ac
             )}
           </tbody>
         </table>
+        <div className="px-6 pb-6">
+          <PaginationControls
+            page={paginatedGraduationList.page}
+            pageSize={gradPageSize}
+            totalItems={gradList.length}
+            onPageChange={setGradPage}
+            onPageSizeChange={(size) => {
+              setGradPageSize(size);
+              setGradPage(1);
+            }}
+            itemLabel="students"
+          />
+        </div>
       </div>
     </div>
+      );
+    })()
   );
 
   switch (activeSubItem) {

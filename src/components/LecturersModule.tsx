@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Trash2, UserCog, Loader2, BookOpen, Calendar, Link, Printer } from 'lucide-react';
+import { Plus, Search, Trash2, UserCog, Loader2, BookOpen, Calendar, Link, Printer, Eye } from 'lucide-react';
 import { Lecturer, Course, Department, LecturerAssignment, AcademicYear, Semester } from '../types';
 import { api } from '../services/api';
 import { BulkUploadModule } from './BulkUploadModule';
 import { printElement } from '../utils/print';
 import { useToast } from '../context/ToastContext';
 import { X, Edit } from 'lucide-react';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface LecturersModuleProps {
   activeSubItem: string | null;
@@ -27,7 +29,12 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
 
   const { success, error: toastError } = useToast();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedLecturerObj, setSelectedLecturerObj] = useState<Lecturer | null>(null);
+  const [lecturerPage, setLecturerPage] = useState(1);
+  const [lecturerPageSize, setLecturerPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [assignmentPage, setAssignmentPage] = useState(1);
+  const [assignmentPageSize, setAssignmentPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Assign form
   const [assignData, setAssignData] = useState({ lid: '', course_code: '', academic_year: '', semester_sid: '' });
@@ -37,11 +44,15 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
     if (activeSubItem === 'assign_lecturer') fetchAssignData();
   }, [activeSubItem]);
 
+  useEffect(() => {
+    setLecturerPage(1);
+  }, [searchTerm, lecturerPageSize]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [l, d] = await Promise.all([api.getLecturers(), api.getDepartments()]);
-      setLecturers(l); setDepartments(d);
+      const [l, d, a] = await Promise.all([api.getLecturers(), api.getDepartments(), api.getLecturerAssignments()]);
+      setLecturers(l); setDepartments(d); setAssignments(a);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -109,8 +120,29 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
 
   const filteredLecturers = lecturers.filter(l =>
     (l.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (l.lid || '').toLowerCase().includes(searchTerm.toLowerCase())
+    (l.lid || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    assignments.some(a =>
+      a.lid === l.lid &&
+      `${a.course_code} ${a.course_name || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
+  const paginatedLecturers = paginateItems<Lecturer>(filteredLecturers, lecturerPage, lecturerPageSize);
+  const paginatedAssignments = paginateItems<LecturerAssignment>(assignments, assignmentPage, assignmentPageSize);
+
+  const assignmentMap = assignments.reduce<Record<string, LecturerAssignment[]>>((acc, assignment) => {
+    if (!acc[assignment.lid]) {
+      acc[assignment.lid] = [];
+    }
+    acc[assignment.lid].push(assignment);
+    return acc;
+  }, {});
+
+  const getLecturerAssignments = (lid: string) =>
+    (assignmentMap[lid] || []).slice().sort((left, right) => {
+      const yearDiff = right.academic_year.localeCompare(left.academic_year);
+      if (yearDiff !== 0) return yearDiff;
+      return right.semester_sid.localeCompare(left.semester_sid);
+    });
 
   const renderSetupLecturer = () => (
     <div className="card">
@@ -213,7 +245,7 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
             <th className="px-6 py-3 font-semibold text-right">Action</th>
           </tr></thead>
           <tbody className="divide-y divide-slate-100">
-            {assignments.length > 0 ? assignments.map(a => (
+            {paginatedAssignments.items.length > 0 ? paginatedAssignments.items.map(a => (
               <tr key={a.id} className="hover:bg-slate-50/50">
                 <td className="px-6 py-3 text-sm font-medium">{a.lecturer_name}</td>
                 <td className="px-6 py-3 text-sm">{a.course_code} - {a.course_name}</td>
@@ -226,6 +258,19 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
             )) : <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No assignments yet.</td></tr>}
           </tbody>
         </table>
+        <div className="px-6">
+          <PaginationControls
+            page={paginatedAssignments.page}
+            pageSize={assignmentPageSize}
+            totalItems={assignments.length}
+            onPageChange={setAssignmentPage}
+            onPageSizeChange={(size) => {
+              setAssignmentPageSize(size);
+              setAssignmentPage(1);
+            }}
+            itemLabel="assignments"
+          />
+        </div>
       </div>
     </div>
   );
@@ -253,11 +298,16 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
             <thead><tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
               <th className="px-6 py-4 font-semibold">Lecturer</th>
               <th className="px-6 py-4 font-semibold hidden md:table-cell">Department</th>
+              <th className="px-6 py-4 font-semibold hidden xl:table-cell">Assigned Courses</th>
               <th className="px-6 py-4 font-semibold hidden lg:table-cell">Designation</th>
               <th className="px-6 py-4 font-semibold text-right">Actions</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLecturers.length > 0 ? filteredLecturers.map(l => (
+              {paginatedLecturers.items.length > 0 ? paginatedLecturers.items.map(l => {
+                const lecturerAssignments = assignmentMap[l.lid] || [];
+                const visibleAssignments = lecturerAssignments.slice(0, 3);
+                const remainingAssignments = lecturerAssignments.length - visibleAssignments.length;
+                return (
                 <tr key={l.id} className="hover:bg-slate-50/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -271,9 +321,37 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm hidden md:table-cell">{l.department || 'N/A'}</td>
+                  <td className="px-6 py-4 hidden xl:table-cell">
+                    {lecturerAssignments.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5 max-w-md">
+                        {visibleAssignments.map((assignment) => (
+                          <span key={assignment.id} className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700 border border-blue-100">
+                            {assignment.course_code}
+                          </span>
+                        ))}
+                        {remainingAssignments > 0 ? (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 border border-slate-200">
+                            +{remainingAssignments} more
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-slate-400">No courses assigned</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-sm hidden lg:table-cell">{l.designation || 'N/A'}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedLecturerObj(l);
+                          setShowViewModal(true);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                        title="View lecturer assignments"
+                      >
+                        <Eye size={16} />
+                      </button>
                       <button onClick={() => {
                           setSelectedLecturerObj(l);
                           setFormData({ lid: l.lid, name: l.name, email: l.email || '', tel: l.tel || '', department: l.department || '', designation: l.designation || '', title: l.title || '' });
@@ -292,11 +370,24 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
                     </div>
                   </td>
                 </tr>
-              )) : <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-500">No lecturers found.</td></tr>}
+              )}) : <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No lecturers found.</td></tr>}
             </tbody>
           </table>
           </div>
         )}
+        <div className="px-6">
+          <PaginationControls
+            page={paginatedLecturers.page}
+            pageSize={lecturerPageSize}
+            totalItems={filteredLecturers.length}
+            onPageChange={setLecturerPage}
+            onPageSizeChange={(size) => {
+              setLecturerPageSize(size);
+              setLecturerPage(1);
+            }}
+            itemLabel="lecturers"
+          />
+        </div>
       </div>
 
       {showEditModal && selectedLecturerObj && (
@@ -353,6 +444,80 @@ export const LecturersModule: React.FC<LecturersModuleProps> = ({ activeSubItem 
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showViewModal && selectedLecturerObj && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div>
+                <h3 className="font-bold text-slate-900">Lecturer Details</h3>
+                <p className="text-xs text-slate-500">
+                  {selectedLecturerObj.title ? `${selectedLecturerObj.title} ` : ''}{selectedLecturerObj.name} ({selectedLecturerObj.lid})
+                </p>
+              </div>
+              <button onClick={() => setShowViewModal(false)} className="p-2 hover:bg-slate-200 rounded-lg text-slate-400 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-88px)]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Department</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">{selectedLecturerObj.department || 'N/A'}</div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Designation</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">{selectedLecturerObj.designation || 'N/A'}</div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Contact</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">{selectedLecturerObj.email || selectedLecturerObj.tel || 'N/A'}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-slate-900">Assigned Courses</h4>
+                    <p className="text-xs text-slate-500">All courses currently linked to this lecturer.</p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-100">
+                    {getLecturerAssignments(selectedLecturerObj.lid).length} assignments
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                        <th className="px-6 py-3 font-semibold">Course</th>
+                        <th className="px-6 py-3 font-semibold">Title</th>
+                        <th className="px-6 py-3 font-semibold">Academic Year</th>
+                        <th className="px-6 py-3 font-semibold">Semester</th>
+                        <th className="px-6 py-3 font-semibold text-center">Credits</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {getLecturerAssignments(selectedLecturerObj.lid).length > 0 ? getLecturerAssignments(selectedLecturerObj.lid).map((assignment) => (
+                        <tr key={assignment.id} className="hover:bg-slate-50/50">
+                          <td className="px-6 py-3 text-sm font-bold text-slate-900">{assignment.course_code}</td>
+                          <td className="px-6 py-3 text-sm text-slate-700">{assignment.course_name || 'N/A'}</td>
+                          <td className="px-6 py-3 text-sm text-slate-700">{assignment.academic_year}</td>
+                          <td className="px-6 py-3 text-sm text-slate-700">{semesters.find((semester) => semester.sid === assignment.semester_sid)?.name || assignment.semester_sid}</td>
+                          <td className="px-6 py-3 text-sm text-center text-slate-700">{assignment.credit_hours ?? 'N/A'}</td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center text-slate-500">No courses assigned to this lecturer.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

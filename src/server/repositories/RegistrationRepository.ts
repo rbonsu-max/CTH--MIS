@@ -47,6 +47,7 @@ export class RegistrationRepository {
   static getRegistrations(index_no?: string, academic_year?: string, semester_sid?: string): any[] {
     let sql = `
       SELECT cr.*, 
+             s.index_number,
              s.surname, s.other_names, (s.surname || ', ' || s.other_names) as full_name,
              c.name as course_name, c.credit_hours
       FROM course_registrations cr
@@ -55,7 +56,10 @@ export class RegistrationRepository {
       WHERE 1=1
     `;
     const params: any[] = [];
-    if (index_no) { sql += ' AND cr.index_no = ?'; params.push(index_no); }
+    if (index_no) {
+      sql += ' AND (cr.index_no = ? OR s.index_number = ?)';
+      params.push(index_no, index_no);
+    }
     if (academic_year) { sql += ' AND cr.academic_year = ?'; params.push(academic_year); }
     if (semester_sid) { sql += ' AND cr.semester_sid = ?'; params.push(semester_sid); }
     
@@ -67,6 +71,7 @@ export class RegistrationRepository {
   static getLecturerRegistrations(userUid: string, index_no?: string, academic_year?: string, semester_sid?: string, course_code?: string): any[] {
     let sql = `
       SELECT cr.*, 
+             s.index_number,
              s.surname, s.other_names, (s.surname || ', ' || s.other_names) as full_name,
              c.name as course_name, c.credit_hours
       FROM course_registrations cr
@@ -79,7 +84,10 @@ export class RegistrationRepository {
       WHERE l.user_uid = ?
     `;
     const params: any[] = [userUid];
-    if (index_no) { sql += ' AND cr.index_no = ?'; params.push(index_no); }
+    if (index_no) {
+      sql += ' AND (cr.index_no = ? OR s.index_number = ?)';
+      params.push(index_no, index_no);
+    }
     if (academic_year) { sql += ' AND cr.academic_year = ?'; params.push(academic_year); }
     if (semester_sid) { sql += ' AND cr.semester_sid = ?'; params.push(semester_sid); }
     if (course_code) { sql += ' AND cr.course_code = ?'; params.push(course_code); }

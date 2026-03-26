@@ -31,6 +31,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
   if (!isOpen || !data) return null;
 
   const { student, assessments, caches } = data;
+  const finalCache = caches[caches.length - 1];
 
   // Group assessments by academic year and semester
   const groupedResults: Record<string, Record<string, Assessment[]>> = {};
@@ -57,20 +58,79 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
           <title>${title} - ${student.full_name}</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
+            :root {
+              color-scheme: light;
+            }
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: white !important;
+            }
+            * {
+              box-sizing: border-box;
+            }
             @media print {
               .no-print { display: none; }
               body { padding: 0; margin: 0; }
-              .print-container { width: 100%; }
+              .print-shell { padding: 0 !important; }
             }
-            body { font-family: 'Inter', sans-serif; }
+            body { font-family: 'Inter', sans-serif; color: #0f172a; }
+            .print-shell {
+              padding: 10mm;
+            }
+            .print-scale-frame {
+              width: 100%;
+              overflow: hidden;
+            }
+            .print-scale-target {
+              transform-origin: top left;
+              width: 100%;
+            }
+            table {
+              width: 100% !important;
+            }
+            thead {
+              display: table-header-group;
+            }
+            tr, img {
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
+            img {
+              max-width: 100%;
+            }
           </style>
         </head>
         <body class="bg-white">
-          <div class="p-8 max-w-4xl mx-auto">
-            ${printContent.innerHTML}
+          <div class="print-shell">
+            <div class="print-scale-frame">
+              <div id="print-scale-target" class="print-scale-target">
+                ${printContent.innerHTML}
+              </div>
+            </div>
           </div>
           <script>
+            const fitToPage = () => {
+              const target = document.getElementById('print-scale-target');
+              if (!target) return;
+              target.style.transform = 'scale(1)';
+              target.style.width = '100%';
+              const frame = target.parentElement;
+              if (!frame) return;
+              const availableWidth = frame.clientWidth;
+              const contentWidth = target.scrollWidth;
+              if (!availableWidth || !contentWidth) return;
+              const scale = Math.min(1, availableWidth / contentWidth);
+              target.style.transform = 'scale(' + scale + ')';
+              target.style.width = scale < 1 ? (100 / scale) + '%' : '100%';
+            };
+
             window.onload = () => {
+              fitToPage();
               window.print();
               window.onafterprint = () => window.close();
             };
@@ -158,6 +218,24 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                 </div>
               </div>
             </div>
+
+            {finalCache && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                <div className="rounded-xl border border-blue-100 bg-blue-50 px-5 py-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Final CGPA</div>
+                  <div className="text-2xl font-black text-blue-900">{finalCache.cGPA.toFixed(4)}</div>
+                </div>
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-5 py-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Class Award</div>
+                  <div className="text-lg font-black text-emerald-900">{finalCache.class || 'N/A'}</div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Latest Semester</div>
+                  <div className="text-lg font-black text-slate-900">{finalCache.academic_year}</div>
+                  <div className="text-xs font-semibold text-slate-500">Semester {finalCache.semester_id}</div>
+                </div>
+              </div>
+            )}
 
             {/* Results */}
             <div className="space-y-12">

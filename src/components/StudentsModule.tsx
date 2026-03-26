@@ -6,6 +6,8 @@ import { printElement } from '../utils/print';
 import { BulkUploadModule } from './BulkUploadModule';
 import { TranscriptModal } from './TranscriptModal';
 import { useToast } from '../context/ToastContext';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface StudentsModuleProps {
   activeSubItem: string | null;
@@ -32,6 +34,19 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
   const { success, error: toastError } = useToast();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [studentPage, setStudentPage] = useState(1);
+  const [studentPageSize, setStudentPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({
+    progid: '',
+    level: '',
+    status: '',
+  });
+  const [pendingFilters, setPendingFilters] = useState({
+    progid: '',
+    level: '',
+    status: '',
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -44,7 +59,8 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     gender: 'Male',
     dob: '',
     phone: '',
-    admission_year: new Date().getFullYear().toString()
+    admission_year: new Date().getFullYear().toString(),
+    status: 'active'
   });
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
@@ -107,6 +123,10 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setStudentPage(1);
+  }, [searchTerm, studentPageSize, appliedFilters]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -138,7 +158,8 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
         gender: 'Male',
         dob: '',
         phone: '',
-        admission_year: new Date().getFullYear().toString()
+        admission_year: new Date().getFullYear().toString(),
+        status: 'active'
       });
       setPhotoPreview(null);
       setPhotoBase64(null);
@@ -228,11 +249,43 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    (s.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.index_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.email || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students.filter(s => {
+    const studentProgram = programs.find((program) => program.progid === s.progid);
+    const isGraduateCandidate = Boolean(
+      studentProgram &&
+      studentProgram.duration > 0 &&
+      Number(s.current_level || 0) >= studentProgram.duration * 100
+    );
+    const normalizedStatus = (s.status || '').toLowerCase();
+    const matchesSearch =
+      (s.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.index_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProgram = !appliedFilters.progid || s.progid === appliedFilters.progid;
+    const matchesLevel = !appliedFilters.level || String(s.current_level || '') === appliedFilters.level;
+    const matchesStatus = !appliedFilters.status
+      || (appliedFilters.status === 'graduated'
+        ? normalizedStatus === 'graduated' || isGraduateCandidate
+        : appliedFilters.status === 'active'
+          ? normalizedStatus === 'active' && !isGraduateCandidate
+          : normalizedStatus === appliedFilters.status.toLowerCase());
+    return matchesSearch && matchesProgram && matchesLevel && matchesStatus;
+  });
+  const paginatedStudents = paginateItems<Student>(filteredStudents, studentPage, studentPageSize);
+
+  const activeFilterCount = [appliedFilters.progid, appliedFilters.level, appliedFilters.status].filter(Boolean).length;
+
+  const handleApplyFilters = () => {
+    setAppliedFilters(pendingFilters);
+    setShowFilterPanel(false);
+  };
+
+  const handleResetFilters = () => {
+    const cleared = { progid: '', level: '', status: '' };
+    setPendingFilters(cleared);
+    setAppliedFilters(cleared);
+    setShowFilterPanel(false);
+  };
 
   const renderAddStudent = () => (
     <div className="space-y-6">
@@ -347,17 +400,31 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                 <option value="400">400</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <label className="label">Admission Year</label>
-              <input 
-                type="text" 
-                className="input" 
+                <div className="space-y-2">
+                  <label className="label">Admission Year</label>
+                  <input 
+                    type="text" 
+                    className="input" 
                 placeholder="e.g. 2025" 
-                value={formData.admission_year}
-                onChange={e => setFormData({...formData, admission_year: e.target.value})}
-              />
-            </div>
-          </div>
+                    value={formData.admission_year}
+                    onChange={e => setFormData({...formData, admission_year: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Status</label>
+                  <select
+                    className="input"
+                    value={formData.status}
+                    onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+                  >
+                    <option value="active">Active</option>
+                    <option value="withdrawn">Withdrawn</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="deferred">Deferred</option>
+                    <option value="graduated">Graduated</option>
+                  </select>
+                </div>
+              </div>
 
           {/* Passport Photo Upload */}
           <div className="pt-2">
@@ -405,7 +472,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
             <button type="button" className="btn btn-secondary" onClick={() => {
               setFormData({
-                index_number: '', surname: '', other_names: '', email: '', progid: '', current_level: 100, gender: 'Male', dob: '', phone: '', admission_year: new Date().getFullYear().toString()
+                index_number: '', surname: '', other_names: '', email: '', progid: '', current_level: 100, gender: 'Male', dob: '', phone: '', admission_year: new Date().getFullYear().toString(), status: 'active'
               });
               setPhotoPreview(null);
               setPhotoBase64(null);
@@ -434,9 +501,12 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
           />
         </div>
         <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar pb-1 lg:pb-0">
-          <button className="btn btn-secondary gap-2 whitespace-nowrap flex-1 lg:flex-none">
+          <button
+            className="btn btn-secondary gap-2 whitespace-nowrap flex-1 lg:flex-none"
+            onClick={() => setShowFilterPanel((prev) => !prev)}
+          >
             <Filter size={18} />
-            Filter
+            Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
           </button>
           <button 
             className="btn btn-secondary gap-2 whitespace-nowrap flex-1 lg:flex-none"
@@ -447,6 +517,59 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
           </button>
         </div>
       </div>
+
+      {showFilterPanel && (
+        <div className="card p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="label">Program</label>
+              <select
+                className="input"
+                value={pendingFilters.progid}
+                onChange={(e) => setPendingFilters((prev) => ({ ...prev, progid: e.target.value }))}
+              >
+                <option value="">All Programs</option>
+                {programs.map((program) => (
+                  <option key={program.progid} value={program.progid}>{program.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="label">Level</label>
+              <select
+                className="input"
+                value={pendingFilters.level}
+                onChange={(e) => setPendingFilters((prev) => ({ ...prev, level: e.target.value }))}
+              >
+                <option value="">All Levels</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="label">Status</label>
+              <select
+                className="input"
+                value={pendingFilters.status}
+                onChange={(e) => setPendingFilters((prev) => ({ ...prev, status: e.target.value }))}
+              >
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="graduated">Graduate</option>
+                <option value="withdrawn">Withdrawn</option>
+                <option value="suspended">Suspended</option>
+                <option value="deferred">Deferred</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <button className="btn btn-secondary" onClick={handleResetFilters}>Reset</button>
+            <button className="btn btn-primary" onClick={handleApplyFilters}>Apply Filters</button>
+          </div>
+        </div>
+      )}
 
       <div className="card overflow-hidden">
         {loading ? (
@@ -467,7 +590,7 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredStudents.length > 0 ? filteredStudents.map((student) => (
+                {paginatedStudents.items.length > 0 ? paginatedStudents.items.map((student) => (
                   <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -545,7 +668,8 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                               gender: student.gender || 'Male',
                               dob: student.dob || '',
                               phone: student.phone || '',
-                              admission_year: student.admission_year || ''
+                              admission_year: student.admission_year || '',
+                              status: student.status || 'active'
                             });
                             setPhotoPreview(student.photo || null);
                             setPhotoBase64(student.photo || null);
@@ -580,11 +704,17 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
           </div>
         )}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <p className="text-xs text-slate-500">Showing {filteredStudents.length} of {students.length} students</p>
-          <div className="flex gap-2">
-            <button className="btn btn-secondary py-1 px-3 text-xs disabled:opacity-50" disabled>Previous</button>
-            <button className="btn btn-secondary py-1 px-3 text-xs disabled:opacity-50" disabled>Next</button>
-          </div>
+          <PaginationControls
+            page={paginatedStudents.page}
+            pageSize={studentPageSize}
+            totalItems={filteredStudents.length}
+            onPageChange={setStudentPage}
+            onPageSizeChange={(size) => {
+              setStudentPageSize(size);
+              setStudentPage(1);
+            }}
+            itemLabel="students"
+          />
         </div>
       </div>
       
@@ -731,6 +861,16 @@ export const StudentsModule: React.FC<StudentsModuleProps> = ({ activeSubItem })
                 <div className="space-y-2">
                   <label className="label">Admission Year</label>
                   <input type="text" className="input" value={formData.admission_year} onChange={e => setFormData({...formData, admission_year: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Status</label>
+                  <select className="input" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                    <option value="active">Active</option>
+                    <option value="withdrawn">Withdrawn</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="deferred">Deferred</option>
+                    <option value="graduated">Graduated</option>
+                  </select>
                 </div>
               </div>
               <div className="pt-2">

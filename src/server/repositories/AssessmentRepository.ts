@@ -44,6 +44,24 @@ export interface BoardsheetCache {
   calculated_at: string;
 }
 
+export interface BroadsheetSummarySourceRow {
+  index_no: string;
+  academic_year: string;
+  level: string;
+  semester_id: string;
+  progid: string;
+  sCH: number | null;
+  sGP: number | null;
+  sGPA: number | null;
+  cCH: number | null;
+  cGP: number | null;
+  cGPA: number | null;
+  class: string | null;
+  index_number: string;
+  surname: string;
+  other_names: string;
+}
+
 export class AssessmentRepository {
   static getAssessments(index_no: string, academic_year: string, semester_id: string): Assessment[] {
     return db.prepare(`
@@ -120,17 +138,59 @@ export class AssessmentRepository {
 
   static getStudentFullHistory(index_no: string): Assessment[] {
     return db.prepare(`
-      SELECT * FROM view_student_results 
-      WHERE index_no = ?
-      ORDER BY academic_year ASC, semester_id ASC
+      SELECT vsr.*
+      FROM view_student_results vsr
+      LEFT JOIN semesters sem ON sem.sid = vsr.semester_id
+      WHERE vsr.index_no = ?
+      ORDER BY CAST(substr(vsr.academic_year, 1, 4) AS INTEGER) ASC, COALESCE(sem.sort_order, 999) ASC, vsr.course_code ASC
     `).all(index_no) as Assessment[];
   }
 
   static getStudentAllCaches(index_no: string): BoardsheetCache[] {
     return db.prepare(`
-      SELECT * FROM broadsheet_cache 
-      WHERE index_no = ?
-      ORDER BY academic_year ASC, semester_id ASC
+      SELECT bc.*
+      FROM broadsheet_cache bc
+      LEFT JOIN semesters sem ON sem.sid = bc.semester_id
+      WHERE bc.index_no = ?
+      ORDER BY CAST(substr(bc.academic_year, 1, 4) AS INTEGER) ASC, COALESCE(sem.sort_order, 999) ASC
     `).all(index_no) as BoardsheetCache[];
+  }
+
+  static getBroadsheetSummaryRows(academic_year: string, progid?: string, level?: string): BroadsheetSummarySourceRow[] {
+    const filters: string[] = ['bc.academic_year = ?'];
+    const params: Array<string> = [academic_year];
+
+    if (progid) {
+      filters.push('bc.progid = ?');
+      params.push(progid);
+    }
+
+    if (level) {
+      filters.push('bc.level = ?');
+      params.push(level);
+    }
+
+    return db.prepare(`
+      SELECT
+        bc.index_no,
+        bc.academic_year,
+        bc.level,
+        bc.semester_id,
+        bc.progid,
+        bc.sCH,
+        bc.sGP,
+        bc.sGPA,
+        bc.cCH,
+        bc.cGP,
+        bc.cGPA,
+        bc.class,
+        s.index_number,
+        s.surname,
+        s.other_names
+      FROM broadsheet_cache bc
+      JOIN students s ON s.iid = bc.index_no
+      WHERE ${filters.join(' AND ')}
+      ORDER BY s.surname ASC, s.other_names ASC, bc.semester_id ASC
+    `).all(...params) as BroadsheetSummarySourceRow[];
   }
 }

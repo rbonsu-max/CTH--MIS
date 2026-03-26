@@ -134,29 +134,29 @@ export default function App() {
 
   const fetchDashboardData = async () => {
     try {
-      const [studentsData, programsData, coursesData, registrationsData, yearsData, semsData, eventsData] = await Promise.all([
+      const [studentsData, programsData, coursesData, yearsData, semsData, eventsData, recentRegistrationsData] = await Promise.all([
         api.getStudents(),
         api.getPrograms(),
         api.getCourses(),
-        api.getRegistrations(),
         api.getAcademicYears(),
         api.getSemesters(),
-        api.getCalendarEvents()
+        api.getCalendarEvents(),
+        api.getRegistrations()
       ]);
 
       const students = Array.isArray(studentsData) ? studentsData : [];
       const programs = Array.isArray(programsData) ? programsData : [];
       const courses = Array.isArray(coursesData) ? coursesData : [];
-      const registrations = Array.isArray(registrationsData) ? registrationsData : [];
       const years = Array.isArray(yearsData) ? yearsData : [];
       const sems = Array.isArray(semsData) ? semsData : [];
       const events = Array.isArray(eventsData) ? eventsData : [];
+      const recentRegistrations = Array.isArray(recentRegistrationsData) ? recentRegistrationsData : [];
 
       const activeYear = years.find(y => y.is_current);
       const activeSem = sems.find(s => s.is_current);
-      
-      const currentRegs = activeYear && activeSem 
-        ? registrations.filter(r => r.academic_year === activeYear.code && r.semester_sid === activeSem.sid)
+
+      const currentRegs = activeYear && activeSem
+        ? await api.getRegistrations(undefined, activeYear.code, activeSem.sid)
         : [];
       
       const registeredStudentCount = new Set(currentRegs.map(r => r.index_no)).size;
@@ -170,7 +170,7 @@ export default function App() {
           : '0%'
       });
 
-      setRecentRegistrations(registrations.slice(0, 5));
+      setRecentRegistrations(recentRegistrations.slice(0, 5));
       setCalendarEvents(events.slice(0, 4));
       
       if (activeYear) setCurrentYear(activeYear.code);

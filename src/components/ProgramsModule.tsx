@@ -6,6 +6,8 @@ import { BulkUploadModule } from './BulkUploadModule';
 import { printElement } from '../utils/print';
 import { useToast } from '../context/ToastContext';
 import { X } from 'lucide-react';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface ProgramsModuleProps {
   activeSubItem: string | null;
@@ -35,6 +37,10 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
   const [students, setStudents] = useState<Student[]>([]);
   const [populateSearch, setPopulateSearch] = useState('');
   const [populateProgid, setPopulateProgid] = useState('');
+  const [programPage, setProgramPage] = useState(1);
+  const [programPageSize, setProgramPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [populatePage, setPopulatePage] = useState(1);
+  const [populatePageSize, setPopulatePageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => { fetchData(); }, []);
   useEffect(() => {
@@ -43,6 +49,14 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
     }
     if (activeSubItem === 'mount_curriculum') fetchMountData();
   }, [activeSubItem]);
+
+  useEffect(() => {
+    setPopulatePage(1);
+  }, [populateSearch, populatePageSize]);
+
+  useEffect(() => {
+    setProgramPage(1);
+  }, [programPageSize]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -142,6 +156,8 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
     (s.full_name || '').toLowerCase().includes(populateSearch.toLowerCase()) ||
     (s.index_number || '').toLowerCase().includes(populateSearch.toLowerCase())
   );
+  const paginatedPopulate = paginateItems<Student>(filteredPopulate, populatePage, populatePageSize);
+  const paginatedPrograms = paginateItems<Program>(programs, programPage, programPageSize);
 
   const renderPopulateProgram = () => (
     <div className="space-y-6">
@@ -174,7 +190,7 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
             <th className="px-6 py-3 font-semibold text-right">Action</th>
           </tr></thead>
           <tbody className="divide-y divide-slate-100">
-            {filteredPopulate.length > 0 ? filteredPopulate.map(s => (
+            {paginatedPopulate.items.length > 0 ? paginatedPopulate.items.map(s => (
               <tr key={s.iid} className="hover:bg-slate-50/50">
                 <td className="px-6 py-3">
                   <div className="text-sm font-bold">{s.full_name}</div>
@@ -191,6 +207,19 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
             )) : <tr><td colSpan={4} className="px-6 py-8 text-center text-slate-400">No students found.</td></tr>}
           </tbody>
         </table>
+        <div className="px-6 pb-6">
+          <PaginationControls
+            page={paginatedPopulate.page}
+            pageSize={populatePageSize}
+            totalItems={filteredPopulate.length}
+            onPageChange={setPopulatePage}
+            onPageSizeChange={(size) => {
+              setPopulatePageSize(size);
+              setPopulatePage(1);
+            }}
+            itemLabel="students"
+          />
+        </div>
       </div>
     </div>
   );
@@ -319,7 +348,7 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
         </div>
       ) : (
         <>
-          {programs.map(program => (
+          {paginatedPrograms.items.map(program => (
             <div key={program.id} className="card hover:border-blue-200 transition-all group">
               <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                 <div className="flex items-start justify-between">
@@ -354,6 +383,17 @@ export const ProgramsModule: React.FC<ProgramsModuleProps> = ({ activeSubItem, o
         </>
       )}
       </div>
+      <PaginationControls
+        page={paginatedPrograms.page}
+        pageSize={programPageSize}
+        totalItems={programs.length}
+        onPageChange={setProgramPage}
+        onPageSizeChange={(size) => {
+          setProgramPageSize(size);
+          setProgramPage(1);
+        }}
+        itemLabel="programs"
+      />
 
       {showEditModal && selectedProgramObj && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

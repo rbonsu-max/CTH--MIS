@@ -12,6 +12,8 @@ import { SettingsAccessRequests } from './SettingsAccessRequests';
 import { AccountSettingsPanel } from './AccountSettingsPanel';
 import { MyAccessRequestsPanel } from './MyAccessRequestsPanel';
 import { printElement } from '../utils/print';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE } from '../utils/pagination';
 
 interface SettingsModuleProps {
   activeSubItem: string | null;
@@ -34,7 +36,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const [userPage, setUserPage] = useState(1);
   const [userTotal, setUserTotal] = useState(0);
   const [userTotalPages, setUserTotalPages] = useState(1);
-  const userPageSize = 8;
+  const [userPageSize, setUserPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
@@ -62,7 +64,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     if (shouldLoadAdminData) {
       fetchData();
     }
-  }, [shouldLoadAdminData, userSearch, userPage, userSearchVersion]);
+  }, [shouldLoadAdminData, userSearch, userPage, userPageSize, userSearchVersion]);
 
   const fetchData = async (options?: { searchTerm?: string; page?: number }) => {
     setLoading(true);
@@ -552,27 +554,17 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
               </tbody>
             </table>
           </div>
-          <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="text-sm text-slate-500">
-              Page <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userPage}</span> of <span className="font-semibold text-slate-700">{userTotal === 0 ? 0 : userTotalPages}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn btn-secondary"
-                disabled={userPage <= 1 || userTotal === 0}
-                onClick={() => setUserPage(prev => Math.max(1, prev - 1))}
-              >
-                Previous
-              </button>
-              <button
-                className="btn btn-secondary"
-                disabled={userPage >= userTotalPages || userTotal === 0}
-                onClick={() => setUserPage(prev => Math.min(userTotalPages, prev + 1))}
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <PaginationControls
+            page={userPage}
+            pageSize={userPageSize}
+            totalItems={userTotal}
+            onPageChange={setUserPage}
+            onPageSizeChange={(size) => {
+              setUserPageSize(size);
+              setUserPage(1);
+            }}
+            itemLabel="users"
+          />
         </div>
       </div>
 

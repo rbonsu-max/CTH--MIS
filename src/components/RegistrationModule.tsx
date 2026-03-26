@@ -4,6 +4,8 @@ import { useToast } from '../context/ToastContext';
 import { Student, Course, Registration } from '../types';
 import { api } from '../services/api';
 import { printElement } from '../utils/print';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface RegistrationModuleProps {
   activeSubItem: string | null;
@@ -481,17 +483,42 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   // ─── VIEW REGISTRATION ────────────────────────────────────────
   const [viewYear, setViewYear] = useState('');
   const [viewSemester, setViewSemester] = useState('');
+  const [viewIndexSearch, setViewIndexSearch] = useState('');
   const [viewRegs, setViewRegs] = useState<any[]>([]);
   const [viewLoading, setViewLoading] = useState(false);
+  const [viewRegPage, setViewRegPage] = useState(1);
+  const [viewRegPageSize, setViewRegPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const fetchViewRegs = async () => {
+  const fetchViewRegs = async (searchIndexNumber?: string) => {
     if (!viewYear || !viewSemester) return;
     setViewLoading(true);
     try {
-      const data = await api.getRegistrations(undefined, viewYear, viewSemester);
+      const normalizedIndex = searchIndexNumber?.trim();
+      const data = await api.getRegistrations(normalizedIndex || undefined, viewYear, viewSemester);
       setViewRegs(data);
+      setViewRegPage(1);
+      if (data.length === 0) {
+        toastError(normalizedIndex ? 'No registrations found for that index number in the selected period.' : 'No registrations found for the selected period.');
+      }
     } catch (e) { console.error(e); }
     finally { setViewLoading(false); }
+  };
+
+  const handleSearchRegistrationByIndex = async () => {
+    if (!viewYear || !viewSemester) {
+      toastError('Select academic year and semester first.');
+      return;
+    }
+    if (!viewIndexSearch.trim()) {
+      toastError('Enter an index number to search.');
+      return;
+    }
+    await fetchViewRegs(viewIndexSearch);
+  };
+
+  const handleResetRegistrationView = async () => {
+    setViewIndexSearch('');
+    await fetchViewRegs();
   };
 
   useEffect(() => {
@@ -508,11 +535,14 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   };
 
   const renderViewRegistration = () => (
+    (() => {
+      const paginatedViewRegs = paginateItems<any>(viewRegs, viewRegPage, viewRegPageSize);
+      return (
     <div className="space-y-6">
       <div className="card p-6">
         <h2 className="font-bold text-lg mb-1">View Registrations</h2>
         <p className="text-slate-500 text-sm mb-4">View all course registrations for a period.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="space-y-2">
             <label className="label">Academic Year</label>
             <select className="input" value={viewYear} onChange={e => setViewYear(e.target.value)}>
@@ -525,8 +555,36 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               {allSemesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
             </select>
           </div>
-          <div className="flex items-end">
-            <button className="btn btn-primary w-full" onClick={() => printElement('print-registrations', 'Course Registrations')}>🖨️ Print</button>
+          <div className="space-y-2 sm:col-span-2">
+            <label className="label">Index Number Search</label>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text"
+                  className="input pl-10"
+                  placeholder="Enter index number only..."
+                  value={viewIndexSearch}
+                  onChange={e => setViewIndexSearch(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void handleSearchRegistrationByIndex();
+                    }
+                  }}
+                />
+              </div>
+              <button className="btn btn-primary whitespace-nowrap" onClick={() => void handleSearchRegistrationByIndex()} disabled={viewLoading}>
+                <Search size={18} className="mr-2" />
+                Search
+              </button>
+              <button className="btn btn-secondary whitespace-nowrap" onClick={() => void handleResetRegistrationView()} disabled={viewLoading}>
+                Reset
+              </button>
+              <button className="btn btn-secondary whitespace-nowrap" onClick={() => printElement('print-registrations', 'Course Registrations')}>
+                Print
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -544,12 +602,12 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               <th className="px-6 py-3 text-right">Actions</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
-              {viewRegs.length > 0 ? viewRegs.map((r, i) => (
+              {paginatedViewRegs.items.length > 0 ? paginatedViewRegs.items.map((r, i) => (
                 <tr key={i} className="hover:bg-slate-50/50">
-                  <td className="px-6 py-3 text-sm text-slate-400">{i + 1}</td>
+                  <td className="px-6 py-3 text-sm text-slate-400">{paginatedViewRegs.startIndex + i + 1}</td>
                   <td className="px-6 py-3">
                     <div className="text-sm font-bold">{r.full_name || `${r.surname || ''}, ${r.other_names || ''}`}</div>
-                    <div className="text-xs text-slate-500 font-mono">{r.index_no}</div>
+                    <div className="text-xs text-slate-500 font-mono">{r.index_number || r.index_no}</div>
                   </td>
                   <td className="px-6 py-3">
                     <div className="text-sm font-medium">{r.course_name || r.course_code}</div>
@@ -565,12 +623,27 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
                     </button>
                   </td>
                 </tr>
-              )) : <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No registrations found.</td></tr>}
+              )) : <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">No registrations found.</td></tr>}
             </tbody>
           </table>
         )}
+        <div className="px-6">
+          <PaginationControls
+            page={paginatedViewRegs.page}
+            pageSize={viewRegPageSize}
+            totalItems={viewRegs.length}
+            onPageChange={setViewRegPage}
+            onPageSizeChange={(size) => {
+              setViewRegPageSize(size);
+              setViewRegPage(1);
+            }}
+            itemLabel="registrations"
+          />
+        </div>
       </div>
     </div>
+      );
+    })()
   );
 
   switch (activeSubItem) {

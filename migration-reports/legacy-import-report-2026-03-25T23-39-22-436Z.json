@@ -1,0 +1,189 @@
+{
+  "sourceCounts": {
+    "students_biodata": 354,
+    "programs": 7,
+    "courses": 111,
+    "programs_populate_cache": 240,
+    "lecturers": 15,
+    "courses_assign": 104,
+    "students_course_registered": 10718,
+    "students_assessments": 9861,
+    "academic_year": 15,
+    "semesters": 2,
+    "boardsheet_cache": 4
+  },
+  "beforeCounts": {
+    "users": 15,
+    "students": 344,
+    "programs": 7,
+    "courses": 111,
+    "lecturers": 15,
+    "lecturer_course_assignments": 1195,
+    "course_registrations": 10040,
+    "student_assessments": 9331,
+    "broadsheet_cache": 4,
+    "academic_years": 33,
+    "semesters": 2,
+    "program_curriculum": 181,
+    "student_levels": 1868,
+    "student_logins": 0
+  },
+  "afterCounts": {
+    "users": 15,
+    "students": 344,
+    "programs": 7,
+    "courses": 111,
+    "lecturers": 15,
+    "lecturer_course_assignments": 1195,
+    "course_registrations": 10040,
+    "student_assessments": 9331,
+    "broadsheet_cache": 4,
+    "academic_years": 33,
+    "semesters": 2,
+    "program_curriculum": 181,
+    "student_levels": 1868,
+    "student_logins": 0
+  },
+  "importedCounts": {
+    "academic_years": 33,
+    "semesters": 2,
+    "programs": 7,
+    "courses": 111,
+    "lecturers": 15,
+    "students": 344,
+    "program_curriculum": 181,
+    "lecturer_course_assignments": 1195,
+    "course_registrations": 10040,
+    "student_assessments": 9331,
+    "broadsheet_cache": 4,
+    "student_levels": 1868
+  },
+  "skippedCounts": {
+    "students": 10,
+    "course_registrations": 678,
+    "student_assessments": 530,
+    "program_curriculum": 59,
+    "lecturer_course_assignments": 5
+  },
+  "skippedReasons": {
+    "student_unknown_program": 9,
+    "student_invalid_iid": 1,
+    "student_duplicate_email_nullified": 5,
+    "lecturer_duplicate_email_nullified": 1,
+    "registration_unknown_student": 117,
+    "registration_unknown_course": 454,
+    "registration_duplicate": 107,
+    "assessment_unknown_course": 343,
+    "assessment_unknown_student": 80,
+    "assessment_duplicate": 107,
+    "curriculum_unknown_course": 7,
+    "curriculum_unknown_program": 52,
+    "assignment_unknown_course": 5
+  },
+  "preservedUsers": {
+    "before": 15,
+    "after": 15,
+    "superadminsBefore": 2,
+    "superadminsAfter": 2
+  },
+  "samples": {
+    "students": [
+      {
+        "iid": "SN/BTH/2009/008",
+        "full_name": "OBENG, Ernest Kwame",
+        "progid": "SNBTH",
+        "admission_year": null
+      },
+      {
+        "iid": "SN/BTH/2009/009",
+        "full_name": "QUARCOE, Gabriel",
+        "progid": "SNBTH",
+        "admission_year": null
+      },
+      {
+        "iid": "SN/BTH/2010/002",
+        "full_name": "TAGOE, EMMANUEL NII TSEI",
+        "progid": "SNBTH",
+        "admission_year": "2010"
+      },
+      {
+        "iid": "SN/BTH/2010/003",
+        "full_name": "COBBINA, SAMUEL",
+        "progid": "SNBTH",
+        "admission_year": "2010"
+      },
+      {
+        "iid": "SN/BTH/2010/004",
+        "full_name": "MENSAH, THEOPHILUS ADOKWEI",
+        "progid": "SNBTH",
+        "admission_year": "2010"
+      }
+    ],
+    "assessments": [
+      {
+        "index_no": "SN/BTH/2021/002",
+        "course_code": "BT 406",
+        "academic_year": "2024/2025",
+        "semester_id": "112733544",
+        "grade": "A"
+      },
+      {
+        "index_no": "SN/BTH/2021/002",
+        "course_code": "BT 402",
+        "academic_year": "2024/2025",
+        "semester_id": "112733544",
+        "grade": "A"
+      },
+      {
+        "index_no": "SN/BTH/2021/002",
+        "course_code": "BT 412",
+        "academic_year": "2024/2025",
+        "semester_id": "112733544",
+        "grade": "A"
+      },
+      {
+        "index_no": "SN/BTH/2021/002",
+        "course_code": "BT 410",
+        "academic_year": "2024/2025",
+        "semester_id": "112733544",
+        "grade": "B+"
+      },
+      {
+        "index_no": "SN/BTH/2021/003",
+        "course_code": "BT 406",
+        "academic_year": "2024/2025",
+        "semester_id": "112733544",
+        "grade": "A"
+      }
+    ],
+    "broadsheet": [
+      {
+        "index_no": "SN/BTH/2019/005",
+        "academic_year": "2021/2022",
+        "semester_id": "112733544",
+        "cGPA": 2.7803
+      },
+      {
+        "index_no": "SN/BTH/2019/006",
+        "academic_year": "2021/2022",
+        "semester_id": "112733544",
+        "cGPA": 2.1176
+      },
+      {
+        "index_no": "SN/BTH/2019/005",
+        "academic_year": "2021/2022",
+        "semester_id": "112726409",
+        "cGPA": 2.8287
+      },
+      {
+        "index_no": "SN/BTH/2019/006",
+        "academic_year": "2021/2022",
+        "semester_id": "112726409",
+        "cGPA": 2.0357
+      }
+    ]
+  },
+  "backupPath": "/Users/user/Desktop/snsportal/sns/backups/sims-pre-legacy-import-2026-03-25T23-39-22-436Z.db",
+  "stagingPath": "/Users/user/Desktop/snsportal/sns/.tmp/legacy-import-staging-2026-03-25T23-39-22-436Z.db",
+  "reportPath": "/Users/user/Desktop/snsportal/sns/migration-reports/legacy-import-report-2026-03-25T23-39-22-436Z.json"
+}

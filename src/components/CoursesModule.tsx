@@ -6,6 +6,8 @@ import { BulkUploadModule } from './BulkUploadModule';
 import { printElement } from '../utils/print';
 import { useToast } from '../context/ToastContext';
 import { X } from 'lucide-react';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface CoursesModuleProps {
   activeSubItem: string | null;
@@ -23,6 +25,8 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
   const { success, error: toastError } = useToast();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCourseObj, setSelectedCourseObj] = useState<Course | null>(null);
+  const [coursePage, setCoursePage] = useState(1);
+  const [coursePageSize, setCoursePageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Mount course state
   const [mountProgid, setMountProgid] = useState('');
@@ -45,6 +49,10 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
   useEffect(() => {
     if (mountProgid && mountSemester) fetchCurriculum();
   }, [mountProgid, mountLevel, mountSemester]);
+
+  useEffect(() => {
+    setCoursePage(1);
+  }, [searchTerm, coursePageSize]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -117,6 +125,7 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const paginatedCourses = paginateItems<Course>(filteredCourses, coursePage, coursePageSize);
 
   const renderMountCourse = () => (
     <div className="space-y-6">
@@ -246,7 +255,7 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr></thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredCourses.length > 0 ? filteredCourses.map(c => (
+                {paginatedCourses.items.length > 0 ? paginatedCourses.items.map(c => (
                   <tr key={c.id} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4 text-sm font-mono font-bold text-slate-600">{c.code}</td>
                     <td className="px-6 py-4"><div className="text-sm font-medium text-slate-900">{c.name}</div><div className="text-xs text-slate-400">{c.department}</div></td>
@@ -267,6 +276,19 @@ export const CoursesModule: React.FC<CoursesModuleProps> = ({ activeSubItem }) =
             </table>
           </div>
         )}
+        <div className="px-6">
+          <PaginationControls
+            page={paginatedCourses.page}
+            pageSize={coursePageSize}
+            totalItems={filteredCourses.length}
+            onPageChange={setCoursePage}
+            onPageSizeChange={(size) => {
+              setCoursePageSize(size);
+              setCoursePage(1);
+            }}
+            itemLabel="courses"
+          />
+        </div>
       </div>
 
       {showEditModal && selectedCourseObj && (

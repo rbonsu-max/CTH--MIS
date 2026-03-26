@@ -112,6 +112,35 @@ export interface PaginatedUsers {
   totalPages: number;
 }
 
+export interface BroadsheetSemesterMetrics {
+  semester_id: string;
+  semester_name: string;
+  sCH: number | null;
+  sGP: number | null;
+  sGPA: number | null;
+  cCH: number | null;
+  cGP: number | null;
+  cGPA: number | null;
+  class: string | null;
+}
+
+export interface BroadsheetSummaryRow {
+  index_no: string;
+  index_number: string;
+  surname: string;
+  first_name: string;
+  other_names: string;
+  progid: string;
+  level: string;
+  class: string | null;
+  semesters: Record<string, BroadsheetSemesterMetrics | undefined>;
+}
+
+export interface BroadsheetSummaryResponse {
+  semesters: Array<{ sid: string; name: string; sort_order: number | null }>;
+  data: BroadsheetSummaryRow[];
+}
+
 export interface BoardsheetCache {
   id: number;
   index_no: string;

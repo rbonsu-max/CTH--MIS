@@ -10,7 +10,7 @@ const hasUserEmailColumn = () => usersTableInfo().some((column) => column.name =
 router.get('/', (req, res) => {
   const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
   const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
-  const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '10'), 10) || 10));
+  const pageSize = Math.min(400, Math.max(1, parseInt(String(req.query.pageSize || '50'), 10) || 50));
   const offset = (page - 1) * pageSize;
   const emailColumnExists = hasUserEmailColumn();
   const where = q

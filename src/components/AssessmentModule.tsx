@@ -7,6 +7,8 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { printElement } from '../utils/print';
+import { PaginationControls } from './PaginationControls';
+import { DEFAULT_PAGE_SIZE, paginateItems } from '../utils/pagination';
 
 interface AssessmentModuleProps {
   activeSubItem: string | null;
@@ -34,6 +36,8 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   const [requestReason, setRequestReason] = useState('');
   const [requestType, setRequestType] = useState<'upload' | 'edit'>('upload');
   const [requestStudentId, setRequestStudentId] = useState('');
+  const [coursePage, setCoursePage] = useState(1);
+  const [coursePageSize, setCoursePageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     fetchInitialData();
@@ -44,6 +48,10 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
       checkAccess();
     }
   }, [selectedCourseId, currentYear, currentSemester]);
+
+  useEffect(() => {
+    setCoursePage(1);
+  }, [selectedCourseId, currentYear, currentSemester, coursePageSize]);
 
   const checkAccess = async () => {
     if (user?.role === 'SuperAdmin') {
@@ -116,7 +124,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     setFetchingStudents(true);
     try {
       const [regData, assessData] = await Promise.all([
-        api.getRegistrations(),
+        api.getRegistrations(undefined, currentYear, currentSemester),
         api.getAssessments(selectedCourseId, currentYear, currentSemester)
       ]);
       
@@ -286,7 +294,9 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
     saveAs(blob, `assessment_template_${selectedCourseId}.xlsx`);
   };
 
-  const renderByCourse = () => (
+  const renderByCourse = () => {
+    const paginatedRegistrations = paginateItems<Registration>(registrations, coursePage, coursePageSize);
+    return (
     <div className="space-y-6">
       <div className="card p-4 md:p-6 bg-slate-900 text-white border-none">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -435,7 +445,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {registrations.map((reg) => {
+                {paginatedRegistrations.items.map((reg) => {
                   const scores = assessments[reg.index_no] || { a1: 0, a2: 0, a3: 0, a4: 0, exam_score: 0 };
                   const total_ca = scores.a1 + scores.a2 + scores.a3 + scores.a4;
                   const total = total_ca + scores.exam_score;
@@ -483,6 +493,17 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
             </table>
           </div>
           <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-end gap-3">
+            <PaginationControls
+              page={paginatedRegistrations.page}
+              pageSize={coursePageSize}
+              totalItems={registrations.length}
+              onPageChange={setCoursePage}
+              onPageSizeChange={(size) => {
+                setCoursePageSize(size);
+                setCoursePage(1);
+              }}
+              itemLabel="students"
+            />
             <button className="btn btn-secondary w-full sm:w-auto" onClick={() => setRegistrations([])}>Cancel Changes</button>
             <button 
               className="btn btn-primary px-8 w-full sm:w-auto"
@@ -496,7 +517,8 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   // ─── BY INDIVIDUAL ────────────────────────────────────────────
   const [indSearch, setIndSearch] = useState('');
@@ -505,12 +527,18 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   const [indScores, setIndScores] = useState<Record<string, { a1: number, a2: number, a3: number, a4: number, exam_score: number }>>({});
   const [indSaving, setIndSaving] = useState(false);
   const [allStudents, setAllStudents] = useState<any[]>([]);
+  const [individualPage, setIndividualPage] = useState(1);
+  const [individualPageSize, setIndividualPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   useEffect(() => {
     if (activeSubItem === 'by_individual') {
       api.getStudents().then(setAllStudents).catch(console.error);
     }
   }, [activeSubItem]);
+
+  useEffect(() => {
+    setIndividualPage(1);
+  }, [indSearch, currentYear, currentSemester, individualPageSize]);
 
   const handleFindIndividual = async () => {
     const student = allStudents.find((s: any) =>
@@ -549,6 +577,9 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   };
 
   const renderByIndividual = () => (
+    (() => {
+      const paginatedIndividualAssessments = paginateItems<any>(indAssessments, individualPage, individualPageSize);
+      return (
     <div className="space-y-6">
       <div className="card p-6">
         <h2 className="font-bold text-lg mb-1">Assessment by Individual</h2>
@@ -593,7 +624,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
                 <th className="px-4 py-3">Grade</th>
               </tr></thead>
               <tbody className="divide-y divide-slate-100">
-                {indAssessments.length > 0 ? indAssessments.map(r => {
+                {paginatedIndividualAssessments.items.length > 0 ? paginatedIndividualAssessments.items.map(r => {
                   const scores = indScores[r.course_code] || { a1: 0, a2: 0, a3: 0, a4: 0, exam_score: 0 };
                   const total = scores.a1 + scores.a2 + scores.a3 + scores.a4 + scores.exam_score;
                   const { grade, color } = calculateGrade(total);
@@ -609,9 +640,22 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-bold ${color}`}>{grade}</span></td>
                     </tr>
                   );
-                }) : <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No registered courses found.</td></tr>}
+                }) : <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-400">No registered courses found.</td></tr>}
               </tbody>
             </table>
+          </div>
+          <div className="px-6">
+            <PaginationControls
+              page={paginatedIndividualAssessments.page}
+              pageSize={individualPageSize}
+              totalItems={indAssessments.length}
+              onPageChange={setIndividualPage}
+              onPageSizeChange={(size) => {
+                setIndividualPageSize(size);
+                setIndividualPage(1);
+              }}
+              itemLabel="courses"
+            />
           </div>
           {indAssessments.length > 0 && (
             <div className="p-4 border-t border-slate-100 flex justify-end">
@@ -624,6 +668,8 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
         </div>
       )}
     </div>
+      );
+    })()
   );
 
   return (

@@ -1,4 +1,4 @@
-import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest, NotificationItem, PaginatedUsers } from '../types';
+import { Student, Program, Course, Registration, Assessment, Lecturer, AcademicYear, Semester, User, CalendarEvent, Department, LecturerAssignment, AssessmentWindow, AssessmentRequest, NotificationItem, PaginatedUsers, BroadsheetSummaryResponse } from '../types';
 
 const API_URL = '/api';
 
@@ -68,7 +68,7 @@ export const api = {
     return res.json();
   },
   updateStudent: async (iid: string, student: Partial<Student>): Promise<any> => {
-    const res = await fetchWithAuth(`${API_URL}/students/${iid}`, {
+    const res = await fetchWithAuth(`${API_URL}/students/${encodeURIComponent(iid)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(student),
@@ -76,18 +76,18 @@ export const api = {
     return res.json();
   },
   deleteStudent: async (iid: string): Promise<void> => {
-    await fetchWithAuth(`${API_URL}/students/${iid}`, { method: 'DELETE' });
+    await fetchWithAuth(`${API_URL}/students/${encodeURIComponent(iid)}`, { method: 'DELETE' });
   },
   getStudentLogin: async (iid: string): Promise<any> => {
-    const res = await fetchWithAuth(`${API_URL}/students/${iid}/login`);
+    const res = await fetchWithAuth(`${API_URL}/students/${encodeURIComponent(iid)}/login`);
     return res.json();
   },
   getTranscript: async (iid: string): Promise<any> => {
-    const res = await fetchWithAuth(`${API_URL}/students/${iid}/transcript`);
+    const res = await fetchWithAuth(`${API_URL}/students/${encodeURIComponent(iid)}/transcript`);
     return res.json();
   },
   createStudentLogin: async (iid: string, data: any): Promise<any> => {
-    const res = await fetchWithAuth(`${API_URL}/students/${iid}/login`, {
+    const res = await fetchWithAuth(`${API_URL}/students/${encodeURIComponent(iid)}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -210,6 +210,13 @@ export const api = {
   getBoardsheet: async (index_no: string, academic_year: string, semester_id: string): Promise<any> => {
     const params = new URLSearchParams({ index_no, academic_year, semester_id });
     const res = await fetchWithAuth(`${API_URL}/assessments/broadsheet?${params.toString()}`);
+    return res.json();
+  },
+  getBroadsheetSummary: async (academic_year: string, progid?: string, level?: string): Promise<BroadsheetSummaryResponse> => {
+    const params = new URLSearchParams({ academic_year });
+    if (progid) params.append('progid', progid);
+    if (level) params.append('level', level);
+    const res = await fetchWithAuth(`${API_URL}/assessments/broadsheet-summary?${params.toString()}`);
     return res.json();
   },
   getGraduationList: async (progid: string, admission_year: string): Promise<any[]> => {
