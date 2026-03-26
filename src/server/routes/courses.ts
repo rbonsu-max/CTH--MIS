@@ -9,7 +9,6 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
   const user = (req as any).user;
-  console.log('[DEBUG] GET /api/courses user:', user);
   if (user && user.role === 'Lecturer') {
     const courses = db.prepare(`
       SELECT c.* 
@@ -18,7 +17,6 @@ router.get('/', (req, res) => {
       JOIN lecturers l ON lca.lid = l.lid
       WHERE l.user_uid = ?
     `).all(user.uid);
-    console.log('[DEBUG] GET /api/courses lecturer courses:', courses);
     return res.json(courses);
   }
   const courses = ProgramRepository.getAllCourses();

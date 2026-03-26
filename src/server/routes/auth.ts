@@ -99,7 +99,16 @@ router.get('/public-settings', (req, res) => {
   const settings = db.prepare(`
     SELECT key, value
     FROM system_settings
-    WHERE key IN ('institution_logo', 'institution_name')
+    WHERE key IN (
+      'institution_logo',
+      'institution_name',
+      'institution_short_name',
+      'institution_address',
+      'institution_phone',
+      'institution_email',
+      'portal_title',
+      'portal_subtitle'
+    )
   `).all() as Array<{ key: string; value: string }>;
 
   res.json(settings.reduce<Record<string, string>>((acc, row) => {

@@ -55,9 +55,23 @@ export class StudentRepository {
   static updateStudent(iid: string, student: Partial<Student>): void {
     db.prepare(`
       UPDATE students 
-      SET surname = ?, other_names = ?, gender = ?, dob = ?, email = ?, phone = ?, progid = ?, current_level = ?, status = ?, photo = COALESCE(?, photo)
+      SET index_number = ?, surname = ?, other_names = ?, gender = ?, dob = ?, email = ?, phone = ?, progid = ?, admission_year = ?, current_level = ?, status = ?, photo = COALESCE(?, photo)
       WHERE iid = ?
-    `).run(student.surname, student.other_names, student.gender, student.dob, student.email, student.phone, student.progid, student.current_level, student.status, student.photo || null, iid);
+    `).run(
+      student.index_number,
+      student.surname,
+      student.other_names,
+      student.gender,
+      student.dob,
+      student.email,
+      student.phone,
+      student.progid,
+      student.admission_year,
+      student.current_level,
+      student.status,
+      student.photo || null,
+      iid
+    );
   }
 
   static deleteStudent(iid: string): void {

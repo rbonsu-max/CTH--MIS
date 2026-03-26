@@ -137,7 +137,7 @@ router.get('/broadsheet', (req, res) => {
   res.json(cache);
 });
 
-router.get('/broadsheet-summary', (req, res) => {
+router.get('/broadsheet-summary', async (req, res) => {
   const academic_year = typeof req.query.academic_year === 'string' ? req.query.academic_year : '';
   const progid = typeof req.query.progid === 'string' ? req.query.progid : undefined;
   const level = typeof req.query.level === 'string' ? req.query.level : undefined;
@@ -147,6 +147,13 @@ router.get('/broadsheet-summary', (req, res) => {
   }
 
   try {
+    const expectedPeriodCount = AssessmentService.getAcademicYearAssessmentPeriodCount(academic_year);
+    const cachedPeriodCount = AssessmentService.getAcademicYearCachePeriodCount(academic_year);
+
+    if (expectedPeriodCount > 0 && cachedPeriodCount < expectedPeriodCount) {
+      await AssessmentService.syncBroadsheetCacheForAcademicYear(academic_year);
+    }
+
     const semesterRows = db.prepare(`
       SELECT sid, name, sort_order
       FROM semesters

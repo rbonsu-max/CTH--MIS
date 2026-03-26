@@ -17,12 +17,26 @@ interface TranscriptModalProps {
 export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClose, data, title }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [logoBase64, setLogoBase64] = useState<string>('');
+  const [gradingPoints, setGradingPoints] = useState<Array<{ grade: string; min_score: number; max_score: number; gp: number }>>([]);
+  const [institution, setInstitution] = useState({
+    institution_name: 'St. Nicholas Anglican Seminary',
+    institution_address: 'P.O.Box AD162, Cape Coast, Ghana',
+    institution_phone: '+233-3321-33174',
+    institution_email: 'registrar@snsanglican.org'
+  });
 
   useEffect(() => {
     if (isOpen) {
-      api.getSettings()
-        .then(settings => {
+      Promise.all([api.getSettings(), api.getGradingPoints()])
+        .then(([settings, grading]) => {
           if (settings.institution_logo) setLogoBase64(settings.institution_logo);
+          setInstitution({
+            institution_name: settings.institution_name || 'St. Nicholas Anglican Seminary',
+            institution_address: settings.institution_address || 'P.O.Box AD162, Cape Coast, Ghana',
+            institution_phone: settings.institution_phone || '+233-3321-33174',
+            institution_email: settings.institution_email || 'registrar@snsanglican.org'
+          });
+          setGradingPoints(grading);
         })
         .catch(() => {});
     }
@@ -178,11 +192,11 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
                 )}
               </div>
               <div className="flex-1 space-y-1">
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight uppercase text-slate-900">ST NICHOLAS SEMINARY</h1>
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight uppercase text-slate-900">{institution.institution_name}</h1>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Academic Section</p>
                 <p className="text-xs font-bold uppercase text-slate-700">{title}</p>
                 <p className="text-[10px] text-slate-500">
-                  P.O.Box AD162, Cape Coast, Ghana || Tel: +233-3321-33174 || Email: registrar@snsanglican.org
+                  {institution.institution_address} || Tel: {institution.institution_phone} || Email: {institution.institution_email}
                 </p>
               </div>
             </div>
@@ -319,21 +333,22 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({ isOpen, onClos
               <div className="space-y-4">
                 <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">Grading System</h4>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-medium text-slate-600">
-                  <div className="flex justify-between"><span>80 - 100</span> <span className="font-bold">A (4.0)</span></div>
-                  <div className="flex justify-between"><span>75 - 79</span> <span className="font-bold">B+ (3.5)</span></div>
-                  <div className="flex justify-between"><span>70 - 74</span> <span className="font-bold">B (3.0)</span></div>
-                  <div className="flex justify-between"><span>65 - 69</span> <span className="font-bold">C+ (2.5)</span></div>
-                  <div className="flex justify-between"><span>60 - 64</span> <span className="font-bold">C (2.0)</span></div>
-                  <div className="flex justify-between"><span>55 - 59</span> <span className="font-bold">D+ (1.5)</span></div>
-                  <div className="flex justify-between"><span>50 - 54</span> <span className="font-bold">D (1.0)</span></div>
-                  <div className="flex justify-between"><span>00 - 49</span> <span className="font-bold">E (0.0)</span></div>
+                  {gradingPoints
+                    .slice()
+                    .sort((left, right) => Number(right.min_score) - Number(left.min_score))
+                    .map((point) => (
+                      <div key={point.grade} className="flex justify-between">
+                        <span>{Number(point.min_score).toFixed(0)} - {Number(point.max_score).toFixed(0)}</span>
+                        <span className="font-bold">{point.grade} ({Number(point.gp).toFixed(1)})</span>
+                      </div>
+                    ))}
                 </div>
               </div>
               <div className="flex flex-col items-center justify-end space-y-4">
                 <div className="w-48 border-b-2 border-slate-900"></div>
                 <div className="text-center">
                   <p className="text-sm font-black uppercase text-slate-900">Registrar</p>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">St. Nicholas Anglican Seminary</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">{institution.institution_name}</p>
                 </div>
               </div>
             </div>

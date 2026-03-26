@@ -34,6 +34,11 @@ import { Login } from './components/Login';
 import { api } from './services/api';
 
 export default function App() {
+  const [branding, setBranding] = useState({
+    institution_name: 'St. Nicholas Anglican Seminary',
+    institution_short_name: 'SNS',
+    portal_title: 'SIMS Portal'
+  });
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
@@ -71,6 +76,18 @@ export default function App() {
 
   useEffect(() => {
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    api.getPublicSettings()
+      .then((settings) => {
+        setBranding({
+          institution_name: settings.institution_name || 'St. Nicholas Anglican Seminary',
+          institution_short_name: settings.institution_short_name || 'SNS',
+          portal_title: settings.portal_title || 'SIMS Portal'
+        });
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -134,13 +151,12 @@ export default function App() {
 
   const fetchDashboardData = async () => {
     try {
-      const [studentsData, programsData, coursesData, yearsData, semsData, eventsData, recentRegistrationsData] = await Promise.all([
+      const [studentsData, programsData, coursesData, yearsData, semsData, recentRegistrationsData] = await Promise.all([
         api.getStudents(),
         api.getPrograms(),
         api.getCourses(),
         api.getAcademicYears(),
         api.getSemesters(),
-        api.getCalendarEvents(),
         api.getRegistrations()
       ]);
 
@@ -149,7 +165,6 @@ export default function App() {
       const courses = Array.isArray(coursesData) ? coursesData : [];
       const years = Array.isArray(yearsData) ? yearsData : [];
       const sems = Array.isArray(semsData) ? semsData : [];
-      const events = Array.isArray(eventsData) ? eventsData : [];
       const recentRegistrations = Array.isArray(recentRegistrationsData) ? recentRegistrationsData : [];
 
       const activeYear = years.find(y => y.is_current);
@@ -171,7 +186,11 @@ export default function App() {
       });
 
       setRecentRegistrations(recentRegistrations.slice(0, 5));
-      setCalendarEvents(events.slice(0, 4));
+      const dashboardEvents = await api.getCalendarEvents({
+        academic_year: activeYear?.code,
+        semester: activeSem?.sid
+      });
+      setCalendarEvents((Array.isArray(dashboardEvents) ? dashboardEvents : []).slice(0, 4));
       
       if (activeYear) setCurrentYear(activeYear.code);
       if (activeSem) setCurrentSemester(activeSem.name);
@@ -425,7 +444,7 @@ export default function App() {
               {calendarEvents.length > 0 ? calendarEvents.map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="bg-blue-500/50 px-2 py-1 rounded text-xs font-bold w-14 text-center">
-                    {item.date}
+                    {new Date(item.date).toString() !== 'Invalid Date' ? new Date(item.date).toLocaleDateString() : item.date}
                   </div>
                   <div className="text-sm font-medium">{item.event}</div>
                 </div>
@@ -433,7 +452,13 @@ export default function App() {
                 <p className="text-blue-100 text-xs italic">No upcoming events scheduled.</p>
               )}
             </div>
-            <button className="w-full mt-6 py-2 bg-white text-blue-600 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors">
+            <button
+              className="w-full mt-6 py-2 bg-white text-blue-600 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors"
+              onClick={() => {
+                setActiveModule('settings');
+                setActiveSubItem('academic_calendar');
+              }}
+            >
               View Full Calendar
             </button>
           </div>
@@ -443,22 +468,17 @@ export default function App() {
               <h2 className="font-bold text-lg">System Notifications</h2>
             </div>
             <div className="p-6 space-y-4">
-              {[
-                { title: 'Backup Successful', time: '2 hours ago', type: 'success' },
-                { title: 'New Lecturer Assigned', time: '5 hours ago', type: 'info' },
-                { title: 'Registration Deadline', time: '1 day ago', type: 'warning' },
-              ].map((notif, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                    notif.type === 'success' ? 'bg-emerald-500' : 
-                    notif.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
-                  }`} />
+              {notifications.length > 0 ? notifications.slice(0, 3).map((notif) => (
+                <div key={notif.id} className="flex gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.is_read ? 'bg-slate-300' : 'bg-blue-500'}`} />
                   <div>
                     <div className="text-sm font-medium text-slate-800">{notif.title}</div>
-                    <div className="text-xs text-slate-400">{notif.time}</div>
+                    <div className="text-xs text-slate-400">{new Date(notif.created_at).toLocaleString()}</div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-slate-400 italic">No notifications yet.</p>
+              )}
             </div>
           </div>
         </div>
@@ -593,8 +613,8 @@ export default function App() {
               animate={{ opacity: 1, x: 0 }}
               className="ml-3 flex flex-col"
             >
-              <span className="text-white font-bold text-lg tracking-tight leading-none">SIMS</span>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mt-0.5">St. Nicholas</span>
+              <span className="text-white font-bold text-lg tracking-tight leading-none">{branding.portal_title}</span>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest mt-0.5">{branding.institution_short_name || branding.institution_name}</span>
             </motion.div>
           )}
         </div>

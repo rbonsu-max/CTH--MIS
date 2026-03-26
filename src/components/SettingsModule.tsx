@@ -41,7 +41,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [newUser, setNewUser] = useState({ fullname: '', username: '', email: '', password: '', role: 'Administrator' });
-  const [newEvent, setNewEvent] = useState({ date: '', event: '' });
+  const [newEvent, setNewEvent] = useState({ date: '', event: '', academic_year: '', semester: '' });
   const [changingPasswordUser, setChangingPasswordUser] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const { success, error: toastError } = useToast();
@@ -64,26 +64,49 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     if (shouldLoadAdminData) {
       fetchData();
     }
-  }, [shouldLoadAdminData, userSearch, userPage, userPageSize, userSearchVersion]);
+  }, [shouldLoadAdminData, activeSubItem, userSearch, userPage, userPageSize, userSearchVersion]);
 
   const fetchData = async (options?: { searchTerm?: string; page?: number }) => {
     setLoading(true);
     try {
-      const [years, sems, userResponse, events] = await Promise.all([
+      const tasks = await Promise.allSettled([
         api.getAcademicYears(),
         api.getSemesters(),
         api.getUsers({ q: options?.searchTerm ?? userSearch, page: options?.page ?? userPage, pageSize: userPageSize }),
-        api.getCalendarEvents()
+        api.getCalendarEvents(),
       ]);
-      const normalizedUsers = userResponse.data || [];
-      const normalizedTotal = userResponse.total || 0;
-      const normalizedTotalPages = userResponse.totalPages || 1;
-      setAcademicYears(years);
-      setSemesters(sems);
-      setUsers(normalizedUsers);
-      setUserTotal(normalizedTotal);
-      setUserTotalPages(normalizedTotalPages);
-      setCalendarEvents(events);
+
+      const [yearsResult, semestersResult, usersResult, eventsResult] = tasks;
+
+      if (yearsResult.status === 'fulfilled') {
+        setAcademicYears(yearsResult.value);
+      }
+
+      if (semestersResult.status === 'fulfilled') {
+        setSemesters(semestersResult.value);
+      }
+
+      let normalizedUsers: User[] = [];
+      let normalizedTotal = 0;
+      let normalizedTotalPages = 1;
+      if (usersResult.status === 'fulfilled') {
+        normalizedUsers = usersResult.value.data || [];
+        normalizedTotal = usersResult.value.total || 0;
+        normalizedTotalPages = usersResult.value.totalPages || 1;
+        setUsers(normalizedUsers);
+        setUserTotal(normalizedTotal);
+        setUserTotalPages(normalizedTotalPages);
+      }
+
+      if (eventsResult.status === 'fulfilled') {
+        setCalendarEvents(eventsResult.value);
+      }
+
+      const failedResult = tasks.find((result) => result.status === 'rejected');
+      if (failedResult?.status === 'rejected') {
+        console.error('Failed to fetch one or more settings resources:', failedResult.reason);
+      }
+
       return {
         users: normalizedUsers,
         total: normalizedTotal,
@@ -319,7 +342,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                 <input 
                   type="text" 
                   className="input" 
-                  placeholder="e.g. 2025/2026" 
+                  placeholder="YYYY/YYYY" 
                   required
                   value={newYear}
                   onChange={e => setNewYear(e.target.value)}
@@ -686,7 +709,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     try {
       await api.createCalendarEvent(newEvent);
       success('Calendar event added successfully!');
-      setNewEvent({ date: '', event: '' });
+      setNewEvent({
+        date: '',
+        event: '',
+        academic_year: academicYears.find((item) => item.is_current)?.code || '',
+        semester: semesters.find((item) => item.is_current)?.sid || ''
+      });
       setShowAddEventModal(false);
       fetchData();
     } catch (error) {
@@ -709,7 +737,19 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
     }
   };
 
-  const renderCalendarManagement = () => (
+  const renderCalendarManagement = () => {
+    const orderedEvents = calendarEvents
+      .slice()
+      .sort((left, right) => {
+        const leftTime = new Date(left.date).getTime();
+        const rightTime = new Date(right.date).getTime();
+        const safeLeft = Number.isNaN(leftTime) ? Number.MAX_SAFE_INTEGER : leftTime;
+        const safeRight = Number.isNaN(rightTime) ? Number.MAX_SAFE_INTEGER : rightTime;
+        return safeLeft - safeRight;
+      });
+    const getSemesterName = (sid?: string) => semesters.find((item) => item.sid === sid)?.name || sid || 'All Semesters';
+
+    return (
     <div className="space-y-6">
       <div className="card">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -717,7 +757,18 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
             <h2 className="font-bold text-lg">Academic Calendar</h2>
             <p className="text-slate-500 text-sm">Manage important dates and events.</p>
           </div>
-          <button className="btn btn-primary gap-2" onClick={() => setShowAddEventModal(true)}>
+          <button
+            className="btn btn-primary gap-2"
+            onClick={() => {
+              setNewEvent({
+                date: '',
+                event: '',
+                academic_year: academicYears.find((item) => item.is_current)?.code || '',
+                semester: semesters.find((item) => item.is_current)?.sid || ''
+              });
+              setShowAddEventModal(true);
+            }}
+          >
             <Plus size={18} />
             New Event
           </button>
@@ -729,18 +780,24 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                   <th className="px-6 py-3 font-semibold">Date</th>
                   <th className="px-6 py-3 font-semibold">Event</th>
+                  <th className="px-6 py-3 font-semibold hidden md:table-cell">Academic Year</th>
+                  <th className="px-6 py-3 font-semibold hidden md:table-cell">Semester</th>
                   <th className="px-6 py-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {calendarEvents.map((ev) => (
+                {orderedEvents.map((ev) => (
                   <tr key={ev.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-slate-900">{ev.date}</div>
+                      <div className="text-sm font-bold text-slate-900">
+                        {new Date(ev.date).toString() !== 'Invalid Date' ? new Date(ev.date).toLocaleDateString() : ev.date}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-600">{ev.event}</div>
                     </td>
+                    <td className="px-6 py-4 hidden md:table-cell text-sm text-slate-600">{ev.academic_year || 'All Years'}</td>
+                    <td className="px-6 py-4 hidden md:table-cell text-sm text-slate-600">{getSemesterName(ev.semester)}</td>
                     <td className="px-6 py-4">
                       <button 
                         className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
@@ -751,9 +808,9 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                     </td>
                   </tr>
                 ))}
-                {calendarEvents.length === 0 && (
+                {orderedEvents.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-6 py-12 text-center text-slate-400 italic">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
                       No events found. Add your first event to get started.
                     </td>
                   </tr>
@@ -775,11 +832,10 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
             </div>
             <form className="p-6 space-y-4" onSubmit={handleAddEvent}>
               <div className="space-y-2">
-                <label className="label">Date (e.g., Mar 25)</label>
+                <label className="label">Date</label>
                 <input 
-                  type="text" 
+                  type="date" 
                   className="input" 
-                  placeholder="Mar 25"
                   required
                   value={newEvent.date}
                   onChange={e => setNewEvent({ ...newEvent, date: e.target.value })}
@@ -796,6 +852,26 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
                   onChange={e => setNewEvent({ ...newEvent, event: e.target.value })}
                 />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="label">Academic Year</label>
+                  <select className="input" value={newEvent.academic_year} onChange={e => setNewEvent({ ...newEvent, academic_year: e.target.value })}>
+                    <option value="">All Academic Years</option>
+                    {academicYears.map((item) => (
+                      <option key={item.code} value={item.code}>{item.code}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="label">Semester</label>
+                  <select className="input" value={newEvent.semester} onChange={e => setNewEvent({ ...newEvent, semester: e.target.value })}>
+                    <option value="">All Semesters</option>
+                    {semesters.map((item) => (
+                      <option key={item.sid} value={item.sid}>{item.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowAddEventModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary gap-2" disabled={submitting}>
@@ -808,7 +884,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ activeSubItem, u
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   switch (activeSubItem) {
     case 'account_settings':

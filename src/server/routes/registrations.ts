@@ -12,7 +12,9 @@ router.get('/windows', (req, res) => {
 });
 
 router.post('/windows', (req, res) => {
-  const { academic_year, semester_sid, start_date, end_date, is_active } = req.body;
+  const { academic_year, semester_sid, is_active } = req.body;
+  const start_date = req.body.start_date ?? req.body.opening_date;
+  const end_date = req.body.end_date ?? req.body.closing_date;
   try {
     RegistrationRepository.openWindow({ academic_year, semester_sid, start_date, end_date, is_active: is_active ? 1 : 0, created_by: (req as any).user.uid });
     res.status(201).json({ academic_year, semester_sid, start_date, end_date });

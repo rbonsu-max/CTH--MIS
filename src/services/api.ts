@@ -458,8 +458,12 @@ export const api = {
   },
 
   // Calendar Events
-  getCalendarEvents: async (): Promise<CalendarEvent[]> => {
-    const res = await fetchWithAuth(`${API_URL}/calendar-events`);
+  getCalendarEvents: async (params?: { academic_year?: string; semester?: string }): Promise<CalendarEvent[]> => {
+    const search = new URLSearchParams();
+    if (params?.academic_year) search.append('academic_year', params.academic_year);
+    if (params?.semester) search.append('semester', params.semester);
+    const query = search.toString();
+    const res = await fetchWithAuth(`${API_URL}/calendar-events${query ? `?${query}` : ''}`);
     return res.json();
   },
   createCalendarEvent: async (data: any): Promise<CalendarEvent> => {

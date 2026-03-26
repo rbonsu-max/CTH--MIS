@@ -23,9 +23,15 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   const [foundStudent, setFoundStudent] = useState<Student | null>(null);
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [registerYear, setRegisterYear] = useState('');
+  const [registerSemester, setRegisterSemester] = useState('');
 
   const handleFindStudent = async () => {
     if (!searchIndex.trim()) return;
+    if (!registerYear || !registerSemester) {
+      toastError('Select or configure the registration period first.');
+      return;
+    }
     setSearching(true);
     setFoundStudent(null);
     setAvailableCourses([]);
@@ -33,13 +39,26 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
     
     try {
       const students = await api.getStudents();
-      const student = students.find(s => s.index_number === searchIndex);
+      const student = students.find(s => s.index_number === searchIndex || s.iid === searchIndex);
       
       if (student) {
         setFoundStudent(student);
-        // Fetch courses for this student's program
-        const allCourses = await api.getCourses();
-        const programCourses = allCourses.filter(c => c.department === student.program_name || true); // Simplified for now
+        const [curriculum, existingRegistrations] = await Promise.all([
+          api.getCurriculum(student.progid, student.current_level, registerSemester),
+          api.getRegistrations(student.iid, registerYear, registerSemester)
+        ]);
+
+        const alreadyRegistered = new Set(existingRegistrations.map((registration) => registration.course_code));
+        const programCourses = curriculum
+          .filter((item: any) => !alreadyRegistered.has(item.course_code))
+          .map((item: any) => ({
+            id: item.id,
+            code: item.course_code,
+            name: item.course_name || item.name,
+            credit_hours: item.credit_hours,
+            department: student.program_name || ''
+          }));
+
         setAvailableCourses(programCourses);
       } else {
         toastError('Student not found');
@@ -62,17 +81,18 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
 
   const handleRegister = async () => {
     if (!foundStudent || selectedCourses.length === 0) return;
+    if (!registerYear || !registerSemester) {
+      toastError('Select or configure the registration period first.');
+      return;
+    }
     setSubmitting(true);
     try {
-      const academic_year = '2025/2026'; // Mock current year
-      const semester_sid = 'SEM1'; // Mock current semester
-      
       await Promise.all(selectedCourses.map(course_code => 
         api.createRegistration({
           index_no: foundStudent.iid,
           course_code,
-          academic_year,
-          semester_sid,
+          academic_year: registerYear,
+          semester_sid: registerSemester,
           status: 'pending'
         })
       ));
@@ -96,13 +116,12 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
   const [newWindow, setNewWindow] = useState({
     academic_year: '',
     semester_sid: '',
-    opening_date: new Date().toISOString().split('T')[0],
-    closing_date: '',
-    level: 100
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: ''
   });
 
   useEffect(() => {
-    if (activeSubItem === 'open_close') {
+    if (activeSubItem === 'open_close' || activeSubItem === 'register_student') {
       fetchWindows();
     }
   }, [activeSubItem]);
@@ -119,14 +138,23 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
       setAcademicYears(yearData);
       setSemesters(semData);
       
-      const active = winData.find(w => w.is_open);
+      const active = winData.find(w => Number(w.is_active) === 1);
       setActiveWindow(active);
       
-      if (yearData.find(y => y.is_current)) {
-        setNewWindow(prev => ({ ...prev, academic_year: yearData.find(y => y.is_current).code }));
+      const currentYear = yearData.find(y => y.is_current);
+      const currentSemester = semData.find(s => s.is_current);
+      if (currentYear) {
+        setRegisterYear(currentYear.code);
+        setNewWindow(prev => ({ ...prev, academic_year: currentYear.code }));
       }
-      if (semData.find(s => s.is_current)) {
-        setNewWindow(prev => ({ ...prev, semester_sid: semData.find(s => s.is_current).sid }));
+      if (currentSemester) {
+        setRegisterSemester(currentSemester.sid);
+        setNewWindow(prev => ({ ...prev, semester_sid: currentSemester.sid }));
+      }
+
+      if (active) {
+        setRegisterYear(active.academic_year);
+        setRegisterSemester(active.semester_sid);
       }
     } catch (error) {
       console.error('Failed to fetch windows:', error);
@@ -185,8 +213,8 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               <div className="text-lg sm:text-xl font-bold">{activeWindow.semester_sid}</div>
             </div>
             <div className="bg-blue-500/30 p-4 sm:p-6 rounded-xl border border-blue-400/30 sm:col-span-2 lg:col-span-1">
-              <div className="text-blue-100 text-xs sm:text-sm mb-1">Level</div>
-              <div className="text-lg sm:text-xl font-bold">Level {activeWindow.level}</div>
+              <div className="text-blue-100 text-xs sm:text-sm mb-1">Window Period</div>
+              <div className="text-lg sm:text-xl font-bold">{activeWindow.start_date} to {activeWindow.end_date}</div>
             </div>
           </div>
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
@@ -227,30 +255,26 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Level</label>
-              <select 
-                className="input"
-                value={newWindow.level}
-                onChange={e => setNewWindow({...newWindow, level: parseInt(e.target.value)})}
-                required
-              >
-                <option value="100">Level 100</option>
-                <option value="200">Level 200</option>
-                <option value="300">Level 300</option>
-                <option value="400">Level 400</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Closing Date</label>
+              <label className="text-xs font-bold text-slate-500 uppercase">Start Date</label>
               <input 
                 type="date" 
                 className="input" 
-                value={newWindow.closing_date}
-                onChange={e => setNewWindow({...newWindow, closing_date: e.target.value})}
+                value={newWindow.start_date}
+                onChange={e => setNewWindow({...newWindow, start_date: e.target.value})}
                 required
               />
             </div>
-            <div className="sm:col-span-2 lg:col-span-2 flex items-end">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase">End Date</label>
+              <input 
+                type="date" 
+                className="input" 
+                value={newWindow.end_date}
+                onChange={e => setNewWindow({...newWindow, end_date: e.target.value})}
+                required
+              />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-1 flex items-end">
               <button type="submit" className="btn btn-primary w-full" disabled={submitting}>
                 {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Open Registration Window'}
               </button>
@@ -264,15 +288,15 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
           <h2 className="font-bold text-lg">Registration History</h2>
         </div>
         <div className="p-6 space-y-4">
-          {windows.filter(w => !w.is_open).map((item) => (
+          {windows.filter(w => Number(w.is_active) !== 1).map((item) => (
             <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-2 bg-slate-100 rounded-lg flex-shrink-0">
                   <Clock size={20} className="text-slate-500" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-bold text-slate-900 truncate">{item.academic_year} - {item.semester_sid} (Level {item.level})</div>
-                  <div className="text-xs text-slate-400">Closed on {item.closing_date}</div>
+                  <div className="text-sm font-bold text-slate-900 truncate">{item.academic_year} - {item.semester_sid}</div>
+                  <div className="text-xs text-slate-400">Closed on {item.end_date}</div>
                 </div>
               </div>
               <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-500 self-start sm:self-center">
@@ -280,7 +304,7 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
               </span>
             </div>
           ))}
-          {windows.filter(w => !w.is_open).length === 0 && (
+          {windows.filter(w => Number(w.is_active) !== 1).length === 0 && (
             <div className="p-8 text-center text-slate-400 italic">No registration history found.</div>
           )}
         </div>
@@ -296,6 +320,22 @@ export const RegistrationModule: React.FC<RegistrationModuleProps> = ({ activeSu
           <p className="text-slate-500 text-sm">Register a student for courses in the current semester.</p>
         </div>
         <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="label">Academic Year</label>
+              <select className="input" value={registerYear} onChange={e => setRegisterYear(e.target.value)}>
+                <option value="">Select Year</option>
+                {academicYears.map(y => <option key={y.code} value={y.code}>{y.code}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="label">Semester</label>
+              <select className="input" value={registerSemester} onChange={e => setRegisterSemester(e.target.value)}>
+                <option value="">Select Semester</option>
+                {semesters.map(s => <option key={s.sid} value={s.sid}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
           <div className="max-w-md space-y-2">
             <label className="label">Student ID / Index Number</label>
             <div className="flex flex-col sm:flex-row gap-2">

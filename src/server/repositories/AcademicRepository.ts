@@ -22,7 +22,29 @@ export interface Semester {
 
 export class AcademicRepository {
   static getAllYears(): AcademicYear[] {
-    return db.prepare('SELECT * FROM academic_years ORDER BY code DESC').all() as AcademicYear[];
+    const years = db.prepare('SELECT * FROM academic_years').all() as AcademicYear[];
+    const extractStartYear = (code: string) => {
+      const match = String(code || '').match(/(\d{4})/);
+      return match ? Number.parseInt(match[1], 10) : Number.MIN_SAFE_INTEGER;
+    };
+    const getYearShapeRank = (code: string) => {
+      if (/^\d{4}\/\d{4}$/.test(code)) return 3;
+      if (/^\d{4}$/.test(code)) return 2;
+      if (/\d{4}/.test(code)) return 1;
+      return 0;
+    };
+
+    return years.sort((left, right) => {
+      if (left.is_current !== right.is_current) return right.is_current - left.is_current;
+
+      const shapeDiff = getYearShapeRank(right.code) - getYearShapeRank(left.code);
+      if (shapeDiff !== 0) return shapeDiff;
+
+      const startDiff = extractStartYear(right.code) - extractStartYear(left.code);
+      if (startDiff !== 0) return startDiff;
+
+      return right.code.localeCompare(left.code);
+    });
   }
 
   static getYearByCode(code: string): AcademicYear | undefined {
@@ -41,11 +63,46 @@ export class AcademicRepository {
   }
 
   static updateYear(code: string, year: Partial<AcademicYear>): void {
-    db.prepare(`
-      UPDATE academic_years 
-      SET date_from = ?, date_to = ?, is_current = ?
-      WHERE code = ?
-    `).run(year.date_from, year.date_to, year.is_current, code);
+    const nextCode = year.code?.trim();
+
+    db.transaction(() => {
+      if (nextCode && nextCode !== code) {
+        db.pragma('defer_foreign_keys = ON');
+
+        db.prepare(`
+          UPDATE academic_years
+          SET code = ?
+          WHERE code = ?
+        `).run(nextCode, code);
+
+        const dependentTables = [
+          ['students', 'admission_year'],
+          ['student_levels', 'academic_year'],
+          ['lecturer_course_assignments', 'academic_year'],
+          ['registration_windows', 'academic_year'],
+          ['course_registrations', 'academic_year'],
+          ['student_assessments', 'academic_year'],
+          ['assessment_windows', 'academic_year'],
+          ['assessment_requests', 'academic_year'],
+          ['broadsheet_cache', 'academic_year'],
+          ['calendar_events', 'academic_year'],
+        ] as const;
+
+        for (const [table, column] of dependentTables) {
+          db.prepare(`
+            UPDATE ${table}
+            SET ${column} = ?
+            WHERE ${column} = ?
+          `).run(nextCode, code);
+        }
+      }
+
+      db.prepare(`
+        UPDATE academic_years 
+        SET date_from = ?, date_to = ?, is_current = ?
+        WHERE code = ?
+      `).run(year.date_from, year.date_to, year.is_current, nextCode || code);
+    })();
   }
 
   static setCurrentYear(code: string): void {

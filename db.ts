@@ -16,6 +16,27 @@ db.pragma('busy_timeout = 5000');
 db.pragma('synchronous = NORMAL');
 db.pragma('foreign_keys = ON');
 
+const normalizeCalendarDate = (raw: unknown): string => {
+  const value = typeof raw === 'string' ? raw.trim() : '';
+  if (!value) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDefaultAcademicYearCode = (): string => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const startYear = now.getMonth() >= 6 ? currentYear : currentYear - 1;
+  return `${startYear}/${startYear + 1}`;
+};
+
 export function initDb() {
   db.exec(`
     -- 0. USER DOMAIN
@@ -388,13 +409,36 @@ export function initDb() {
   // Seed default academic year and semester if empty
   const yearCount = db.prepare('SELECT COUNT(*) as count FROM academic_years').get() as { count: number };
   if (yearCount.count === 0) {
-    db.prepare('INSERT INTO academic_years (code, is_current) VALUES (?, ?)').run('2023/2024', 1);
+    db.prepare('INSERT INTO academic_years (code, is_current) VALUES (?, ?)').run(getDefaultAcademicYearCode(), 1);
   }
 
   const semCount = db.prepare('SELECT COUNT(*) as count FROM semesters').get() as { count: number };
   if (semCount.count === 0) {
     db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM1', 'Semester 1', 1, 1);
     db.prepare('INSERT INTO semesters (sid, name, sort_order, is_current) VALUES (?, ?, ?, ?)').run('SEM2', 'Semester 2', 2, 0);
+  }
+
+  const defaultSystemSettings = [
+    ['institution_name', 'St. Nicholas Anglican Seminary'],
+    ['institution_short_name', 'SNS'],
+    ['institution_address', 'P.O.Box AD162, Cape Coast, Ghana'],
+    ['institution_phone', '+233-3321-33174'],
+    ['institution_email', 'registrar@snsanglican.org'],
+    ['portal_title', 'SIMS Portal'],
+    ['portal_subtitle', 'Student Information Management System']
+  ];
+  const insertSetting = db.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)');
+  for (const [key, value] of defaultSystemSettings) {
+    insertSetting.run(key, value);
+  }
+
+  const legacyCalendarEvents = db.prepare('SELECT id, date FROM calendar_events').all() as Array<{ id: string; date: string }>;
+  const updateCalendarDate = db.prepare('UPDATE calendar_events SET date = ? WHERE id = ?');
+  for (const item of legacyCalendarEvents) {
+    const normalizedDate = normalizeCalendarDate(item.date);
+    if (normalizedDate && normalizedDate !== item.date) {
+      updateCalendarDate.run(normalizedDate, item.id);
+    }
   }
 
   // Seed default grading points if empty

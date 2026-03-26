@@ -85,9 +85,9 @@ router.post('/', (req, res) => {
 // PUT update student
 router.put('/:iid', (req, res) => {
   const { iid } = req.params;
-  const { surname, other_names, gender, dob, email, phone, progid, current_level, status, photo } = req.body;
+  const { index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, status, photo } = req.body;
   try {
-    StudentRepository.updateStudent(iid, { surname, other_names, gender, dob, email, phone, progid, current_level, status, photo });
+    StudentRepository.updateStudent(iid, { index_number, surname, other_names, gender, dob, email, phone, progid, admission_year, current_level, status, photo });
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

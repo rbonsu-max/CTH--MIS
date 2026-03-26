@@ -17,12 +17,21 @@ export function Login({ onLogin }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [logoBase64, setLogoBase64] = useState<string>('');
+  const [branding, setBranding] = useState({
+    institution_name: 'St. Nicholas Anglican Seminary',
+    portal_title: 'SIMS Portal',
+    portal_subtitle: 'Student Information Management System'
+  });
 
   useEffect(() => {
-    // Fetch generic settings before login
     api.getPublicSettings()
       .then(settings => {
         if (settings.institution_logo) setLogoBase64(settings.institution_logo);
+        setBranding({
+          institution_name: settings.institution_name || 'St. Nicholas Anglican Seminary',
+          portal_title: settings.portal_title || 'SIMS Portal',
+          portal_subtitle: settings.portal_subtitle || 'Student Information Management System'
+        });
       })
       .catch(() => console.error('Failed to load settings'));
   }, []);
@@ -71,8 +80,8 @@ export function Login({ onLogin }: LoginProps) {
               <GraduationCap size={32} />
             </div>
           )}
-          <h1 className="text-3xl font-bold text-slate-900">SIMS Portal</h1>
-          <p className="text-slate-500 mt-2">Student Information Management System</p>
+          <h1 className="text-3xl font-bold text-slate-900">{branding.portal_title}</h1>
+          <p className="text-slate-500 mt-2">{branding.portal_subtitle}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
@@ -99,7 +108,7 @@ export function Login({ onLogin }: LoginProps) {
                   readOnly={isResettingPassword}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none ${isResettingPassword ? 'bg-slate-100 text-slate-500' : 'bg-slate-50'}`}
-                  placeholder="admin@sns.edu or Index Number"
+                  placeholder="Username, email, or index number"
                 />
               </div>
             </div>
@@ -175,7 +184,7 @@ export function Login({ onLogin }: LoginProps) {
         </div>
 
         <p className="text-center mt-8 text-sm text-slate-400">
-          © 2026 St. Nicholas Anglican Seminary. All rights reserved.
+          © {new Date().getFullYear()} {branding.institution_name}. All rights reserved.
         </p>
       </motion.div>
     </div>

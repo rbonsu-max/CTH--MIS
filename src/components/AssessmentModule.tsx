@@ -27,6 +27,7 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
 
   const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
+  const [gradingPoints, setGradingPoints] = useState<Array<{ grade: string; min_score: number; max_score: number; gp: number }>>([]);
   const [currentYear, setCurrentYear] = useState('');
   const [currentSemester, setCurrentSemester] = useState('');
   
@@ -102,11 +103,13 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
       const [courseData, yearData, semData] = await Promise.all([
         api.getCourses(),
         api.getAcademicYears(),
-        api.getSemesters()
+        api.getSemesters(),
       ]);
+      const gradingData = await api.getGradingPoints();
       setCourses(courseData);
       setAcademicYears(yearData);
       setSemesters(semData);
+      setGradingPoints(gradingData);
       
       const currYear = yearData.find(y => y.is_current);
       const currSem = semData.find(s => s.is_current);
@@ -175,13 +178,25 @@ export const AssessmentModule: React.FC<AssessmentModuleProps> = ({ activeSubIte
   };
 
   const calculateGrade = (total: number) => {
-    if (total >= 80) return { grade: 'A', point: 4.0, color: 'bg-emerald-100 text-emerald-700' };
-    if (total >= 75) return { grade: 'B+', point: 3.5, color: 'bg-blue-100 text-blue-700' };
-    if (total >= 70) return { grade: 'B', point: 3.0, color: 'bg-blue-100 text-blue-700' };
-    if (total >= 65) return { grade: 'C+', point: 2.5, color: 'bg-orange-100 text-orange-700' };
-    if (total >= 60) return { grade: 'C', point: 2.0, color: 'bg-orange-100 text-orange-700' };
-    if (total >= 55) return { grade: 'D+', point: 1.5, color: 'bg-red-100 text-red-700' };
-    if (total >= 50) return { grade: 'D', point: 1.0, color: 'bg-red-100 text-red-700' };
+    const scale = gradingPoints
+      .slice()
+      .sort((left, right) => Number(right.min_score) - Number(left.min_score));
+    const match = scale.find((point) => total >= Number(point.min_score) && total <= Number(point.max_score));
+
+    if (match) {
+      const positiveGp = Number(match.gp) >= 2.5;
+      const marginalGp = Number(match.gp) > 0 && Number(match.gp) < 2.5;
+      return {
+        grade: match.grade,
+        point: Number(match.gp),
+        color: positiveGp
+          ? 'bg-emerald-100 text-emerald-700'
+          : marginalGp
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-red-100 text-red-700'
+      };
+    }
+
     return { grade: 'E', point: 0, color: 'bg-red-100 text-red-700' };
   };
 

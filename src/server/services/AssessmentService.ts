@@ -175,4 +175,62 @@ export class AssessmentService {
       await this.computeGPA(student.index_no, academicYear, semesterId);
     }
   }
+
+  static getAcademicYearAssessmentPeriodCount(academicYear: string): number {
+    const row = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM (
+        SELECT index_no, semester_id
+        FROM student_assessments
+        WHERE academic_year = ?
+        GROUP BY index_no, semester_id
+      )
+    `).get(academicYear) as { total: number };
+
+    return row?.total || 0;
+  }
+
+  static getAcademicYearCachePeriodCount(academicYear: string): number {
+    const row = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM broadsheet_cache
+      WHERE academic_year = ?
+    `).get(academicYear) as { total: number };
+
+    return row?.total || 0;
+  }
+
+  static async syncBroadsheetCacheForAcademicYear(academicYear: string): Promise<number> {
+    const students = db.prepare(`
+      SELECT DISTINCT index_no
+      FROM student_assessments
+      WHERE academic_year = ?
+    `).all(academicYear) as Array<{ index_no: string }>;
+
+    let savedCount = 0;
+
+    for (const student of students) {
+      const studentMeta = db.prepare(`
+        SELECT current_level, progid
+        FROM students
+        WHERE iid = ?
+      `).get(student.index_no) as { current_level?: number; progid?: string } | undefined;
+
+      const existingCaches = AssessmentRepository.getStudentAllCaches(student.index_no);
+      const fullHistory = AssessmentRepository.getStudentFullHistory(student.index_no);
+      const caches = this.buildStudentCaches(student.index_no, fullHistory, {
+        level: studentMeta?.current_level?.toString() || '100',
+        progid: studentMeta?.progid || '',
+        existingCaches,
+      });
+
+      for (const cache of caches) {
+        if (cache.academic_year !== academicYear) continue;
+        AssessmentRepository.saveBoardsheetCache(cache);
+        savedCount += 1;
+      }
+    }
+
+    return savedCount;
+  }
 }

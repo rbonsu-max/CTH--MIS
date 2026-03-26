@@ -11,7 +11,9 @@ router.get('/years', (req, res) => {
 });
 
 router.post('/years', (req, res) => {
-  const { code, is_current, date_from, date_to } = req.body;
+  const { code, is_current } = req.body;
+  const date_from = req.body.date_from ?? req.body.start_date ?? null;
+  const date_to = req.body.date_to ?? req.body.end_date ?? null;
   if (!code) {
     return res.status(400).json({ error: 'code is required' });
   }
@@ -38,9 +40,12 @@ router.post('/years/:code/set-current', (req, res) => {
 
 router.put('/years/:code', (req, res) => {
   const { code } = req.params;
-  const { date_from, date_to, is_current } = req.body;
+  const nextCode = typeof req.body.code === 'string' ? req.body.code.trim() : undefined;
+  const date_from = req.body.date_from ?? req.body.start_date ?? null;
+  const date_to = req.body.date_to ?? req.body.end_date ?? null;
+  const is_current = req.body.is_current;
   try {
-    AcademicRepository.updateYear(code, { date_from, date_to, is_current: is_current ? 1 : 0 });
+    AcademicRepository.updateYear(code, { code: nextCode, date_from, date_to, is_current: is_current ? 1 : 0 });
     res.json({ success: true });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
