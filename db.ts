@@ -441,6 +441,34 @@ export function initDb() {
     }
   }
 
+  const duplicateWindows = db.prepare(`
+    SELECT academic_year, semester_sid
+    FROM registration_windows
+    GROUP BY academic_year, semester_sid
+    HAVING COUNT(*) > 1
+  `).all() as Array<{ academic_year: string; semester_sid: string }>;
+  for (const period of duplicateWindows) {
+    const rows = db.prepare(`
+      SELECT id, start_date, end_date, is_active
+      FROM registration_windows
+      WHERE academic_year = ? AND semester_sid = ?
+      ORDER BY
+        CASE WHEN start_date <= end_date THEN 0 ELSE 1 END,
+        is_active DESC,
+        id DESC
+    `).all(period.academic_year, period.semester_sid) as Array<{ id: number; start_date: string; end_date: string; is_active: number }>;
+    const keeper = rows[0];
+    if (!keeper) continue;
+    db.prepare(`
+      DELETE FROM registration_windows
+      WHERE academic_year = ? AND semester_sid = ? AND id <> ?
+    `).run(period.academic_year, period.semester_sid, keeper.id);
+  }
+  db.prepare(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_registration_windows_period_unique
+    ON registration_windows(academic_year, semester_sid)
+  `).run();
+
   // Seed default grading points if empty
   const gradingCount = db.prepare('SELECT COUNT(*) as count FROM grading_points').get() as { count: number };
   if (gradingCount.count === 0) {

@@ -22,7 +22,12 @@ export interface CourseRegistration {
 
 export class RegistrationRepository {
   static getWindows(): RegistrationWindow[] {
-    return db.prepare('SELECT * FROM registration_windows ORDER BY academic_year DESC, semester_sid DESC').all() as RegistrationWindow[];
+    return db.prepare(`
+      SELECT rw.*
+      FROM registration_windows rw
+      LEFT JOIN semesters s ON rw.semester_sid = s.sid
+      ORDER BY rw.academic_year DESC, COALESCE(s.sort_order, 999), rw.id DESC
+    `).all() as RegistrationWindow[];
   }
 
   static getActiveWindow(academic_year: string, semester_sid: string): RegistrationWindow | undefined {
@@ -34,9 +39,21 @@ export class RegistrationRepository {
   }
 
   static openWindow(window: Partial<RegistrationWindow>): void {
+    if (!window.academic_year || !window.semester_sid || !window.start_date || !window.end_date) {
+      throw new Error('academic_year, semester_sid, start_date, and end_date are required');
+    }
+    if (window.start_date > window.end_date) {
+      throw new Error('Registration window start date cannot be after the end date');
+    }
+
     db.prepare(`
       INSERT INTO registration_windows (academic_year, semester_sid, start_date, end_date, is_active, created_by)
       VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(academic_year, semester_sid) DO UPDATE SET
+        start_date = excluded.start_date,
+        end_date = excluded.end_date,
+        is_active = excluded.is_active,
+        created_by = excluded.created_by
     `).run(window.academic_year, window.semester_sid, window.start_date, window.end_date, window.is_active, window.created_by);
   }
 

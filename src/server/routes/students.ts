@@ -9,6 +9,11 @@ const router = express.Router();
 
 // GET all students
 router.get('/', (req, res) => {
+  const user = (req as any).user;
+  if (user?.role === 'Student') {
+    const student = StudentRepository.getStudentByIid(user.uid);
+    return res.json(student ? [student] : []);
+  }
   const students = StudentRepository.getAllStudents();
   res.json(students);
 });
